@@ -48,8 +48,6 @@ class TcData < Test::Unit::TestCase
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'><b>2</b></e>"),
                 {'e' => {'a1' => 'v1', 'b' => '2'}})
 
-
-    #FAILS FAILS TODO Fix me
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'>v2<b>bv2</b></e>"),
                 {'e' => {'a1' => 'v1', 'b' => 'bv2'}})
 
