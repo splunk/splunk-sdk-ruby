@@ -1,4 +1,5 @@
 require 'rest-client'
+require 'libxml'
 
 class Context
   DEFAULT_HOST = "localhost"
@@ -9,33 +10,42 @@ class Context
   def initialize(args)
     @args = args
     @token = nil
-    @protocol = init_default('scheme', DEFAULT_PROTOCOL)
-    @host = init_default('host', DEFAULT_HOST)
-    @port = init_default('port', DEFAULT_PORT)
+    @protocol = init_default(:protocol, DEFAULT_PROTOCOL)
+    @host = init_default(:host, DEFAULT_HOST)
+    @port = init_default(:port, DEFAULT_PORT)
     @prefix = "#{@protocol}://#{@host}:#{@port}"
-    @username = init_default('username', '')
-    @password = init_default('password', '')
-    @namespace = init_default('namespace', '')
+    @username = init_default(:username, '')
+    @password = init_default(:password, '')
+    @namespace = init_default(:namespace, nil)
     @headers = nil
   end
 
   def login
-    response = post(url("/services/auth/login"), :username=>@username, :password=>@password)
-    @headers = {'Authorization' => @token}
+    response = post("/services/auth/login", {:username=>@username, :password=>@password})
+    doc = LibXML::XML::Parser.string(response.to_s).parse
+    @token = doc.find('//sessionKey').last.content
+    @headers = {'Authorization' => "Splunk #{@token}"}
   end
 
   def logout
 
   end
 
-  def post(path, body, params)
-    RestClient.post(path, body, params) do |response, request, result, &block|
-
+  def post(path, body, params={})
+    params.merge!(@headers) if !@headers.nil?
+    RestClient.post(url(path), body, params) do |response, request, result, &block|
+      #TODO: Need error handling
+      response
     end
   end
 
-  def get(path, params)
-
+  def get(path, params={})
+    params.merge!(@headers) if !@headers.nil?
+    puts url(path)
+    RestClient.get(url(path), params) do |response, request, result, &block|
+      #TODO: Need error handling
+      response
+    end
   end
 
   def delete(path, params)
@@ -66,5 +76,10 @@ private
 
 
 end
+
+c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'http')
+c.login
+puts c.get('authentication/users')
+
 
 
