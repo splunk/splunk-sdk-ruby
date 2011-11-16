@@ -2,6 +2,8 @@ require 'rest-client'
 require 'libxml'
 require 'openssl'
 require './aloader'
+require './splunk_error'
+require './splunk_http_error'
 
 class Context
   DEFAULT_HOST = "localhost"
@@ -25,10 +27,14 @@ class Context
   end
 
   def login
-    response = post("/services/auth/login", {:username=>@username, :password=>@password})
-    doc = LibXML::XML::Parser.string(response.to_s).parse
-    @token = doc.find('//sessionKey').last.content
-    @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
+    begin
+      response = post("/services/auth/login", {:username=>@username, :password=>@password})
+      doc = LibXML::XML::Parser.string(response.to_s).parse
+      @token = doc.find('//sessionKey').last.content
+      @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
+    rescue => e
+      raise SplunkError, e.message
+    end
   end
 
   def logout
@@ -38,7 +44,7 @@ class Context
   def post(path, body, params={})
     resource = create_resource(path, params)
     resource.post body, params do |response, request, result, &block|
-      #TODO: Need error handling
+      check_for_error_return(response)
       response
     end
   end
@@ -46,7 +52,7 @@ class Context
   def get(path, params={})
     resource = create_resource(path, params)
     resource.get params do |response, request, result, &block|
-      #TODO: Need error handling
+      check_for_error_return(response)
       response
     end
   end
@@ -54,7 +60,7 @@ class Context
   def delete(path, params)
     resource = create_resource(path, params)
     resource.delete params do |response, request, result, &block|
-      #TODO: Need error handling
+      check_for_error_return(response)
       response
     end
   end
@@ -94,6 +100,12 @@ private
       )
     end
     resource
+  end
+
+  def check_for_error_return(response)
+    if response.code >= 400
+      raise SplunkHTTPError(response)
+    end
   end
 
 end

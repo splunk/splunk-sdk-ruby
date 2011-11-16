@@ -1,0 +1,2 @@
+class SplunkError < StandardError
+end

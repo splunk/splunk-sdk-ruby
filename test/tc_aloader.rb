@@ -2,7 +2,7 @@ require "test/unit"
 require "ostruct"
 require "splunk-sdk/aloader"
 
-class TcData < Test::Unit::TestCase
+class TcAloader < Test::Unit::TestCase
 
   def test_elems
     assert_raise(ArgumentError) { assert_equal(AtomResponseLoader::load_text(""), nil) }
