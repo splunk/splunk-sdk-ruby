@@ -1,4 +1,4 @@
-require './aloader'
+require_relative 'aloader'
 
 class SplunkHTTPError < SplunkError
   attr_reader :status, :reason, :headers, :body, :detail

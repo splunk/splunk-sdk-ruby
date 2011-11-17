@@ -1,9 +1,10 @@
 require 'rest-client'
 require 'libxml'
 require 'openssl'
-require './aloader'
-require './splunk_error'
-require './splunk_http_error'
+require 'pathname'
+require_relative 'aloader'
+require_relative 'splunk_error'
+require_relative 'splunk_http_error'
 
 class Context
   DEFAULT_HOST = "localhost"
@@ -110,12 +111,30 @@ private
 
 end
 
-c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'http')
+=begin
+c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
 c.login
 r = c.get('authentication/users')
 al = AtomResponseLoader::load_text(r)
 puts r
 puts al
+
+# XML Namespaces
+NAMESPACE_ATOM = "atom:http://www.w3.org/2005/Atom"
+NAMESPACE_REST = "s:http://dev.splunk.com/ns/rest"
+NAMESPACE_OPENSEARCH = "opensearch:http://a9.com/-/spec/opensearch/1.1"
+
+ns = [NAMESPACE_ATOM,NAMESPACE_REST,NAMESPACE_OPENSEARCH]
+
+doc = LibXML::XML::Parser.string(r).parse
+puts '***************'
+
+puts doc.root.name
+puts doc.find('atom:title', ns).length
+puts doc.find('atom:author', ns).length
+puts doc.find('atom:id', ns).length
+puts doc.find('atom:id', ns).length
+=end
 
 
 
