@@ -28,8 +28,9 @@ class Context
   end
 
   def login
+    #Note that this will throw it's own exception and we want to pass it up
+    response = post("/services/auth/login", {:username=>@username, :password=>@password})
     begin
-      response = post("/services/auth/login", {:username=>@username, :password=>@password})
       doc = LibXML::XML::Parser.string(response.to_s).parse
       @token = doc.find('//sessionKey').last.content
       @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
@@ -40,6 +41,7 @@ class Context
 
   def logout
     @token = nil
+    @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
   end
 
   def post(path, body, params={})
@@ -105,7 +107,7 @@ private
 
   def check_for_error_return(response)
     if response.code >= 400
-      raise SplunkHTTPError(response)
+      raise SplunkHTTPError.new(response)
     end
   end
 

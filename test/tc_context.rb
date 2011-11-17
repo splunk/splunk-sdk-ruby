@@ -7,26 +7,59 @@ class TcContext < Test::Unit::TestCase
   NAMESPACE_REST = "s:http://dev.splunk.com/ns/rest"
   NAMESPACE_OPENSEARCH = "opensearch:http://a9.com/-/spec/opensearch/1.1"
 
+  def is_atom(context, endpoint)
+    ns = [NAMESPACE_ATOM,NAMESPACE_REST,NAMESPACE_OPENSEARCH]
+
+    r = context.get(endpoint)
+
+    doc = LibXML::XML::Parser.string(r).parse
+
+    false if doc.root.name != 'feed'
+    false if doc.find('atom:title', ns).length != 1
+    false if doc.find('atom:author', ns).length != 1
+    false if doc.find('atom:id', ns).length != 1
+
+    true
+  end
+
   #Test to make sure that certain endpoints return what looks like an ATOM feed
   def test_protocol
     c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
     c.login
-    r = c.get('authentication/users')
 
-    ns = [NAMESPACE_ATOM,NAMESPACE_REST,NAMESPACE_OPENSEARCH]
-
-    doc = LibXML::XML::Parser.string(r).parse
-
-    assert_equal(doc.root.name, 'feed')
-    assert_equal(doc.find('atom:title', ns).length, 1)
-    assert_equal(doc.find('atom:author', ns).length, 1)
-    assert_equal(doc.find('atom:id', ns).length, 1)
-    assert_equal(doc.find('atom:id', ns).length, 1)
+    ['/services', 'authentication/users', 'search/jobs'].each do |endpoint|
+      assert(is_atom(c,endpoint))
+    end
   end
 
   #Test to make sure that we can login & logout
   def test_authentication
+    #Test good login
+    c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
+    c.login
 
+    #Test a get with the above context - should work
+    assert(is_atom(c, 'authentication/users'))
+
+    #Test log out
+    c.logout
+
+    #Test a get with the above context - should fail
+    assert_raise SplunkHTTPError do
+      is_atom(c, 'authentication/users')
+    end
+
+    #Test bad login (bad user)
+    assert_raise SplunkHTTPError do
+      c = Context.new(:username => 'baduser', :password => 'sk8free', :protocol => 'https')
+      c.login
+    end
+
+    #Test bad login (bad password)
+    assert_raise SplunkHTTPError do
+      c = Context.new(:username => 'admin', :password => 'badpsw', :protocol => 'https')
+      c.login
+    end
   end
 
   def test_post
@@ -67,10 +100,6 @@ class TcContext < Test::Unit::TestCase
 
   def test_delete_user
 
-  end
-
-  def is_atom(body)
-    body
   end
 
 end
