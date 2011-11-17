@@ -27,7 +27,7 @@ public
       items = doc.root.find('./#{@match}')
     end
 
-    #process just the root if there are no children or just one child
+    #process just the root if there are no children or just one child.
     count = items.children.size
     #return load_root(items) if count <= 1
     load_root(items)
