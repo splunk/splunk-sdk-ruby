@@ -2,16 +2,22 @@ require_relative 'aloader'
 require_relative 'splunk_error'
 
 class SplunkHTTPError < SplunkError
-  attr_reader :status, :reason, :headers, :body, :detail
+  attr_reader :status, :reason, :code, :headers, :body, :detail
 
   def initialize(response)
     @body = response.body
-
     doc = LibXML::XML::Parser.string(@body).parse
-    @detail = doc.find('//msg').last.content
+    temp_detail = doc.find('//msg').last
+
+    if temp_detail.nil?
+      @detail = nil
+    else
+      @detail = temp_detail.content
+    end
 
     al = AtomResponseLoader::load_text(@body)
 
+    @code = response.code
     @status = al['status']
     @status = "" if @status.nil?
     @reason = al['reason']

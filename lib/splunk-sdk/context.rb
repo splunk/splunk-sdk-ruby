@@ -60,7 +60,7 @@ class Context
     end
   end
 
-  def delete(path, params)
+  def delete(path, params={})
     resource = create_resource(path, params)
     resource.delete params do |response, request, result, &block|
       check_for_error_return(response)
