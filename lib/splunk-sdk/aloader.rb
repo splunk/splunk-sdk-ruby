@@ -2,19 +2,35 @@ require 'libxml'
 
 XML_NS = 'http://dev.splunk.com/ns/rest'
 
+#Some bitchin metaprogramming to allow "dot notation" reading from a Hash
+class Hash
+  def to_obj
+    self.inject(Object.new) do |obj, ary| # ary is [:key, "value"]
+      obj.instance_variable_set("@#{ary[0]}", ary[1])
+      class << obj; self; end.instance_eval do # do this on obj's metaclass
+        attr_reader ary[0].to_sym # add getter method for this ivar
+      end
+      obj # return obj for next iteration
+    end
+  end
+end
+
+
+
 class AtomResponseLoader
 public
 
-  def initialize(text, match=nil)
+  def initialize(text, convert_to_obj=false, match=nil)
     raise ArgumentError, "text is nil" if text.nil?
     text = text.strip
     raise ArgumentError, "text size is 0" if text.size == 0
     @text = text
+    @convert_to_obj = convert_to_obj
     @match = match
     @name_table = {"namespaces" => [], "names" => {}}
   end
 
-  def load
+  def load()
     parser = LibXML::XML::Parser.string(@text)
     doc = parser.parse
 
@@ -30,6 +46,7 @@ public
     #process just the root if there are no children or just one child.
     count = items.children.size
     #return load_root(items) if count <= 1
+
     load_root(items)
 
     #process everything
@@ -40,12 +57,21 @@ public
     AtomResponseLoader.new(text).load
   end
 
+  def self.load_text_as_record(text)
+    AtomResponseLoader.new(text, true).load
+  end
+
+  #Method to convert a dict to a 'dot notation' accessor object
+  def self.record(hash)
+    hash.to_obj
+  end
+
 private
   def load_root(node)
     return load_dict(node) if is_dict(node)
     return load_list(node) if is_list(node)
     k,v = load_elem(node)
-    {k => v}
+    @convert_to_obj ? {k => v}.to_obj : {k => v}
   end
 
   def load_elem(node)
@@ -54,10 +80,12 @@ private
     value = load_value(node)
     return name,value if attrs.nil?
     return name,attrs if value.nil?
+
     if value.instance_of?(String)
-      attrs["$text"] = value
+      attrs["xxtext"] = value
       return name, attrs
     end
+
     attrs.each { |k,v|
       value[k] = v
     }
@@ -78,7 +106,7 @@ private
       name = child.attributes['name']
       value[name] = load_value(child)
     end
-    value
+    @convert_to_obj ? value.to_obj : value
   end
 
   def load_list(node)
@@ -115,7 +143,7 @@ private
       end
     end
     return nil if value.size == 0
-    value
+    @convert_to_obj ? value.to_obj : value
   end
 
   def is_dict(node)

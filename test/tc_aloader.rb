@@ -8,31 +8,42 @@ class TcAloader < Test::Unit::TestCase
     assert_raise(ArgumentError) { assert_equal(AtomResponseLoader::load_text(""), nil) }
 
     assert_equal(AtomResponseLoader::load_text("<a></a>"), {'a' => nil})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a></a>").a, nil)
 
     assert_equal(AtomResponseLoader::load_text("<a>1</a>"), {'a' => '1'})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a>1</a>").a, '1')
 
     assert_equal(AtomResponseLoader::load_text("<a><b></b></a>"), {'a' => {'b' => nil}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b></b></a>").a.b, nil)
 
     assert_equal(AtomResponseLoader::load_text("<a><b>1</b></a>"), {'a' => {'b' => '1'}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b>1</b></a>").a.b, '1')
 
     assert_equal(AtomResponseLoader::load_text("<a><b></b><b></b></a>"),
                 {'a' => {'b' => [nil, nil]}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b></b><b></b></a>").a.b, [nil,nil])
 
     assert_equal(AtomResponseLoader::load_text("<a><b>1</b><b>2</b></a>"),
                 {'a' => {'b' => ['1','2']}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b>1</b><b>2</b></a>").a.b, ['1','2'])
 
     assert_equal(AtomResponseLoader::load_text("<a><b></b><c></c></a>"),
                 {'a' => {'b' => nil, 'c' => nil}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b></b><c></c></a>").a.b, nil)
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b></b><c></c></a>").a.c, nil)
 
     assert_equal(AtomResponseLoader::load_text("<a><b>1</b><c>2</c></a>"),
                 {'a' => {'b' => '1', 'c' => '2'}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b>1</b><c>2</c></a>").a.b, '1')
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b>1</b><c>2</c></a>").a.c, '2')
 
     assert_equal(AtomResponseLoader::load_text("<a><b><c>1</c></b></a>"),
                 {'a' => {'b' => {'c' => '1'}}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b><c>1</c></b></a>").a.b.c, '1')
 
     assert_equal(AtomResponseLoader::load_text("<a><b><c>1</c></b><b>2</b></a>"),
                 {'a' => {'b' => [{'c' => '1'}, '2']}})
-
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b><c>1</c></b><b>2</b></a>").a.b[0].c, '1')
   end
 
   def test_attrs
@@ -43,7 +54,7 @@ class TcAloader < Test::Unit::TestCase
                 {'e' => {'a1' => 'v1', 'a2' => 'v2'}})
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'>v2</e>"),
-                {'e' => {'$text' => 'v2', 'a1' => 'v1'}})
+                {'e' => {'xxtext' => 'v2', 'a1' => 'v1'}})
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'><b>2</b></e>"),
                 {'e' => {'a1' => 'v1', 'b' => '2'}})
@@ -53,9 +64,11 @@ class TcAloader < Test::Unit::TestCase
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'><a1>v2</a1></e>"),
                 {'e' => {'a1' => 'v1'}})
+    #assert_equal(AtomResponseLoader::load_text_as_record("<e a1='v1'><a1>v2</a1></e>").e.a1, 'v1')
 
     assert_equal(AtomResponseLoader::load_text("<e1 a1='v1'><e2 a1='v1'>v2</e2></e1>"),
-                {'e1' => {'a1' => 'v1', 'e2' => {'$text' => 'v2', 'a1' => 'v1'}}})
+                {'e1' => {'a1' => 'v1', 'e2' => {'xxtext' => 'v2', 'a1' => 'v1'}}})
+    #assert_equal(AtomResponseLoader::load_text_as_record("<e1 a1='v1'><e2 a1='v1'>v2</e2></e1>").e1.e2.xxtext,'v2')
   end
 
   def test_dict
