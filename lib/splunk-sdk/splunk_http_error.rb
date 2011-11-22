@@ -26,6 +26,8 @@ class SplunkHTTPError < SplunkError
 
     detail.nil? ? detail_msg = "" : detail_msg = @detail
     message = "HTTP #{@status.to_str} #{@reason}#{detail_msg}"
+
     super message
+
   end
 end

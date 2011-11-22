@@ -2,9 +2,14 @@ require 'rest-client'
 require 'libxml'
 require 'openssl'
 require 'pathname'
+require 'stringio'
+require 'netrc'
+#require 'uuid'
+
 require_relative 'aloader'
 require_relative 'splunk_error'
 require_relative 'splunk_http_error'
+
 
 class Context
   DEFAULT_HOST = "localhost"
@@ -45,6 +50,18 @@ class Context
   end
 
   def post(path, body, params={})
+    #Warning - kludge alert!
+    #because rest-client puts '[]' after repeated params, we need to process them special by
+    #prepending them to any body we have
+    if body.is_a? Hash
+      body.each do |k, v|
+        if v.is_a? Array
+          body = build_stream(flatten_params(body)).string
+          break
+        end
+      end
+    end
+
     resource = create_resource(path, params)
     resource.post body, params do |response, request, result, &block|
       check_for_error_return(response)
@@ -111,31 +128,74 @@ private
     end
   end
 
+  #ripped directly from rest-client
+  def build_stream(params = nil)
+    r = flatten_params(params)
+    stream = StringIO.new(r.collect do |entry|
+      "#{entry[0]}=#{handle_key(entry[1])}"
+    end.join("&"))
+    stream.seek(0)
+    stream
+  end
+
+  # for UrlEncoded escape the keys
+  def handle_key key
+    URI.escape(key.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+  end
+
+  def flatten_params(params, parent_key = nil)
+    result = []
+    params.each do |key, value|
+      calculated_key = parent_key ? "#{parent_key}[#{handle_key(key)}]" : handle_key(key)
+      if value.is_a? Hash
+        result += flatten_params(value, calculated_key)
+      elsif value.is_a? Array
+        result += flatten_params_array(value, calculated_key)
+      else
+        result << [calculated_key, value]
+      end
+    end
+    result
+  end
+
+  def flatten_params_array value, calculated_key
+    result = []
+    value.each do |elem|
+      if elem.is_a? Hash
+        result += flatten_params(elem, calculated_key)
+      elsif elem.is_a? Array
+        result += flatten_params_array(elem, calculated_key)
+      else
+        result << ["#{calculated_key}", elem]
+      end
+    end
+    result
+  end
+
+
 end
 
 =begin
 c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
 c.login
-r = c.get('authentication/users')
-al = AtomResponseLoader::load_text(r)
-puts r
-puts al
+response = c.post(PATH_USERS, :name => 'baz', :password => "changeme", :roles => 'user')
 
-# XML Namespaces
-NAMESPACE_ATOM = "atom:http://www.w3.org/2005/Atom"
-NAMESPACE_REST = "s:http://dev.splunk.com/ns/rest"
-NAMESPACE_OPENSEARCH = "opensearch:http://a9.com/-/spec/opensearch/1.1"
+c.post()
 
-ns = [NAMESPACE_ATOM,NAMESPACE_REST,NAMESPACE_OPENSEARCH]
+#login as admin
+def random_uname
+  UUID.new.generate
+end
 
-doc = LibXML::XML::Parser.string(r).parse
-puts '***************'
+PATH_USERS = "authentication/users"
 
-puts doc.root.name
-puts doc.find('atom:title', ns).length
-puts doc.find('atom:author', ns).length
-puts doc.find('atom:id', ns).length
-puts doc.find('atom:id', ns).length
+c = Context.new(:username => 'admin', :password => 'sk8free')
+c.login
+
+#create a random user
+uname = random_uname
+p uname
+response = c.post(PATH_USERS, :name => uname, :password => 'changeme', :roles => ['power','user'])
 =end
 
 
