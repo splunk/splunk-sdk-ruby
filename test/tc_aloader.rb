@@ -43,7 +43,8 @@ class TcAloader < Test::Unit::TestCase
 
     assert_equal(AtomResponseLoader::load_text("<a><b><c>1</c></b><b>2</b></a>"),
                 {'a' => {'b' => [{'c' => '1'}, '2']}})
-    assert_equal(AtomResponseLoader::load_text_as_record("<a><b><c>1</c></b><b>2</b></a>").a.b[0].c, '1')
+    assert_equal(AtomResponseLoader::load_text_as_record("<a><b><c>1</c></b><b>2</b></a>").a.b,
+                 [{'c' => '1'}, '2'])
   end
 
   def test_attrs
@@ -54,7 +55,7 @@ class TcAloader < Test::Unit::TestCase
                 {'e' => {'a1' => 'v1', 'a2' => 'v2'}})
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'>v2</e>"),
-                {'e' => {'xxtext' => 'v2', 'a1' => 'v1'}})
+                {'e' => {'_text' => 'v2', 'a1' => 'v1'}})
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'><b>2</b></e>"),
                 {'e' => {'a1' => 'v1', 'b' => '2'}})
@@ -64,11 +65,11 @@ class TcAloader < Test::Unit::TestCase
 
     assert_equal(AtomResponseLoader::load_text("<e a1='v1'><a1>v2</a1></e>"),
                 {'e' => {'a1' => 'v1'}})
-    #assert_equal(AtomResponseLoader::load_text_as_record("<e a1='v1'><a1>v2</a1></e>").e.a1, 'v1')
+    assert_equal(AtomResponseLoader::load_text_as_record("<e a1='v1'><a1>v2</a1></e>").e.a1, 'v1')
 
     assert_equal(AtomResponseLoader::load_text("<e1 a1='v1'><e2 a1='v1'>v2</e2></e1>"),
-                {'e1' => {'a1' => 'v1', 'e2' => {'xxtext' => 'v2', 'a1' => 'v1'}}})
-    #assert_equal(AtomResponseLoader::load_text_as_record("<e1 a1='v1'><e2 a1='v1'>v2</e2></e1>").e1.e2.xxtext,'v2')
+                {'e1' => {'a1' => 'v1', 'e2' => {'_text' => 'v2', 'a1' => 'v1'}}})
+    assert_equal(AtomResponseLoader::load_text_as_record("<e1 a1='v1'><e2 a1='v1'>v2</e2></e1>").e1.e2._text,'v2')
   end
 
   def test_dict
@@ -79,6 +80,12 @@ class TcAloader < Test::Unit::TestCase
             </dict>"),
       {'n1' => 'v1', 'n2' => 'v2'})
 
+    assert_equal(AtomResponseLoader::load_text_as_record("
+            <dict>
+              <key name='n1'>v1</key>
+              <key name='n2'>v2</key>
+            </dict>").n2, 'v2')
+
     assert_equal(AtomResponseLoader::load_text("
           <content>
             <dict>
@@ -87,6 +94,14 @@ class TcAloader < Test::Unit::TestCase
             </dict>
           </content>"),
     {'content' => {'n1' => 'v1', 'n2' => 'v2'}})
+
+    assert_equal(AtomResponseLoader::load_text_as_record("
+          <content>
+            <dict>
+              <key name='n1'>v1</key>
+              <key name='n2'>v2</key>
+            </dict>
+          </content>").content.n2, 'v2')
 
     assert_equal(AtomResponseLoader::load_text("
           <dict>
@@ -191,5 +206,19 @@ class TcAloader < Test::Unit::TestCase
     assert_equal(result['feed']['entry']['content']['cpu_arch'], 'i386')
     assert_equal(result['feed']['entry']['content']['os_name'], 'Darwin')
     assert_equal(result['feed']['entry']['content']['os_version'], '10.8.0')
+
+    #Test dot notation
+    f.close
+    f = open("test/services.server.info.xml", 'r')
+
+    result = AtomResponseLoader::load_text_as_record(f.read)
+    assert_equal(result.feed.title, 'server-info')
+    assert_equal(result.feed.author.name, 'Splunk')
+    assert_equal(result.feed.entry.content.cpu_arch, 'i386')
+    assert_equal(result.feed.entry.content.os_name, 'Darwin')
+    assert_equal(result.feed.entry.content.os_version, '10.8.0')
+
+    f.close
+
   end
 end

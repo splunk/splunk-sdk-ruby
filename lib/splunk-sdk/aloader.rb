@@ -6,9 +6,15 @@ XML_NS = 'http://dev.splunk.com/ns/rest'
 class Hash
   def to_obj
     self.inject(Object.new) do |obj, ary| # ary is [:key, "value"]
-      obj.instance_variable_set("@#{ary[0]}", ary[1])
+      #Replace any embedded : with an _
+      key = ary[0].gsub(':','_')
+      if ary[1].is_a? Hash
+        obj.instance_variable_set("@#{key}", ary[1].to_obj)
+      else
+        obj.instance_variable_set("@#{key}", ary[1])
+      end
       class << obj; self; end.instance_eval do # do this on obj's metaclass
-        attr_reader ary[0].to_sym # add getter method for this ivar
+        attr_reader key.to_sym # add getter method for this ivar
       end
       obj # return obj for next iteration
     end
@@ -20,12 +26,11 @@ end
 class AtomResponseLoader
 public
 
-  def initialize(text, convert_to_obj=false, match=nil)
+  def initialize(text, match=nil)
     raise ArgumentError, "text is nil" if text.nil?
     text = text.strip
     raise ArgumentError, "text size is 0" if text.size == 0
     @text = text
-    @convert_to_obj = convert_to_obj
     @match = match
     @name_table = {"namespaces" => [], "names" => {}}
   end
@@ -58,7 +63,8 @@ public
   end
 
   def self.load_text_as_record(text)
-    AtomResponseLoader.new(text, true).load
+    result = AtomResponseLoader.new(text).load
+    result.to_obj
   end
 
   #Method to convert a dict to a 'dot notation' accessor object
@@ -71,7 +77,7 @@ private
     return load_dict(node) if is_dict(node)
     return load_list(node) if is_list(node)
     k,v = load_elem(node)
-    @convert_to_obj ? {k => v}.to_obj : {k => v}
+    {k => v}
   end
 
   def load_elem(node)
@@ -82,7 +88,7 @@ private
     return name,attrs if value.nil?
 
     if value.instance_of?(String)
-      attrs["xxtext"] = value
+      attrs["_text"] = value
       return name, attrs
     end
 
@@ -106,7 +112,7 @@ private
       name = child.attributes['name']
       value[name] = load_value(child)
     end
-    @convert_to_obj ? value.to_obj : value
+    value
   end
 
   def load_list(node)
@@ -143,7 +149,7 @@ private
       end
     end
     return nil if value.size == 0
-    @convert_to_obj ? value.to_obj : value
+    value
   end
 
   def is_dict(node)
