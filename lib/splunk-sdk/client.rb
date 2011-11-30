@@ -4,6 +4,11 @@ require 'libxml'
 
 PATH_APPS_LOCAL = 'apps/local'
 PATH_CAPABILITIES = 'authorization/capabilities'
+PATH_LOGGER = 'server/logger'
+PATH_ROLES = 'authentication/roles'
+PATH_USERS = 'authentication/users'
+PATH_MESSAGES = 'messages'
+
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
@@ -25,16 +30,7 @@ class Service
   end
 
   def apps
-    item = Proc.new {|service, name| Entity.new(service, PATH_APPS_LOCAL + '/' + name, name)}
-
-    ctor = Proc.new {|service, name, args|
-          new_args = args
-          new_args[:name] = name
-          service.post(PATH_APPS_LOCAL, new_args)
-    }
-
-    dtor = Proc.new {|service, name| service.delete(PATH_APPS_LOCAL + '/' + name)}
-    Collection.new(self, PATH_APPS_LOCAL, nil, :item => item, :ctor => ctor, :dtor => dtor)
+    create_collection(PATH_APPS_LOCAL)
   end
 
   def capabilities
@@ -47,6 +43,40 @@ class Service
     response = @context.get('server/info')
     record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     return record.content
+  end
+
+  def loggers
+    item = Proc.new {|service, name| Entity.new(service, PATH_LOGGER + '/' +name, name)}
+    Collection.new(self, PATH_LOGGER, nil, :item => item)
+  end
+
+  def settings
+    return Entity.new(self, 'server/settings')
+  end
+
+
+  def roles
+    create_collection(PATH_ROLES)
+  end
+
+  def users
+    create_collection(PATH_USERS)
+  end
+
+  def messages
+  end
+
+  def create_collection(path)
+    item = Proc.new { |service, name| Entity.new(service, path + '/' + name, name) }
+
+    ctor = Proc.new { |service, name, args|
+      new_args = args
+      new_args[:name] = name
+      service.post(path, new_args)
+    }
+
+    dtor = Proc.new { |service, name| service.delete(path + '/' + name) }
+    Collection.new(self, path, nil, :item => item, :ctor => ctor, :dtor => dtor)
   end
 end
 
@@ -178,7 +208,7 @@ s.apps.each do |app|
   p x.eai_acl.can_write
 end
 
-#BOGUS ALERT!
+#TODO: BOGUS ALERT!  FIXME
 s.apps.each do |app|
   p app['check_for_updates'].check_for_updates
 end
@@ -186,3 +216,12 @@ end
 p s.capabilities
 
 p s.info.version
+
+s.loggers.each do |logger|
+  p logger.read()
+end
+
+p s.settings
+
+p s.users.list
+p s.roles.list
