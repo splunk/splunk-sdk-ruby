@@ -60,9 +60,7 @@ public
     items.each do |item|
       arr << load_root(item)
     end
-
     arr
-
   end
 
   def self.load_text(text, match=nil, namespaces=nil)

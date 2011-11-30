@@ -8,6 +8,9 @@ PATH_LOGGER = 'server/logger'
 PATH_ROLES = 'authentication/roles'
 PATH_USERS = 'authentication/users'
 PATH_MESSAGES = 'messages'
+PATH_INFO = 'server/info'
+PATH_SETTINGS = 'server/settings'
+
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
@@ -40,33 +43,41 @@ class Service
   end
 
   def info
-    response = @context.get('server/info')
+    response = @context.get(PATH_INFO)
     record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     return record.content
   end
 
   def loggers
-    item = Proc.new {|service, name| Entity.new(service, PATH_LOGGER + '/' +name, name)}
-    Collection.new(self, PATH_LOGGER, nil, :item => item)
+    item = Proc.new {|service, name| Entity.new(service, PATH_LOGGER + '/' + name, name)}
+    Collection.new(self, PATH_LOGGER, "loggers", :item => item)
   end
 
   def settings
-    return Entity.new(self, 'server/settings')
+    return Entity.new(self, PATH_SETTINGS, "settings")
   end
 
-
   def roles
-    create_collection(PATH_ROLES)
+    create_collection(PATH_ROLES, "roles")
   end
 
   def users
-    create_collection(PATH_USERS)
+    create_collection(PATH_USERS, "users")
   end
 
   def messages
+    item = Proc.new {|service, name| Message.new(service, name)}
+    ctor = Proc.new { |service, name, args|
+      new_args = args
+      new_args[:name] = name
+      service.post(path, new_args)
+    }
+
+    dtor = Proc.new { |service, name| service.delete(path + '/' + name) }
+    Collection.new(self, PATH_MESSAGES, "messages", :item => item, :ctor => ctor, :dtor => dtor)
   end
 
-  def create_collection(path)
+  def create_collection(path, collection_name=nil)
     item = Proc.new { |service, name| Entity.new(service, path + '/' + name, name) }
 
     ctor = Proc.new { |service, name, args|
@@ -76,7 +87,7 @@ class Service
     }
 
     dtor = Proc.new { |service, name| service.delete(path + '/' + name) }
-    Collection.new(self, path, nil, :item => item, :ctor => ctor, :dtor => dtor)
+    Collection.new(self, path, collection_name, :item => item, :ctor => ctor, :dtor => dtor)
   end
 end
 
@@ -104,10 +115,6 @@ class Job
 end
 
 class Input
-
-end
-
-class Message
 
 end
 
@@ -157,6 +164,7 @@ class Collection
     retval = []
     response = @service.context.get(@path, :count => -1)
     record = AtomResponseLoader::load_text_as_record(response)
+    return retval if !record.feed.instance_variable_defined?('@entry')
     record.feed.entry.each do |entry|
       retval << entry["title"] #because 'entry' is an array we don't allow dots
     end
@@ -165,6 +173,8 @@ class Collection
 end
 
 class Entity
+  attr_reader :name
+
   def initialize(service, path, name=nil)
     @service = service
     @path = path
@@ -172,11 +182,12 @@ class Entity
   end
 
   def [](key)
-    return read([key])
+    obj = read([key])
+    obj.send(key)
   end
 
   def []=(key, value)
-
+    update(key => value)
   end
 
   def read(field_list=nil)
@@ -190,38 +201,66 @@ class Entity
   end
 
   def update(args)
-
+    response = @service.context.post(@path, args)
+    self
   end
 
+end
+
+class Message < Entity
+  def initialize(service, name)
+    super(service, PATH_MESSAGES + '/' + name, name)
+  end
+
+  def value
+    self[@name]
+  end
 end
 
 s = connect(:username => 'admin', :password => 'sk8free')
 p s.apps.list
 
+p "Testing read...."
 s.apps.each do |app|
   x = app.read()
   p x.check_for_updates
 end
 
+p "Testing readmeta...."
 s.apps.each do |app|
   x = app.readmeta()
   p x.eai_acl.can_write
 end
 
-#TODO: BOGUS ALERT!  FIXME
+p "Testing []........"
 s.apps.each do |app|
-  p app['check_for_updates'].check_for_updates
+  p app['check_for_updates']
 end
 
+p "Testing capabilities......"
 p s.capabilities
 
+p "Testing info....."
 p s.info.version
 
+p "Testing loggers......"
 s.loggers.each do |logger|
   p logger.read()
 end
 
+p "Testing settings....."
 p s.settings
 
+p "Testing users......"
 p s.users.list
+s.users.each do |user|
+  u = user.read()
+  p user.name
+  p u.realname
+end
+
+p "Testing roles......."
 p s.roles.list
+
+p "Testing messages......"
+p s.messages.list
