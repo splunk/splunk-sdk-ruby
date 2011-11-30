@@ -25,7 +25,6 @@ class TcContext < Test::Unit::TestCase
       p "SplunkHTTPError not caught.  Caught #{e.class} instead"
       assert(false)
     end
-
   end
 
   def is_atom(context, endpoint)
@@ -35,10 +34,10 @@ class TcContext < Test::Unit::TestCase
 
     doc = LibXML::XML::Parser.string(r).parse
 
-    false if doc.root.name != 'feed'
-    false if doc.find('atom:title', ns).length != 1
-    false if doc.find('atom:author', ns).length != 1
-    false if doc.find('atom:id', ns).length != 1
+    return false if doc.root.name != 'feed'
+    return false if doc.find('atom:title', ns).length != 1
+    return false if doc.find('atom:author', ns).length != 1
+    return false if doc.find('atom:id', ns).length != 1
 
     true
   end

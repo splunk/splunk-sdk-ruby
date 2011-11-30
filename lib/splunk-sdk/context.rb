@@ -178,7 +178,17 @@ end
 =begin
 c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
 c.login
-response = c.post(PATH_USERS, :name => 'baz', :password => "changeme", :roles => 'user')
+response = c.get('apps/local')
+result = AtomResponseLoader::load_text_as_record(response)
+p result.feed.title
+p result.feed.author.name
+result.feed.entry.each do |entry|
+  e = AtomResponseLoader::record(entry)
+  p e.content.eai_acl.perms.read
+end
+=end
+
+=begin
 
 c.post()
 

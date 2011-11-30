@@ -26,13 +26,13 @@ end
 class AtomResponseLoader
 public
 
-  def initialize(text, match=nil)
+  def initialize(text, match=nil, namespaces=nil)
     raise ArgumentError, "text is nil" if text.nil?
     text = text.strip
     raise ArgumentError, "text size is 0" if text.size == 0
     @text = text
     @match = match
-    @name_table = {"namespaces" => [], "names" => {}}
+    @namespaces = namespaces
   end
 
   def load()
@@ -42,28 +42,40 @@ public
     #if the document is empty, bail
     return nil if not doc.child?
 
+    items = []
     if @match.nil?
-      items = doc.root
+      items << doc.root
+    elsif @namespaces.nil?
+      items = doc.root.find(@match).to_a
     else
-      items = doc.root.find('./#{@match}')
+      items = doc.root.find(@match, @namespaces).to_a
     end
 
     #process just the root if there are no children or just one child.
-    count = items.children.size
-    #return load_root(items) if count <= 1
+    count = items.size
 
-    load_root(items)
+    return load_root(items[0]) if count == 1
 
-    #process everything
-    #[load_root(items)]
+    arr = []
+    items.each do |item|
+      arr << load_root(item)
+    end
+
+    arr
+
   end
 
-  def self.load_text(text)
-    AtomResponseLoader.new(text).load
+  def self.load_text(text, match=nil, namespaces=nil)
+    AtomResponseLoader.new(text, match, namespaces).load
   end
 
-  def self.load_text_as_record(text)
-    result = AtomResponseLoader.new(text).load
+  def self.load_text_as_record(text, match=nil, namespaces=nil)
+    result = AtomResponseLoader.new(text, match, namespaces).load
+    if result.is_a? Array
+      retarr = []
+      result.each {|item| retarr << item.to_obj}
+      return retarr
+    end
     result.to_obj
   end
 

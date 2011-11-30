@@ -220,5 +220,15 @@ class TcAloader < Test::Unit::TestCase
 
     f.close
 
+    #Test matching
+    f = open("test/services.server.info.xml", 'r')
+
+    match_entry_content = '/ns0:feed/ns0:entry/ns0:content'
+    namespaces = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
+
+    result = AtomResponseLoader::load_text_as_record(f.read, match_entry_content, namespaces)
+    assert_equal(result.content.cpu_arch, 'i386')
+    assert_equal(result.content.os_name, 'Darwin')
+    assert_equal(result.content.os_version, '10.8.0')
   end
 end
