@@ -70,10 +70,10 @@ class Service
     ctor = Proc.new { |service, name, args|
       new_args = args
       new_args[:name] = name
-      service.post(path, new_args)
+      service.context.post(path, new_args)
     }
 
-    dtor = Proc.new { |service, name| service.delete(path + '/' + name) }
+    dtor = Proc.new { |service, name| service.context.delete(path + '/' + name) }
     Collection.new(self, PATH_MESSAGES, "messages", :item => item, :ctor => ctor, :dtor => dtor)
   end
 
@@ -83,10 +83,10 @@ class Service
     ctor = Proc.new { |service, name, args|
       new_args = args
       new_args[:name] = name
-      service.post(path, new_args)
+      service.context.post(path, new_args)
     }
 
-    dtor = Proc.new { |service, name| service.delete(path + '/' + name) }
+    dtor = Proc.new { |service, name| service.context.delete(path + '/' + name) }
     Collection.new(self, path, collection_name, :item => item, :ctor => ctor, :dtor => dtor)
   end
 end
@@ -95,36 +95,6 @@ def connect(args)
   Service.new args
 end
 
-class App
-
-end
-
-class Configuration
-
-end
-
-class Capability
-end
-
-class Index
-
-end
-
-class Job
-
-end
-
-class Input
-
-end
-
-class Role
-
-end
-
-class User
-
-end
 
 class Collection
   def initialize(service, path, name=nil, procs={})
@@ -155,7 +125,7 @@ class Collection
     @dtor.call(@service, name)
   end
 
-  def create(name, args)
+  def create(name, args={})
     raise NotImplementedError if @ctor.nil?
     @ctor.call(@service, name, args)
   end
@@ -263,4 +233,7 @@ p "Testing roles......."
 p s.roles.list
 
 p "Testing messages......"
-p s.messages.list
+#p s.messages.list
+
+
+#TODO: Need to test updating & messages (need some messages)
