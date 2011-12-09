@@ -145,8 +145,12 @@ class Collection
     response = @service.context.get(@path, :count => -1)
     record = AtomResponseLoader::load_text_as_record(response)
     return retval if !record.feed.instance_variable_defined?('@entry')
-    record.feed.entry.each do |entry|
-      retval << entry["title"] #because 'entry' is an array we don't allow dots
+    if record.feed.entry.is_a?(Array)
+      record.feed.entry.each do |entry|
+        retval << entry["title"] #because 'entry' is an array we don't allow dots
+      end
+    else
+      retval << record.feed.entry.title
     end
     retval
   end
