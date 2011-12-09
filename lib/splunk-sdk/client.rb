@@ -130,6 +130,16 @@ class Collection
     @ctor.call(@service, name, args)
   end
 
+  def [](key)
+    raise NotImplmentedError if @item.nil?
+    raise KeyError if !contains(key) 
+    return @item.call(@service, key)
+  end
+
+  def contains(name)
+    return list().include?(name)
+  end
+
   def list
     retval = []
     response = @service.context.get(@path, :count => -1)
