@@ -4,6 +4,7 @@ require 'openssl'
 require 'pathname'
 require 'stringio'
 require 'netrc'
+require 'socket'
 #require 'uuid'
 
 require_relative 'aloader'
@@ -12,6 +13,8 @@ require_relative 'splunk_http_error'
 
 
 class Context
+  attr_reader :protocol, :host, :port, :key_file, :cert_file, :token
+
   DEFAULT_HOST = "localhost"
   DEFAULT_PORT = "8089"
   DEFAULT_PROTOCOL = "https"
@@ -80,20 +83,22 @@ class Context
   def delete(path, params={})
     resource = create_resource(path, params)
     resource.delete params do |response, request, result, &block|
-      p request
-      p response
       check_for_error_return(response)
       response
     end
   end
 
-
-private
-  def init_default(key, deflt)
-    if @args.has_key?(key)
-      return @args[key]
+  def connect
+    cn = TCPSocket.new @host, @port
+    if protocol == 'https'
+      ssl_context = OpenSSL::SSL::SSLContext.new
+      ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      sslsocket = OpenSSL::SSL::SSLSocket.new(cn, ssl_context)
+      sslsocket.sync_close = true
+      sslsocket.connect
+      return sslsocket
     end
-    deflt
+    return cn
   end
 
   def fullpath(path)
@@ -103,6 +108,14 @@ private
     username = '-' if username == '*'
     appname = '-' if appname == '*'
     "/servicesNS/#{username}/#{appname}/#{path}"
+  end
+
+private
+  def init_default(key, deflt)
+    if @args.has_key?(key)
+      return @args[key]
+    end
+    deflt
   end
 
   def url(path)

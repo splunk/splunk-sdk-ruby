@@ -59,6 +59,10 @@ class TcClient < Test::Unit::TestCase
   end
 
   def test_info
-    @service.info.build
+    keys = [
+    "build", "cpu_arch", "guid", "isFree", "isTrial", "licenseKeys",
+    "licenseSignature", "licenseState", "master_guid", "mode",
+    "os_build", "os_name", "os_version", "serverName", "version" ]
+    @service.info.keys {|key| assert(key.include? keys)}
   end
 end

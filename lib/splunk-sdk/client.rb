@@ -18,11 +18,11 @@ MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
 def _filter_content(content, key_list=nil)
   if key_list.nil?
-    return content.to_obj
+    return content.add_attrs
   end
   result = {}
   key_list.each {|key| result[key] = content[key]}
-  result.to_obj
+  result.add_attrs
 end
 
 class Service
@@ -217,24 +217,46 @@ class Index < Entity
     super(service, PATH_INDEXES + '/' + name, name)
   end
 
-  def value
-    self[@name]
-  end
-
   def attach(host=nil, source=nil, sourcetype=nil)
+    args = {:index => @name}
+    args['host'] = host if host
+    args['source'] = source if source
+    args['sourcetype'] = sourcetype if sourcetype
+    path = "receivers/stream?#{args.urlencode}"
 
+    cn = @service.context.connect
+    cn.write("POST #{@service.context.fullpath(path)} HTTP/1.1\r\n")
+    cn.write("Host: #{@service.context.host}:#{@service.context.port}\r\n")
+    cn.write("Accept-Encoding: identity\r\n")
+    cn.write("Authorization: Splunk #{@service.context.token}\r\n")
+    cn.write("X-Splunk-Input-Mode: Streaming\r\n")
+    cn.write("\r\n")
+    cn
   end
 
   def clean
-
+    saved = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
+    update(:maxTotalDataSizeMB => 1, :frozenTimePeriodInSecs => 1)
+    @service.context.post(@path, {})
+    until self['totalEventCount'] == '0' do sleep(1) end
+    update(saved)
   end
 
   def submit(event, host=nil, source=nil, sourcetype=nil)
+    args = {:index => @name}
+    args['host'] = host if host
+    args['source'] = source if source
+    args['sourcetype'] = sourcetype if sourcetype
 
+    path = "receivers/simple?#{args.urlencode}"
+    @service.context.post(path, event, {})
   end
 
   def upload(filename, args={})
-
+    args['index'] = @name
+    args['name'] = filename
+    path = "data/inputs/oneshot"
+    @service.context.post(path, args)
   end
 end
 
@@ -290,9 +312,26 @@ p "Testing messages......"
 
 
 #TODO: Need to test updating & messages (need some messages)
-=end
+
 
 p "Testing indexes"
 s.indexes.each do |index|
   p index.name
+  p index.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
 end
+=end
+
+main = s.indexes['main']
+main.clean
+
+#main.submit("this is an event", nil, "baz", "foo")
+
+#main.upload("/Users/rdas/logs/xaa")
+
+cn = main.attach()
+(1..5).each do
+  cn.write("Hello World\r\n")
+end
+cn.close
+
+
