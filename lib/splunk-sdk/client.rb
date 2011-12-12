@@ -10,6 +10,7 @@ PATH_USERS = 'authentication/users'
 PATH_MESSAGES = 'messages'
 PATH_INFO = 'server/info'
 PATH_SETTINGS = 'server/settings'
+PATH_INDEXES = 'data/indexes'
 
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
@@ -57,6 +58,16 @@ class Service
     return Entity.new(self, PATH_SETTINGS, "settings")
   end
 
+  def indexes
+    item = Proc.new {|service, name| Index.new(service, name)}
+    ctor = Proc.new { |service, name, args|
+      new_args = args
+      new_args[:name] = name
+      service.context.post(PATH_INDEXES, new_args)
+    }
+    Collection.new(self, PATH_INDEXES, "loggers", :item => item, :ctor => ctor)
+  end
+
   def roles
     create_collection(PATH_ROLES, "roles")
   end
@@ -70,7 +81,7 @@ class Service
     ctor = Proc.new { |service, name, args|
       new_args = args
       new_args[:name] = name
-      service.context.post(path, new_args)
+      service.context.post(PATH_MESSAGES, new_args)
     }
 
     dtor = Proc.new { |service, name| service.context.delete(path + '/' + name) }
@@ -201,7 +212,35 @@ class Message < Entity
   end
 end
 
+class Index < Entity
+  def initialize(service, name)
+    super(service, PATH_INDEXES + '/' + name, name)
+  end
+
+  def value
+    self[@name]
+  end
+
+  def attach(host=nil, source=nil, sourcetype=nil)
+
+  end
+
+  def clean
+
+  end
+
+  def submit(event, host=nil, source=nil, sourcetype=nil)
+
+  end
+
+  def upload(filename, args={})
+
+  end
+end
+
 s = connect(:username => 'admin', :password => 'sk8free')
+=begin
+
 p s.apps.list
 
 p "Testing read...."
@@ -251,3 +290,9 @@ p "Testing messages......"
 
 
 #TODO: Need to test updating & messages (need some messages)
+=end
+
+p "Testing indexes"
+s.indexes.each do |index|
+  p index.name
+end

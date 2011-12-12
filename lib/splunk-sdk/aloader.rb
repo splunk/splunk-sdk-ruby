@@ -16,6 +16,7 @@ class Hash
       class << obj; self; end.instance_eval do # do this on obj's metaclass
         attr_reader key.to_sym # add getter method for this ivar
       end
+
       obj # return obj for next iteration
     end
   end
