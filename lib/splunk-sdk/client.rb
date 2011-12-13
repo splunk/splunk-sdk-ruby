@@ -200,6 +200,18 @@ class Entity
     self
   end
 
+  def disable
+    @service.context.post(@path + "/disable", '')
+  end
+
+  def enable
+    @service.context.post(@path + "/enable", '')
+  end
+
+  def reload
+    @service.context.post(@path + "/_reload", '')
+  end
+
 end
 
 class Message < Entity
@@ -260,8 +272,11 @@ class Index < Entity
   end
 end
 
-s = connect(:username => 'admin', :password => 'sk8free')
+
+
+
 =begin
+s = connect(:username => 'admin', :password => 'sk8free')
 
 p s.apps.list
 
@@ -319,7 +334,7 @@ s.indexes.each do |index|
   p index.name
   p index.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
 end
-=end
+
 
 main = s.indexes['main']
 main.clean
@@ -335,3 +350,6 @@ end
 cn.close
 
 
+p s.indexes
+p s.indexes['main'].read
+=end
