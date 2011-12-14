@@ -31,6 +31,7 @@ class Hash
     self.each do |k, v|
       #Replace any embedded : with an _
       key = k.gsub(':','_')
+      key.gsub!('.','_')
       if v.is_a? Hash
         instance_variable_set("@#{key}", v.add_attrs)
       else

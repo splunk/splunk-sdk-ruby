@@ -1,6 +1,7 @@
 require_relative 'aloader'
 require_relative 'context'
 require 'libxml'
+require 'cgi'
 
 PATH_APPS_LOCAL = 'apps/local'
 PATH_CAPABILITIES = 'authorization/capabilities'
@@ -11,18 +12,27 @@ PATH_MESSAGES = 'messages'
 PATH_INFO = 'server/info'
 PATH_SETTINGS = 'server/settings'
 PATH_INDEXES = 'data/indexes'
-
+PATH_CONFS = "properties"
+PATH_CONF = "configs/conf-%s"
+PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
-def _filter_content(content, key_list=nil)
+def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
-    return content.add_attrs
+    return content.add_attrs if add_attrs
+    return content
   end
   result = {}
   key_list.each {|key| result[key] = content[key]}
-  result.add_attrs
+
+  return result.add_attrs if add_attrs
+  result
+end
+
+def _path_stanza(conf, stanza)
+  PATH_STANZA % [conf, CGI::escape(stanza)]
 end
 
 class Service
@@ -46,7 +56,7 @@ class Service
   def info
     response = @context.get(PATH_INFO)
     record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
-    return record.content
+    record.content
   end
 
   def loggers
@@ -55,7 +65,7 @@ class Service
   end
 
   def settings
-    return Entity.new(self, PATH_SETTINGS, "settings")
+    Entity.new(self, PATH_SETTINGS, "settings")
   end
 
   def indexes
@@ -74,6 +84,11 @@ class Service
 
   def users
     create_collection(PATH_USERS, "users")
+  end
+
+  def confs
+    item = Proc.new {|service, conf| ConfCollection.new(self, conf) }
+    Collection.new(self, PATH_CONFS, "confs", :item => item)
   end
 
   def messages
@@ -107,6 +122,7 @@ def connect(args)
 end
 
 
+
 class Collection
   def initialize(service, path, name=nil, procs={})
     @service = service
@@ -134,26 +150,30 @@ class Collection
   def delete(name)
     raise NotImplmentedError if @dtor.nil?
     @dtor.call(@service, name)
+    return self
   end
 
   def create(name, args={})
     raise NotImplementedError if @ctor.nil?
     @ctor.call(@service, name, args)
+    return self[name]
   end
 
   def [](key)
     raise NotImplmentedError if @item.nil?
-    raise KeyError if !contains(key) 
-    return @item.call(@service, key)
+    raise KeyError if !contains?(key)
+    @item.call(@service, key)
   end
 
-  def contains(name)
-    return list().include?(name)
+  def contains?(name)
+    list().include?(name)
   end
+
+  #TODO: Need method 'itemmeta'
 
   def list
     retval = []
-    response = @service.context.get(@path, :count => -1)
+    response = @service.context.get(@path + "?count=-1")
     record = AtomResponseLoader::load_text_as_record(response)
     return retval if !record.feed.instance_variable_defined?('@entry')
     if record.feed.entry.is_a?(Array)
@@ -178,7 +198,8 @@ class Entity
 
   def [](key)
     obj = read([key])
-    obj.send(key)
+    #obj.send(key)
+    return obj[key]
   end
 
   def []=(key, value)
@@ -188,7 +209,7 @@ class Entity
   def read(field_list=nil)
     response = @service.context.get(@path)
     data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
-    return _filter_content(data["content"], field_list)
+    _filter_content(data["content"], field_list)
   end
 
   def readmeta()
@@ -196,7 +217,7 @@ class Entity
   end
 
   def update(args)
-    response = @service.context.post(@path, args)
+    @service.context.post(@path, args)
     self
   end
 
@@ -249,8 +270,11 @@ class Index < Entity
   def clean
     saved = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
     update(:maxTotalDataSizeMB => 1, :frozenTimePeriodInSecs => 1)
-    @service.context.post(@path, {})
-    until self['totalEventCount'] == '0' do sleep(1) end
+    #@service.context.post(@path, {})
+    until self['totalEventCount'] == '0' do
+      sleep(1)
+      puts self['totalEventCount']
+    end
     update(saved)
   end
 
@@ -272,10 +296,37 @@ class Index < Entity
   end
 end
 
+class Conf < Entity
+  def initialize(service, path, name)
+    super(service, path, name)
+  end
 
+  def read(field_list=nil)
+    response = @service.context.get(@path)
+    data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    _filter_content(data["content"], field_list, false)
+  end
 
+  def submit(stanza)
+    @service.context.post(@path, stanza, {})
+  end
+end
+
+class ConfCollection < Collection
+  def initialize(svc, conf)
+    item = Proc.new {|service, stanza| Conf.new(service, _path_stanza(conf, stanza), stanza)}
+    ctor = Proc.new {|service, stanza, args|
+          new_args = args
+          new_args[:name] = stanza
+          service.context.post(PATH_CONF % conf, new_args)
+        }
+    dtor = Proc.new {|service, stanza| service.context.delete(_path_stanza(conf, stanza))}
+    super(svc, PATH_CONF % [conf, conf], conf, :item => item, :ctor => ctor, :dtor => dtor)
+  end
+end
 
 =begin
+
 s = connect(:username => 'admin', :password => 'sk8free')
 
 p s.apps.list
@@ -352,4 +403,25 @@ cn.close
 
 p s.indexes
 p s.indexes['main'].read
+
+s.confs.each do |conf|
+  conf.each do |stanza|
+    stanza.read
+    break
+  end
+end
+
+
+props = s.confs['props']
+stanza = props.create('sdk-tests')
+p props.contains? 'sdk-tests'
+p stanza.name
+p stanza.read().keys.include? 'maxDist'
+p stanza.read()['maxDist']
+value = Integer(stanza['maxDist'])
+p 'value=%d' % value
+stanza.update(:maxDist => value+1)
+p 'value after=%d' % stanza['maxDist']
+props.delete('sdk-tests')
+p props.contains? 'sdk-tests'
 =end

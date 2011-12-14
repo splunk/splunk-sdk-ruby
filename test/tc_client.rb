@@ -79,7 +79,7 @@ class TcClient < Test::Unit::TestCase
   def test_indexes
     @service.indexes.each {|index| index.read}
     @service.indexes.create(TEST_INDEX_NAME) if !@service.indexes.list.include?(TEST_INDEX_NAME)
-    assert(@service.indexes.contains(TEST_INDEX_NAME))
+    assert(@service.indexes.contains?(TEST_INDEX_NAME))
 
     attrs = [
       'thawedPath', 'quarantineFutureSecs',
@@ -115,23 +115,68 @@ class TcClient < Test::Unit::TestCase
 
     index.clean
     assert(index['totalEventCount'], '0')
-
+    puts "ONE"
     cn = index.attach
     cn.write("Hello World!")
     cn.close
     wait_event_count(index,'1', 30)
     assert(index['totalEventCount'], '1')
 
+    puts "TWO"
     index.submit("Hello again!")
     wait_event_count(index, '2', 30)
     assert(index['totalEventCount'], '2')
 
+    puts "THREE"
     testpath = File.dirname(File.expand_path(__FILE__))
     index.upload(File.join(testpath, "testfile.txt"))
     wait_event_count(index, '3', 30)
     assert(index['totalEventCount'], '3')
-
+    puts "FOUR"
     index.clean
     assert(index['totalEventCount'], '0')
+    puts "DONE WITH TEST_INDEXES"
+  end
+
+  def test_confs
+    puts 'BEFORE CONFS'
+    @service.confs.each do |conf|
+      conf.each do |stanza|
+        stanza.read
+        break
+      end
+    end
+
+    puts 'BEFORE ASSERT1'
+    #assert(@service.confs.contains? 'props')
+    props = @service.confs['props']
+
+    puts 'BEFORE ASSERT2'
+    stanza = props.create('sdk-tests')
+
+    puts 'BEFORE CONTAINS'
+    assert(props.contains? 'sdk-tests')
+
+    puts 'BEFORE ASSERT3'
+    assert(stanza.name == 'sdk-tests')
+
+    puts 'BEFORE ASSERT4'
+    assert(stanza.read().keys.include? 'maxDist')
+
+    puts 'BEFORE ASSERT 5'
+    value = Integer(stanza['maxDist'])
+    stanza.update(:maxDist => value+1)
+    assert(stanza['maxDist'], String(value+1))
+
+    puts 'BEFORE ASSERT 6'
+    stanza['maxDist'] = value
+    assert(stanza['maxDist'], String(value))
+
+    puts 'BEFORE ASSERT 7'
+    props.delete('sdk-tests')
+
+    puts 'BEFORE CONTAINS'
+    assert(!props.contains?('sdk-tests'))
+    puts 'TEST_CONFS DONE'
   end
 end
