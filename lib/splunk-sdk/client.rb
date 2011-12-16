@@ -87,6 +87,10 @@ class Service
     create_collection(PATH_USERS, "users")
   end
 
+  def jobs
+    Jobs.new(self)
+  end
+
   def confs
     item = Proc.new {|service, conf| ConfCollection.new(self, conf) }
     Collection.new(self, PATH_CONFS, "confs", :item => item)
@@ -327,7 +331,7 @@ class ConfCollection < Collection
 end
 
 class Jobs < Collection
-  def initialize(svc, sid)
+  def initialize(svc)
     @service = svc
     item = Proc.new {|service, sid| Job.new(service, sid)}
     super(svc, PATH_JOBS, "jobs", :item => item)
