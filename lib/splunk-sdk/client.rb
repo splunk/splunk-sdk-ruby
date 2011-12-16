@@ -15,6 +15,7 @@ PATH_INDEXES = 'data/indexes'
 PATH_CONFS = "properties"
 PATH_CONF = "configs/conf-%s"
 PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
+PATH_JOBS = "search/jobs"
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
@@ -177,7 +178,7 @@ class Collection
     record = AtomResponseLoader::load_text_as_record(response)
     return retval if !record.feed.instance_variable_defined?('@entry')
     if record.feed.entry.is_a?(Array)
-      record.feed.entry.each do |entry|
+      record.feed.entry.each do |entry|              ``
         retval << entry["title"] #because 'entry' is an array we don't allow dots
       end
     else
@@ -325,6 +326,122 @@ class ConfCollection < Collection
   end
 end
 
+class Jobs < Collection
+  def initialize(svc, sid)
+    @service = svc
+    item = Proc.new {|service, sid| Job.new(service, sid)}
+    super(svc, PATH_JOBS, "jobs", :item => item)
+  end
+
+  def create(query, args={})
+    args[:search] = query
+    response = @service.context.post(PATH_JOBS, '', args)
+
+    return respose if args[:exec_mode] == 'one_shot'
+
+    sid = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    Job.new(@service, sid)
+  end
+
+  def list
+    response = @service.context.get(PATH_JOBS)
+    entry = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    return [] if entry.nil?
+    entry = [entry] if !entry.is_a Array
+    retarr = []
+    entry.each {|item| retarr << item.sid}
+    retarr
+  end
+end
+
+class Jobs
+  def initialize(svc, sid)
+    @service = svc
+    @sid = sid
+    @path = PATH_JOBS + '/' + sid
+    @control_path = @control + '/control'
+  end
+
+  def [](key)
+    obj = read([key])
+    return obj[key]
+  end
+
+  def read(field_list=nil)
+    response = @service.context.get(@path)
+    data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    _filter_content(data["content"], field_list)
+  end
+
+  def cancel
+    @service.context.post(@control_path, :action => 'cancel')
+    self
+  end
+
+  def disable_preview
+    @service.context.post(@control_path, :action => 'disablepreview')
+    self
+  end
+
+  def events(args={})
+    @service.context.get(@path + '/events', args)
+  end
+
+  def enable_preview
+    @service.context.post(@control_path, :action => 'enablepreview')
+    self
+  end
+
+  def finalize
+    @service.context.post(@control_path, :action => 'finalize')
+    self
+  end
+
+  def pause
+    @service.context.post(@control_path, :action => 'pause')
+    self
+  end
+
+  def preview(args={})
+    @service.context.get(@path + '/results_preview', args)
+  end
+
+  def results(args={})
+    @service.context.get(@path + '/results', args)
+  end
+
+  def searchlog(args={})
+    @service.context.get(@path + 'search.log', args)
+  end
+
+  def setpriority(value)
+    @service.context.post(@control_path, :action => 'setpriority', :priority => value)
+    self
+  end
+
+  def summary(args={})
+    @service.context.get(@path + '/summary', args)
+  end
+
+  def timeline(args={})
+    @service.context.get(@path + 'timeline', args)
+  end
+
+  def touch
+    @service.context.post(@control_path, :action => 'touch')
+    self
+  end
+
+  def setttl(value)
+    @service.context.post(@control_path, :action => 'setttl', :ttl => value)
+  end
+
+  def unpause
+    @service.context.post(@control_path, :action => 'unpause')
+    self
+  end
+end
+
 =begin
 
 s = connect(:username => 'admin', :password => 'sk8free')
@@ -424,4 +541,5 @@ stanza.update(:maxDist => value+1)
 p 'value after=%d' % stanza['maxDist']
 props.delete('sdk-tests')
 p props.contains? 'sdk-tests'
+
 =end

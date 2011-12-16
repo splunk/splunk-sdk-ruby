@@ -22,7 +22,6 @@ class TcClient < Test::Unit::TestCase
   end
 
 =begin
-
   def test_apps
     @service.apps.each do |app|
       app.read
@@ -45,7 +44,6 @@ class TcClient < Test::Unit::TestCase
     assert(@service.apps.list.include?(TEST_APP_NAME) == false)
   end
 =end
-
   def test_capabilities
     expected = [
         "admin_all_objects", "change_authentication",
@@ -141,15 +139,21 @@ class TcClient < Test::Unit::TestCase
   def test_confs
     puts 'BEFORE CONFS'
     @service.confs.each do |conf|
-      conf.each do |stanza|
-        stanza.read
-        break
-      end
+    #  conf.each do |stanza|
+    #    stanza.read
+    #    break
+    # end
     end
 
     puts 'BEFORE ASSERT1'
     #assert(@service.confs.contains? 'props')
     props = @service.confs['props']
+
+    #props.each do |prop|
+     # puts prop
+    #end
+
+    props.delete('sdk-tests') if props.contains? 'sdk-tests'
 
     puts 'BEFORE ASSERT2'
     stanza = props.create('sdk-tests')
