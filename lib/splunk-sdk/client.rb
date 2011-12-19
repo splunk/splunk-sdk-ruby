@@ -18,7 +18,10 @@ PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
 PATH_JOBS = "search/jobs"
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
+NAMESPACES_SEARCH = ['ns0:http://www.w3.org/2005/Atom', 's:http://dev.splunk.com/ns/rest']
+
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
+MATCH_ENTRY_CONTENT_SEARCH = 's:entry/s:content'
 
 def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
@@ -343,27 +346,28 @@ class Jobs < Collection
 
     return respose if args[:exec_mode] == 'one_shot'
 
+    #TODO: DO NOT RETURN SID HERE
     sid = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     Job.new(@service, sid)
   end
 
   def list
     response = @service.context.get(PATH_JOBS)
-    entry = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    entry = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     return [] if entry.nil?
-    entry = [entry] if !entry.is_a Array
+    entry = [entry] if !entry.is_a? Array
     retarr = []
-    entry.each {|item| retarr << item.sid}
+    entry.each {|item| retarr << item.content.sid}
     retarr
   end
 end
 
-class Jobs
+class Job
   def initialize(svc, sid)
     @service = svc
     @sid = sid
     @path = PATH_JOBS + '/' + sid
-    @control_path = @control + '/control'
+    @control_path = @path + '/control'
   end
 
   def [](key)
@@ -373,8 +377,8 @@ class Jobs
 
   def read(field_list=nil)
     response = @service.context.get(@path)
-    data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
-    _filter_content(data["content"], field_list)
+    data = AtomResponseLoader::load_text(response)
+    _filter_content(data["entry"]["content"], field_list)
   end
 
   def cancel
@@ -547,3 +551,11 @@ props.delete('sdk-tests')
 p props.contains? 'sdk-tests'
 
 =end
+s = connect(:username => 'admin', :password => 'sk8free')
+jobs = s.jobs
+p jobs.list
+jobs.list.each do |sid|
+  job = Job.new(s, sid)
+  puts job['diskUsage']
+end
+
