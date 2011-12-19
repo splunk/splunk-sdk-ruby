@@ -2,6 +2,7 @@ require_relative 'aloader'
 require_relative 'context'
 require 'libxml'
 require 'cgi'
+require 'json/pure' #TODO: Please get me working with json/ext - it SO much faster
 
 PATH_APPS_LOCAL = 'apps/local'
 PATH_CAPABILITIES = 'authorization/capabilities'
@@ -341,14 +342,24 @@ class Jobs < Collection
   end
 
   def create(query, args={})
-    args[:search] = query
-    response = @service.context.post(PATH_JOBS, '', args)
+    args["search"] = query
+    response = @service.context.post(PATH_JOBS, args)
 
-    return respose if args[:exec_mode] == 'one_shot'
+    return response if args[:exec_mode] == 'oneshot'
 
     #TODO: DO NOT RETURN SID HERE
     sid = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     Job.new(@service, sid)
+  end
+
+  def create_oneshot(query, args={})
+    args[:search] = query
+    args[:exec_mode] = "oneshot"
+    args[:output_mode] = "json"
+    response = @service.context.post(PATH_JOBS, args)
+
+    json = JSON.parse(response)
+    SearchResults.new(json)
   end
 
   def list
@@ -447,6 +458,18 @@ class Job
   def unpause
     @service.context.post(@control_path, :action => 'unpause')
     self
+  end
+end
+
+class SearchResults
+  include Enumerable
+
+  def initialize(data)
+    @data = data
+  end
+
+  def each(&block)
+    @data.each {|row| block.call(row) }
   end
 end
 
@@ -558,4 +581,12 @@ jobs.list.each do |sid|
   job = Job.new(s, sid)
   puts job['diskUsage']
 end
+
+#result = jobs.create("search *", :exec_mode => 'oneshot', :output_mode => 'json')
+#puts '********************************'
+#puts result
+
+result = jobs.create_oneshot("search *", :max_count => 1000, :max_results => 1000)
+result.each {|row| puts row['_raw']}
+puts result.count
 
