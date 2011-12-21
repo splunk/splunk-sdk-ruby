@@ -3,6 +3,7 @@ require_relative 'context'
 require 'libxml'
 require 'cgi'
 require 'json/pure' #TODO: Please get me working with json/ext - it SO much faster
+require 'json/stream'
 
 PATH_APPS_LOCAL = 'apps/local'
 PATH_CAPABILITIES = 'authorization/capabilities'
@@ -17,12 +18,10 @@ PATH_CONFS = "properties"
 PATH_CONF = "configs/conf-%s"
 PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
 PATH_JOBS = "search/jobs"
+PATH_EXPORT = "search/jobs/export"
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
-NAMESPACES_SEARCH = ['ns0:http://www.w3.org/2005/Atom', 's:http://dev.splunk.com/ns/rest']
-
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
-MATCH_ENTRY_CONTENT_SEARCH = 's:entry/s:content'
 
 def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
@@ -347,8 +346,8 @@ class Jobs < Collection
 
     return response if args[:exec_mode] == 'oneshot'
 
-    #TODO: DO NOT RETURN SID HERE
-    sid = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    response = AtomResponseLoader::load_text(response)
+    sid = response['response']['sid']
     Job.new(@service, sid)
   end
 
@@ -360,6 +359,27 @@ class Jobs < Collection
 
     json = JSON.parse(response)
     SearchResults.new(json)
+  end
+
+  def create_stream(query, args={})
+    args[:search] = query
+    args[:output_mode] = "json"
+
+    path = PATH_JOBS + "/export?#{args.urlencode}"
+
+    cn = @service.context.connect
+    cn.write("GET #{@service.context.fullpath(path)} HTTP/1.1\r\n")
+    cn.write("Host: #{@service.context.host}:#{@service.context.port}\r\n")
+    cn.write("User-Agent: splunk-sdk-ruby/0.1\r\n")
+    cn.write("Authorization: Splunk #{@service.context.token}\r\n")
+    cn.write("Accept: */*\r\n")
+    cn.write("\r\n")
+
+    cn.readline #return code TODO: Parse me and return error if problem
+    cn.readline #accepts
+    cn.readline #blank
+
+    ResultsReader.new(cn)
   end
 
   def list
@@ -403,6 +423,7 @@ class Job
   end
 
   def events(args={})
+    args[:output_mode] = 'json'
     @service.context.get(@path + '/events', args)
   end
 
@@ -426,6 +447,7 @@ class Job
   end
 
   def results(args={})
+    args[:output_mode] = 'json'
     @service.context.get(@path + '/results', args)
   end
 
@@ -470,6 +492,105 @@ class SearchResults
 
   def each(&block)
     @data.each {|row| block.call(row) }
+  end
+end
+
+#I'm an idiot because I couldn't find any way to pass local context variables to
+#a block in the parser.  Thus the hideous monkey-patch and the 'obj' param
+class JSON::Stream::Parser
+  def initialize(obj, &block)
+    @state = :start_document
+    @utf8 = JSON::Stream::Buffer.new
+    @listeners = Hash.new {|h, k| h[k] = [] }
+    @stack, @unicode, @buf, @pos = [], "", "", -1
+    @obj = obj
+    instance_eval(&block) if block_given?
+  end
+end
+
+class ResultsReader
+  include Enumerable
+
+  def initialize(socket)
+    @socket = socket
+    @events = []
+
+    callbacks = proc do
+      start_document {
+        #puts 'start document'
+        @array_depth = 0
+      }
+
+      end_document {
+        #puts 'end document'
+      }
+
+      start_object {
+        @event = {}
+      }
+      end_object {
+        @obj.event_found(@event)
+      }
+
+      start_array {
+        #puts 'start array'
+        @array_depth += 1
+        if @array_depth > 1
+          @isarray = true
+          @array = []
+        end
+      }
+
+      end_array {
+        if @array_depth > 1
+          @event[@k] = @array
+          @isarray = false
+        end
+        #puts 'end array'
+      }
+
+      key {|k|
+        @k = k
+      }
+
+      value {|v|
+        if @isarray
+          @array << v
+        else
+          @event[@k] = v
+        end
+      }
+    end
+
+    @parser = JSON::Stream::Parser.new(self, &callbacks)
+  end
+
+  def close
+    @socket.close()
+  end
+
+  def event_found(event)
+    @events << event
+  end
+
+  def read
+    data = @socket.read(4096)
+    return nil if data.nil?
+    #TODO: Put me in to show [] at end of events bug
+    puts String(data.size) + ':' + data
+    @parser << data
+    data.size
+  end
+
+  def each(&block)
+    while true
+      sz = read if @events.count == 0
+      break if sz == 0 or sz.nil?
+      @events.each do |event|
+        block.call(event)
+      end
+      @events.clear
+    end
   end
 end
 
@@ -575,18 +696,31 @@ p props.contains? 'sdk-tests'
 
 =end
 s = connect(:username => 'admin', :password => 'sk8free')
-jobs = s.jobs
-p jobs.list
-jobs.list.each do |sid|
-  job = Job.new(s, sid)
-  puts job['diskUsage']
-end
+reader = s.jobs.create_stream('search host="45.2.94.5"')
+reader.each {|event| puts event}
+reader.close
+
+#job = s.jobs.create("search * | stats count", :max_count => 1000, :max_results => 1000)
+
+#while true
+#  stats = job.read(['isDone'])
+#  break if stats['isDone'] == '1'
+#  sleep(1)
+#end
+
+#puts job.results(:output_mode => 'json')
 
 #result = jobs.create("search *", :exec_mode => 'oneshot', :output_mode => 'json')
 #puts '********************************'
 #puts result
 
-result = jobs.create_oneshot("search *", :max_count => 1000, :max_results => 1000)
-result.each {|row| puts row['_raw']}
-puts result.count
+#result = jobs.create_oneshot("search *", :max_count => 1000, :max_results => 1000)
+#result.each {|row| puts row['_raw']}
+#puts result.count
 
+#jobs = s.jobs
+#p jobs.list
+#jobs.list.each do |sid|
+#  job = Job.new(s, sid)
+#  puts job['diskUsage']
+#end

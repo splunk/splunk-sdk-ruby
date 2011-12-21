@@ -73,13 +73,23 @@ class Context
   end
 
   def get(path, params={})
-    resource = create_resource(path, params)
-    resource.get params do |response, request, result, &block|
+    headers = {} #we don't allow additional headers for now
+
+    #flatten params onto the path
+    fullpath = path
+    if params.count > 0
+      ext_path = build_stream(flatten_params(params)).string
+      fullpath = path + '?' + ext_path
+    end
+
+    resource = create_resource(fullpath, headers)
+    resource.get headers do |response, request, result, &block|
       check_for_error_return(response)
       response
     end
   end
 
+  #TODO: Make this the same as 'get'.  In other words, params are not headers
   def delete(path, params={})
     resource = create_resource(path, params)
     resource.delete params do |response, request, result, &block|
@@ -110,7 +120,6 @@ class Context
     "/servicesNS/#{username}/#{appname}/#{path}"
   end
 
-private
   def init_default(key, deflt)
     if @args.has_key?(key)
       return @args[key]
@@ -122,7 +131,7 @@ private
     "#{@prefix}#{fullpath(path)}"
   end
 
-  def create_resource(path, params)
+  def create_resource(path, params={})
     params.merge!(@headers) if !@headers.nil?
     if @key_file.nil? or @cert_file.nil?
       resource = RestClient::Resource.new url(path)
