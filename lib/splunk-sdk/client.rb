@@ -203,6 +203,28 @@ class Service
     Entity.new(self, PATH_SETTINGS, "settings")
   end
 
+  # Returns all indexes
+  #
+  # ==== Returns
+  # A Collection of Index objects
+  #
+  # ==== Example 1 - display the name of all indexes along with various attributes of each
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.indexes.each do |i|
+  #     puts i.name + ': ' + String(i.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs']))
+  #   end
+  #
+  #     _audit: {"maxTotalDataSizeMB"=>"500000", "frozenTimePeriodInSecs"=>"188697600"}
+  #     _blocksignature: {"maxTotalDataSizeMB"=>"0", "frozenTimePeriodInSecs"=>"0"}
+  #     _internal: {"maxTotalDataSizeMB"=>"500000", "frozenTimePeriodInSecs"=>"2419200"}
+  #     _thefishbucket: {"maxTotalDataSizeMB"=>"500000", "frozenTimePeriodInSecs"=>"2419200"}
+  #     history: {"maxTotalDataSizeMB"=>"500000", "frozenTimePeriodInSecs"=>"604800"}
+  #     ...
+  #
+  # ==== Example 2 - clean (removed all data from) the index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   main = svc.indexes['main'] #Return Entity object for index 'main'
+  #   main.clean
   def indexes
     item = Proc.new {|service, name| Index.new(service, name)}
     ctor = Proc.new { |service, name, args|
@@ -267,7 +289,7 @@ class Service
 end
 
 
-
+#TODO: Implement Inputs
 
 
 class Collection
@@ -840,8 +862,7 @@ s = Service::connect(:username => 'admin', :password => 'sk8free')
 reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}
 
-sapp = s.apps['sample_app']
-puts sapp['eai:acl']['perms']
+s.indexes.each {|i| puts i.name + ': ' + String(i.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs']))}
 
 #p s.settings.read
 #s.loggers.each {|logger| puts logger.name + ":" + logger['level']}
