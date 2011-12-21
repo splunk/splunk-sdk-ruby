@@ -19,6 +19,8 @@ PATH_CONF = "configs/conf-%s"
 PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
 PATH_JOBS = "search/jobs"
 PATH_EXPORT = "search/jobs/export"
+PATH_RESTART = "server/control/restart"
+PATH_PARSE = "search/parser"
 
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
@@ -94,6 +96,16 @@ class Service
     Jobs.new(self)
   end
 
+  def restart
+    @context.get(PATH_RESTART)
+  end
+
+  def parse(query, args={})
+    args['q'] = query
+    args['output_mode'] = 'json'
+    @context.get(PATH_PARSE, args)
+  end
+
   def confs
     item = Proc.new {|service, conf| ConfCollection.new(self, conf) }
     Collection.new(self, PATH_CONFS, "confs", :item => item)
@@ -128,6 +140,7 @@ end
 def connect(args)
   Service.new args
 end
+
 
 
 
@@ -696,7 +709,8 @@ p props.contains? 'sdk-tests'
 
 =end
 s = connect(:username => 'admin', :password => 'sk8free')
-reader = s.jobs.create_stream('search host="45.2.94.5"')
+
+reader = s.jobs.create_stream('search host="45.2.94.5" | top Generator')
 reader.each {|event| puts event}
 reader.close
 
