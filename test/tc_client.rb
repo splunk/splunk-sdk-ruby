@@ -19,6 +19,7 @@ end
 class TcClient < Test::Unit::TestCase
   def setup
     @service = Service.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW)
+    @service.login
   end
 
 =begin

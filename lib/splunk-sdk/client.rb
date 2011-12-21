@@ -25,6 +25,8 @@ PATH_PARSE = "search/parser"
 NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
+
+
 def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
     return content.add_attrs if add_attrs
@@ -41,35 +43,162 @@ def _path_stanza(conf, stanza)
   PATH_STANZA % [conf, CGI::escape(stanza)]
 end
 
+##
+# This class is the main place for clients to access and control Splunk.
+# You create a Service instance by simply calling Service::connect or
+# just creating a new Service instance with your user and password.
+#
 class Service
-  attr_reader :context
+  attr_reader :context # :nodoc:
 
+  # Create an instance of Service and logs in to Splunk
+  #
+  # ==== Attributes
+  # +args+ - Valid args are listed below.  Note that they are all Strings:
+  # * +:username+ - log in to Splunk as this user (no default)
+  # * +:password+ - password for user 'username' (no default)
+  # * +:host+ - Splunk host (e.g. '10.1.2.3') (defaults to 'localhost')
+  # * +:port+ - the Splunk management port (defaults to '8089')
+  # * +:protocol+ - either 'https' or 'http' (defaults to 'https')
+  # * +:namespace+ - application namespace option.  'username:appname' (defaults to nil)
+  # * +:key_file+ - the full path to a SSL key file (defaults to nil)
+  # * +:cert_file+ - the full path to a SSL certificate file (defaults to nil)
+  #
+  # ==== Returns
+  # instance of a Service class - must call login to use
+  #
+  # ==== Examples
+  #   svc = Service.new(:username => 'admin', :password => 'foo')
+  #   svc = Service.new(:username => 'admin', :password => 'foo', :host => '10.1.1.1', :port = '9999')
   def initialize(args)
     @context = Context.new(args)
+  end
+
+  # Creates an instance of Service and logs into Splunk
+  #
+  # ==== Attributes
+  # +args+ - Same as ::new
+  #
+  # ==== Returns
+  # instance of a Service class, logged into Splunk
+  #
+  # ==== Examples
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.apps #get a list of apps (we can do this because we are logged in)
+  def self.connect(args)
+    svc = Service.new args
+    svc.login
+    svc
+  end
+
+  # Log into Splunk
+  #
+  # ==== Examples
+  #   svc = Service.new(:username => 'admin', :password => 'foo')
+  #   svc.login #Now we can make other calls to Splunk via svc
+  #
+  def login
     @context.login
   end
 
+  # Log out of Splunk
+  def logout
+    @context.logout
+  end
+
+  # Return a collection of all apps.  To operate on apps, call methods on the returned Collection
+  # and Entities from the Collection.
+  #
+  # ==== Returns
+  # Collection of all apps
+  #
+  # ==== Example 1 - list all apps
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.apps.each {|app| puts app['name']}
+  #     gettingstarted
+  #     launcher
+  #     learned
+  #     legacy
+  #     sample_app
+  #     search
+  #     splunk_datapreview
+  #     ...
+  #
+  # ==== Example 2 - delete the sample app
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.apps.delete('sample_app')
+  #
+  # ==== Example 3 - display permissions for the sample app
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   sapp = svc.apps['sample_app']
+  #   puts sapp['eai:acl']['perms']
+  #     {"read"=>["*"], "write"=>["*"]}
   def apps
     create_collection(PATH_APPS_LOCAL)
   end
 
+  # Return the list of all capabilities in the system.  This list is not mutable because capabilities
+  # are hard-wired into Splunk
+  #
+  # ==== Returns
+  # An Array of capability Strings
+  #
+  # ==== Examples
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.capabilities
+  #     ["admin_all_objects", "change_authentication", "change_own_password", "delete_by_keyword",...]
   def capabilities
     response = @context.get(PATH_CAPABILITIES)
     record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     record.content.capabilities
   end
 
+  # Returns a ton of info about the running Splunk instance
+  #
+  # ==== Returns
+  # A Hash of key/value pairs
+  #
+  # ==== Examples
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.info
+  #     {"build"=>"112383", "cpu_arch"=>"i386", "eai:acl"=>{"app"=>nil, "can_list"=>"0",......}
   def info
     response = @context.get(PATH_INFO)
     record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     record.content
   end
 
+  # Returns all loggers in the system.  Each logger logs errors, warnings, debug info, or informational
+  # information about a specific part of the Splunk system
+  #
+  # ==== Returns
+  # A Collection of loggers
+  #
+  # ==== Example - display each logger along with it's minimum log level (ERROR, WARN, INFO, DEBUG)
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
+  #     ...
+  #     DedupProcessor:WARN
+  #     DeployedApplication:INFO
+  #     DeployedServerClass:WARN
+  #     DeploymentClient:WARN
+  #     DeploymentClientAdminHandler:WARN
+  #     DeploymentMetrics:INFO
+  #     ...
   def loggers
     item = Proc.new {|service, name| Entity.new(service, PATH_LOGGER + '/' + name, name)}
     Collection.new(self, PATH_LOGGER, "loggers", :item => item)
   end
 
+  # Returns Splunk server settings
+  #
+  # ==== Returns
+  # An Entity with all server settings
+  #
+  # ==== Example - get a Hash of all server settings
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.settings.read
+  #     {"SPLUNK_DB"=>"/opt/4.3/splunkbeta/var/lib/splunk", "SPLUNK_HOME"=>"/opt/4.3/splunkbeta",...}
   def settings
     Entity.new(self, PATH_SETTINGS, "settings")
   end
@@ -137,9 +266,6 @@ class Service
   end
 end
 
-def connect(args)
-  Service.new args
-end
 
 
 
@@ -198,7 +324,7 @@ class Collection
     record = AtomResponseLoader::load_text_as_record(response)
     return retval if !record.feed.instance_variable_defined?('@entry')
     if record.feed.entry.is_a?(Array)
-      record.feed.entry.each do |entry|              ``
+      record.feed.entry.each do |entry|
         retval << entry["title"] #because 'entry' is an array we don't allow dots
       end
     else
@@ -590,7 +716,7 @@ class ResultsReader
     data = @socket.read(4096)
     return nil if data.nil?
     #TODO: Put me in to show [] at end of events bug
-    puts String(data.size) + ':' + data
+    #puts String(data.size) + ':' + data
     @parser << data
     data.size
   end
@@ -604,12 +730,13 @@ class ResultsReader
       end
       @events.clear
     end
+    close
   end
 end
 
 =begin
 
-s = connect(:username => 'admin', :password => 'sk8free')
+s = Service::connect(:username => 'admin', :password => 'sk8free')
 
 p s.apps.list
 
@@ -708,11 +835,18 @@ props.delete('sdk-tests')
 p props.contains? 'sdk-tests'
 
 =end
-s = connect(:username => 'admin', :password => 'sk8free')
+s = Service::connect(:username => 'admin', :password => 'sk8free')
 
-reader = s.jobs.create_stream('search host="45.2.94.5" | top Generator')
+reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}
-reader.close
+
+sapp = s.apps['sample_app']
+puts sapp['eai:acl']['perms']
+
+#p s.settings.read
+#s.loggers.each {|logger| puts logger.name + ":" + logger['level']}
+
+#reader.close
 
 #job = s.jobs.create("search * | stats count", :max_count => 1000, :max_results => 1000)
 
