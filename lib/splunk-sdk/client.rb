@@ -235,21 +235,65 @@ class Service
     Collection.new(self, PATH_INDEXES, "loggers", :item => item, :ctor => ctor)
   end
 
+  # Returns all roles
+  #
+  # ==== Returns
+  # A Collection of roles
+  #
+  # ==== Example - List every role along with it's list of capabilities
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.roles.each {|i| puts i.name + ': ' + String(i.read.capabilities) }
+  #     admin: ["admin_all_objects", "change_authentication", ... ]
+  #     can_delete: ["delete_by_keyword"]
+  #     power: ["rtsearch", "schedule_search"]
+  #     user: ["change_own_password", "get_metadata", ... ]
   def roles
     create_collection(PATH_ROLES, "roles")
   end
 
+  # Returns all users
+  #
+  # ==== Returns
+  # A Collection of users
+  #
+  # ==== Example - Create a new user, then list all users
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.users.create('jack', :password => 'mypassword', :realname => 'Jack_be_nimble', :roles => ['user'])
+  #   svc.users.each {|i| puts i.name + ':' + String(i.read) }
+  #     admin:{"defaultApp"=>"launcher", "defaultAppIsUserOverride"=>"1", "defaultAppSourceRole"=>"system",
+  #     jack:{"defaultApp"=>"launcher", "defaultAppIsUserOverride"=>"0", "defaultAppSourceRole"=>"system",
   def users
     create_collection(PATH_USERS, "users")
   end
 
+  # Returns a new Jobs Object
+  #
+  # ==== Returns
+  #   A new Jobs Object
+  #
+  # ==== Example - Get a list of all current jobs
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.jobs.list
+  #     1325621349.33
   def jobs
     Jobs.new(self)
   end
 
+  # Restart the Splunk Server
+  #
+  # ==== Returns
+  #   A bunch of crappy XML that makes little sense
   def restart
     @context.get(PATH_RESTART)
   end
+
+  # Parse a search into it's components
+  #
+  # ==== Returns
+  #   A JSON structure with information about the search
+  #
+  # ==== Example - Parse a simple search
+  #   puts s.parse("search error")
 
   def parse(query, args={})
     args['q'] = query
@@ -862,7 +906,8 @@ s = Service::connect(:username => 'admin', :password => 'sk8free')
 reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}
 
-s.indexes.each {|i| puts i.name + ': ' + String(i.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs']))}
+puts s.parse("search error")
+#job = s.jobs.create("search * | stats count", :max_count => 1000, :max_results => 1000)
 
 #p s.settings.read
 #s.loggers.each {|logger| puts logger.name + ":" + logger['level']}
