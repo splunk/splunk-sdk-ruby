@@ -502,7 +502,10 @@ class Collection
   end
 end
 
+# Entity objects represent individual items such as indexes, users, roles, etc.
+# They are usually contained within Collection objects
 class Entity
+  # The name of this Entity
   attr_reader :name
 
   def initialize(service, path, name=nil) # :nodoc:
@@ -511,26 +514,80 @@ class Entity
     @name = name
   end
 
+  # Access an individual attribute named <b>+key+</b>.
+  # Note that this results in an HTTP round trip, fetching all values for the Entity even though a single
+  # attribute is returned.
+  #
+  # ==== Returns
+  # A String representing the attribute fetched
+  #
+  # ==== Example - Display the cold path for index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   index = svc.indexes['main']
+  #   puts index['coldPath']
   def [](key)
     obj = read([key])
     #obj.send(key)
     return obj[key]
   end
 
+  # Updates an individual attribute named <b>+key+</b> with String <b>+value+</b>
+  #
+  # ==== Returns
+  # The new value
+  #
+  # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   index =  svc.indexes['main']
+  #   index['rotatePeriodInSecs'] = '61'  #Note that you cannot use the number 61.  It must be a String.
   def []=(key, value)
     update(key => value)
   end
 
+  # Return all or a specified subset of attribute/value pairs for this Entity
+  #
+  # ==== Returns
+  # A Hash of all attributes and values for this Entity.  If Array <b>+field_list+</b> is specified,
+  # only those fields are returned.  If a field does not exist, nil is returned for it's value.
+  #
+  # ==== Example 1 - Return a Hash of all attribute/values for index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.indexes['main'].read
+  #     {"assureUTF8"=>"0", "blockSignSize"=>"0", "blockSignatureDatabase"=>"_blocksignature",....}
+  #
+  # ==== Example 2 - Return a Hash of only the specified attribute/values for index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.indexes['main'],read(['coldPath', 'blockSignSize'])
+  #     {"coldPath"=>"$SPLUNK_DB/defaultdb/colddb", "blockSignSize"=>"0"}
   def read(field_list=nil)
     response = @service.context.get(@path)
     data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
     _filter_content(data["content"], field_list)
   end
 
+  # Return metadata information for this Entity. This is the same as:
+  # <tt>entity.read(['eai:acl', 'eai:attributes')</tt>
+  #
+  # ==== Returns
+  # A Hash of this entities attributes/values for 'eai:acl' and 'eai:attributes'
+  #
+  # ==== Example: Get metadata information for the index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.indexes['main'].readmeta
+  #     {"eai:acl"=>{"app"=>"search", "can_list"=>"1",...},"eai:attributes"=>{"optionalFields"=>["assureUTF8"...]}}
   def readmeta()
     read(['eai:acl', 'eai:attributes'])
   end
 
+  # Updates an Entity with a Hash of attribute/value pairs specified as <b>+args+</b>
+  #
+  # ==== Returns
+  # The Entity object after it's been updated
+  #
+  # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   index =  svc.indexes['main']
+  #   index.update('rotatePeriodInSecs' => '61')  #Note that you cannot use the number 61.  It must be a String.
   def update(args)
     @service.context.post(@path, args)
     self
@@ -550,21 +607,39 @@ class Entity
 
 end
 
+# Message objects represent system-wide messages
 class Message < Entity
   def initialize(service, name)
     super(service, PATH_MESSAGES + '/' + name, name)
   end
 
+  # Return the message
+  #
+  # ==== Returns
+  # The message String: (the value of the message named <b>+name+</b>)
   def value
     self[@name]
   end
 end
 
+# Splunk can have many indexes.  Each index is represented by an Index object.
 class Index < Entity
   def initialize(service, name)
     super(service, PATH_INDEXES + '/' + name, name)
   end
 
+  # Streaming HTTP(S) input for Splunk. Write to the returned stream Socket, and Splunk will index the data.
+  # Optionally, you can assign a <b>+host+</b>, <b>+source+</b> or <b>+sourcetype+</b> that will apply
+  # to every event sent on the socket. Note that the client is responsible for closing the socket when finished.
+  #
+  # ==== Returns
+  # Either an encrypted or non-encrypted stream Socket depending on if Service.connect is http or https
+  #
+  # ==== Example - Index 5 events written to the stream and assign a sourcetype 'mysourcetype' to each event
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   stream = svc.indexes['main'].attach(nil, nil, 'mysourcetype')
+  #   (1..5).each { stream.write("This is a cheezy event\r\n") }
+  #   stream.close
   def attach(host=nil, source=nil, sourcetype=nil)
     args = {:index => @name}
     args['host'] = host if host
@@ -582,6 +657,16 @@ class Index < Entity
     cn
   end
 
+  # Nuke all events in this index.  This is done by setting <b>+maxTotalDataSizeMG+</b> and
+  # <b>+frozenTimePeriodInSecs+</b> both to 1. The call will then block until <b>+totalEventCount+</b> == 0.
+  # When the call is completed, the original parameters are restored.
+  #
+  # ==== Returns
+  # The original 'maxTotalDataSizeMB' and 'frozenTimePeriodInSecs' parameters in a Hash
+  #
+  # ==== Example - clean the 'main' index
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.indexes['main'].clean
   def clean
     saved = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
     update(:maxTotalDataSizeMB => 1, :frozenTimePeriodInSecs => 1)
@@ -593,14 +678,22 @@ class Index < Entity
     update(saved)
   end
 
-  def submit(event, host=nil, source=nil, sourcetype=nil)
+  # Batch HTTP(S) input for Splunk. Specify one or more events in a String along with optional
+  # <b>+host+</b>, <b>+source+</b> or <b>+sourcetype+</b> fields which will apply to all events.
+  #
+  # Example - Index a single event into the 'main' index with source 'baz' and sourcetype 'foo'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.indexes['main'].submit("this is an event", nil, "baz", "foo")
+  #
+  # Example 2 - Index multiple events into the 'main' index with default metadata
+  def submit(events, host=nil, source=nil, sourcetype=nil)
     args = {:index => @name}
     args['host'] = host if host
     args['source'] = source if source
     args['sourcetype'] = sourcetype if sourcetype
 
     path = "receivers/simple?#{args.urlencode}"
-    @service.context.post(path, event, {})
+    @service.context.post(path, events, {})
   end
 
   def upload(filename, args={})
@@ -1009,8 +1102,12 @@ s = Service::connect(:username => 'admin', :password => 'sk8free')
 reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}
 
+index =  s.indexes['main']
+puts index.update('rotatePeriodInSecs' => '61')
+
+
 #puts s.confs['props'].list
-puts s.messages['test'].value
+#puts s.messages['test'].value
 
 #puts s.confs['props']['manpage'].read
 #job = s.jobs.create("search * | stats count", :max_count => 1000, :max_results => 1000)
