@@ -1,3 +1,4 @@
+# :stopdoc:
 require "test/unit"
 require "splunk-sdk/aloader"
 require "splunk-sdk/context"

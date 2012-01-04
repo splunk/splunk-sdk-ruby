@@ -26,7 +26,7 @@ NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/r
 MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
 
-
+# :stopdoc:
 def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
     return content.add_attrs if add_attrs
@@ -42,6 +42,7 @@ end
 def _path_stanza(conf, stanza)
   PATH_STANZA % [conf, CGI::escape(stanza)]
 end
+# :startdoc:
 
 ##
 # This class is the main place for clients to access and control Splunk.
@@ -269,7 +270,7 @@ class Service
   # Returns a new Jobs Object
   #
   # ==== Returns
-  #   A new Jobs Object
+  # A new Jobs Object
   #
   # ==== Example - Get a list of all current jobs
   #   svc = Service.connect(:username => 'admin', :password => 'foo')
@@ -290,22 +291,85 @@ class Service
   # Parse a search into it's components
   #
   # ==== Returns
-  #   A JSON structure with information about the search
+  # A JSON structure with information about the search
   #
   # ==== Example - Parse a simple search
-  #   puts s.parse("search error")
-
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.parse("search error")
+  #     {
+	#       "remoteSearch": "litsearch error | fields  keepcolorder=t \"host\" \"index\" \"linecount\" \"source\" \"sourcetype\" \"splunk_server\"",
+	#       "remoteTimeOrdered": true,
+	#       "eventsSearch": "search error",
+	#       "eventsTimeOrdered": true,
+	#       "eventsStreaming": true,
+	#       "reportsSearch": "",
+	#       "commands": [
+	#     	{
+	#     		"command": "search",
+	#     		"rawargs": "error",
+	#     		"pipeline": "streaming",
+	#     		"args": {
+	#   			"search": ["error"],
+	#   		}
+	#   		"isGenerating": true,
+	#   		"streamType": "SP_STREAM",
+	#   	},
+	#     ]
+  #     }
   def parse(query, args={})
     args['q'] = query
     args['output_mode'] = 'json'
     @context.get(PATH_PARSE, args)
   end
 
+  # Return a Collection of ConfCollection objects.  Each ConfCollection represents a Collection of
+  # stanzas in that particular configuration file.
+  #
+  # ==== Returns
+  # A Collection of ConfCollection objects
+  #
+  # ==== Notes
+  # You cannot use dot (.) notation for accessing configs, stanzas or lines beacause
+  # they can look nasty, thus breaking Ruby's idea of an accessor
+  #
+  # ==== Example 1 - Display a list of stanzas in the props.conf file
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts s.confs['props'].list
+  #     (?i)source::....zip(.\d+)?
+  #     __singleline
+  #     access_combined
+  #     access_combined_wcookie
+  #     access_common
+  #     ActiveDirectory
+  #     anaconda
+  #     ...
+  #
+  # ==== Example 2 - Display a Hash of configuration lines on a particular stanza
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   confs = svc.confs             #Return a Collection of ConfCollection objects (config files)
+  #   stanzas = confs['props']      #Return a ConfCollection (stanzas in a config file)
+  #   stanza = stanzas['manpage']   #Return a collection of Conf objects (lines in a stanza)
+  #   puts stanza.read
+  #     {"ANNOTATE_PUNCT"=>"1", "BREAK_ONLY_BEFORE"=>"gooblygook", "BREAK_ONLY_BEFORE_DATE"=>"1",...}
   def confs
     item = Proc.new {|service, conf| ConfCollection.new(self, conf) }
     Collection.new(self, PATH_CONFS, "confs", :item => item)
   end
 
+  # Return a collection of Message objects
+  #
+  # ==== Returns
+  # A Collection of Message objects
+  #
+  # ==== Example 1 - list all message names
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.messages.list
+  #     test
+  #
+  # ==== Example 2 - display the message named 'test'
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts s.messages['test'].value
+  #     my message
   def messages
     item = Proc.new {|service, name| Message.new(service, name)}
     ctor = Proc.new { |service, name, args|
@@ -318,7 +382,7 @@ class Service
     Collection.new(self, PATH_MESSAGES, "messages", :item => item, :ctor => ctor, :dtor => dtor)
   end
 
-  def create_collection(path, collection_name=nil)
+  def create_collection(path, collection_name=nil) # :nodoc:
     item = Proc.new { |service, name| Entity.new(service, path + '/' + name, name) }
 
     ctor = Proc.new { |service, name, args|
@@ -335,7 +399,10 @@ end
 
 #TODO: Implement Inputs
 
-
+##
+# Collections are groups of items, which can be Entity objects, subclasses of
+# Entity objects or Job objects.
+# They are created by calling one of many methods on the Service object.
 class Collection
   def initialize(service, path, name=nil, procs={})
     @service = service
@@ -347,43 +414,78 @@ class Collection
     @dtor = init_default(:dtor, nil)
   end
 
-  def init_default(key, deflt)
+  def init_default(key, deflt) # :nodoc:
     if @procs.has_key?(key)
       return @procs[key]
     end
     deflt
   end
 
-  def each(&block)
+  # Calls block once for each item in the collection
+  #
+  # ==== Example - display the name and level of each logger
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
+  def each(&block)  # :yields: item
     self.list().each do |name|
       yield @item.call(@service, name)
     end
   end
 
+  # Deletes an item named <b>+name+</b>
+  #
+  # ==== Example - delete stanza _sdk-tests_ from _props.conf_
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   props = svc.confs['props']
+  #   props.delete('sdk-tests')
   def delete(name)
     raise NotImplmentedError if @dtor.nil?
     @dtor.call(@service, name)
     return self
   end
 
+  # Creates an item in this collection named <b>+name+</b> with optional args
+  #
+  # ==== Example - create a user named _jack_ and assign a password, a real name and a role
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   svc.users.create('jack', :password => 'mypassword', :realname => 'Jack_be_nimble', :roles => ['user'])
   def create(name, args={})
     raise NotImplementedError if @ctor.nil?
     @ctor.call(@service, name, args)
     return self[name]
   end
 
+  # Returns an item in this collection given <b>+key+</b>
+  #
+  # ==== Example - get an Index object called _main_
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   main = svc.indexes['main']
   def [](key)
     raise NotImplmentedError if @item.nil?
     raise KeyError if !contains?(key)
     @item.call(@service, key)
   end
 
+  # Returns _true_ if an item called <b>+name</b> exists in the Collection
+  #
+  # ==== Example - does an index called _main_ exist?
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   if svc.indexes.contains?('main')
+  #     puts 'index main exists'
+  #   else
+  #     puts 'index main does not exist'
+  #   end
   def contains?(name)
     list().include?(name)
   end
 
   #TODO: Need method 'itemmeta'
 
+  # Returns an Array of item names contained in this Collection
+  #
+  # ==== Example - list all roles
+  #   svc = Service.connect(:username => 'admin', :password => 'foo')
+  #   puts svc.roles.list
   def list
     retval = []
     response = @service.context.get(@path + "?count=-1")
@@ -403,7 +505,7 @@ end
 class Entity
   attr_reader :name
 
-  def initialize(service, path, name=nil)
+  def initialize(service, path, name=nil) # :nodoc:
     @service = service
     @path = path
     @name = name
@@ -702,6 +804,7 @@ end
 
 #I'm an idiot because I couldn't find any way to pass local context variables to
 #a block in the parser.  Thus the hideous monkey-patch and the 'obj' param
+
 class JSON::Stream::Parser
   def initialize(obj, &block)
     @state = :start_document
@@ -713,7 +816,7 @@ class JSON::Stream::Parser
   end
 end
 
-class ResultsReader
+class ResultsReader # :nodoc:
   include Enumerable
 
   def initialize(socket)
@@ -906,7 +1009,10 @@ s = Service::connect(:username => 'admin', :password => 'sk8free')
 reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}
 
-puts s.parse("search error")
+#puts s.confs['props'].list
+puts s.messages['test'].value
+
+#puts s.confs['props']['manpage'].read
 #job = s.jobs.create("search * | stats count", :max_count => 1000, :max_results => 1000)
 
 #p s.settings.read
