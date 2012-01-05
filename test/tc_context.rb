@@ -1,4 +1,7 @@
 # :stopdoc:
+require "rubygems"
+require "bundler/setup"
+
 require "test/unit"
 require "splunk-sdk/aloader"
 require "splunk-sdk/context"
