@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>Class: Service</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/splunk-sdk/client.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-connect">::connect</a>
+    
+    <li><a href="#method-c-new">::new</a>
+    
+    <li><a href="#method-i-apps">#apps</a>
+    
+    <li><a href="#method-i-capabilities">#capabilities</a>
+    
+    <li><a href="#method-i-confs">#confs</a>
+    
+    <li><a href="#method-i-indexes">#indexes</a>
+    
+    <li><a href="#method-i-info">#info</a>
+    
+    <li><a href="#method-i-jobs">#jobs</a>
+    
+    <li><a href="#method-i-loggers">#loggers</a>
+    
+    <li><a href="#method-i-login">#login</a>
+    
+    <li><a href="#method-i-logout">#logout</a>
+    
+    <li><a href="#method-i-messages">#messages</a>
+    
+    <li><a href="#method-i-parse">#parse</a>
+    
+    <li><a href="#method-i-restart">#restart</a>
+    
+    <li><a href="#method-i-roles">#roles</a>
+    
+    <li><a href="#method-i-settings">#settings</a>
+    
+    <li><a href="#method-i-users">#users</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./LICENSE.html">LICENSE</a>
+  
+    <li class="file"><a href="./README_rdoc.html">README</a>
+  
+    <li class="file"><a href="./Rakefile.html">Rakefile</a>
+  
+    <li class="file"><a href="./TODO.html">TODO</a>
+  
+    <li class="file"><a href="./test/testfile_txt.html">testfile</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./JSON.html">JSON</a>
+  
+    <li><a href="./JSON/Stream.html">JSON::Stream</a>
+  
+    <li><a href="./JSON/Stream/Parser.html">JSON::Stream::Parser</a>
+  
+    <li><a href="./AtomResponseLoader.html">AtomResponseLoader</a>
+  
+    <li><a href="./Collection.html">Collection</a>
+  
+    <li><a href="./Conf.html">Conf</a>
+  
+    <li><a href="./ConfCollection.html">ConfCollection</a>
+  
+    <li><a href="./Context.html">Context</a>
+  
+    <li><a href="./Entity.html">Entity</a>
+  
+    <li><a href="./Hash.html">Hash</a>
+  
+    <li><a href="./Index.html">Index</a>
+  
+    <li><a href="./Job.html">Job</a>
+  
+    <li><a href="./Jobs.html">Jobs</a>
+  
+    <li><a href="./Message.html">Message</a>
+  
+    <li><a href="./Object.html">Object</a>
+  
+    <li><a href="./ResultsReader.html">ResultsReader</a>
+  
+    <li><a href="./SearchResults.html">SearchResults</a>
+  
+    <li><a href="./Service.html">Service</a>
+  
+    <li><a href="./SplunkError.html">SplunkError</a>
+  
+    <li><a href="./SplunkHTTPError.html">SplunkHTTPError</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class Service</h1>
+
+  <div id="description" class="description">
+    
+<p>This class is the main place for clients to access and control Splunk. You
+create a <a href="Service.html">Service</a> instance by simply calling <a
+href="Service.html#method-c-connect">::connect</a> or just creating a new
+<a href="Service.html">Service</a> instance with your user and password.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-connect" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">connect</span><span
+            class="method-args">(args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Creates an instance of <a href="Service.html">Service</a> and logs into
+Splunk</p>
+
+<h4 id="method-c-connect-label-Attributes">Attributes</h4>
+
+<p><code>args</code> - Same as <a href="Service.html#method-c-new">::new</a></p>
+
+<h4 id="method-c-connect-label-Returns">Returns</h4>
+
+<p>instance of a <a href="Service.html">Service</a> class, logged into Splunk</p>
+
+<h4 id="method-c-connect-label-Examples">Examples</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">apps</span> <span class="ruby-comment">#get a list of apps (we can do this because we are logged in)</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="connect-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 89</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">connect</span>(<span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">args</span>
+  <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">login</span>
+  <span class="ruby-identifier">svc</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- connect-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- connect-method -->
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Create an instance of <a href="Service.html">Service</a> and logs in to
+Splunk</p>
+
+<h4 id="method-c-new-label-Attributes">Attributes</h4>
+
+<p><code>args</code> - Valid args are listed below.  Note that they are all
+Strings:</p>
+<ul><li>
+<p><code>:username</code> - log in to Splunk as this user (no default)</p>
+</li><li>
+<p><code>:password</code> - password for user ‘username’ (no default)</p>
+</li><li>
+<p><code>:host</code> - Splunk host (e.g. ‘10.1.2.3’) (defaults to
+‘localhost’)</p>
+</li><li>
+<p><code>:port</code> - the Splunk management port (defaults to ‘8089’)</p>
+</li><li>
+<p><code>:protocol</code> - either ‘https’ or ‘http’ (defaults to
+‘https’)</p>
+</li><li>
+<p><code>:namespace</code> - application namespace option. 
+‘username:appname’ (defaults to nil)</p>
+</li><li>
+<p><code>:key_file</code> - the full path to a SSL key file (defaults to nil)</p>
+</li><li>
+<p><code>:cert_file</code> - the full path to a SSL certificate file (defaults
+to nil)</p>
+</li></ul>
+
+<h4 id="method-c-new-label-Returns">Returns</h4>
+
+<p>instance of a <a href="Service.html">Service</a> class - must call login to
+use</p>
+
+<h4 id="method-c-new-label-Examples">Examples</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>, :<span class="ruby-identifier">host</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'10.1.1.1'</span>, :<span class="ruby-identifier">port</span> = <span class="ruby-string">'9999'</span>)
+</pre>
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 74</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">args</span>)
+  <span class="ruby-ivar">@context</span> = <span class="ruby-constant">Context</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- new-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- new-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-apps" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">apps</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a collection of all apps.  To operate on apps, call methods on the
+returned <a href="Collection.html">Collection</a> and Entities from the <a
+href="Collection.html">Collection</a>.</p>
+
+<h4 id="method-i-apps-label-Returns">Returns</h4>
+
+<p><a href="Collection.html">Collection</a> of all apps</p>
+
+<h4 id="method-i-apps-label-Example+1+-+list+all+apps">Example 1 - list all apps</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">apps</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">app</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">app</span>[<span class="ruby-string">'name'</span>]}
+  <span class="ruby-identifier">gettingstarted</span>
+  <span class="ruby-identifier">launcher</span>
+  <span class="ruby-identifier">learned</span>
+  <span class="ruby-identifier">legacy</span>
+  <span class="ruby-identifier">sample_app</span>
+  <span class="ruby-identifier">search</span>
+  <span class="ruby-identifier">splunk_datapreview</span>
+  <span class="ruby-operator">...</span>
+</pre>
+
+<h4 id="method-i-apps-label-Example+2+-+delete+the+sample+app">Example 2 - delete the sample app</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">apps</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">'sample_app'</span>)
+</pre>
+
+<h4 id="method-i-apps-label-Example+3+-+display+permissions+for+the+sample+app">Example 3 - display permissions for the sample app</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">sapp</span> = <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">apps</span>[<span class="ruby-string">'sample_app'</span>]
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">sapp</span>[<span class="ruby-string">'eai:acl'</span>][<span class="ruby-string">'perms'</span>]
+  {<span class="ruby-string">&quot;read&quot;</span>=<span class="ruby-operator">&gt;</span>[<span class="ruby-string">&quot;*&quot;</span>], <span class="ruby-string">&quot;write&quot;</span>=<span class="ruby-operator">&gt;</span>[<span class="ruby-string">&quot;*&quot;</span>]}
+</pre>
+          
+
+          
+          <div class="method-source-code" id="apps-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 137</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">apps</span>
+  <span class="ruby-identifier">create_collection</span>(<span class="ruby-constant">PATH_APPS_LOCAL</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- apps-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- apps-method -->
+
+    
+      <div id="method-i-capabilities" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">capabilities</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the list of all capabilities in the system.  This list is not
+mutable because capabilities are hard-wired into Splunk</p>
+
+<h4 id="method-i-capabilities-label-Returns">Returns</h4>
+
+<p>An Array of capability Strings</p>
+
+<h4 id="method-i-capabilities-label-Examples">Examples</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">capabilities</span>
+  [<span class="ruby-string">&quot;admin_all_objects&quot;</span>, <span class="ruby-string">&quot;change_authentication&quot;</span>, <span class="ruby-string">&quot;change_own_password&quot;</span>, <span class="ruby-string">&quot;delete_by_keyword&quot;</span>,<span class="ruby-operator">...</span>]
+</pre>
+          
+
+          
+          <div class="method-source-code" id="capabilities-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 151</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">capabilities</span>
+  <span class="ruby-identifier">response</span> = <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">get</span>(<span class="ruby-constant">PATH_CAPABILITIES</span>)
+  <span class="ruby-identifier">record</span> = <span class="ruby-constant">AtomResponseLoader</span><span class="ruby-operator">::</span><span class="ruby-identifier">load_text_as_record</span>(<span class="ruby-identifier">response</span>, <span class="ruby-constant">MATCH_ENTRY_CONTENT</span>, <span class="ruby-constant">NAMESPACES</span>)
+  <span class="ruby-identifier">record</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">capabilities</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- capabilities-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- capabilities-method -->
+
+    
+      <div id="method-i-confs" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">confs</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a <a href="Collection.html">Collection</a> of <a
+href="ConfCollection.html">ConfCollection</a> objects.  Each <a
+href="ConfCollection.html">ConfCollection</a> represents a <a
+href="Collection.html">Collection</a> of stanzas in that particular
+configuration file.</p>
+
+<h4 id="method-i-confs-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of <a
+href="ConfCollection.html">ConfCollection</a> objects</p>
+
+<h4 id="method-i-confs-label-Notes">Notes</h4>
+
+<p>You cannot use dot (.) notation for accessing configs, stanzas or lines
+beacause they can look nasty, thus breaking Ruby’s idea of an accessor</p>
+
+<h4 id="method-i-confs-label-Example+1+-+Display+a+list+of+stanzas+in+the+props.conf+file">Example 1 - Display a list of stanzas in the props.conf file</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">s</span>.<span class="ruby-identifier">confs</span>[<span class="ruby-string">'props'</span>].<span class="ruby-identifier">list</span>
+  (<span class="ruby-value">ii</span>)<span class="ruby-identifier">source</span><span class="ruby-operator">::</span><span class="ruby-operator">...</span>.<span class="ruby-identifier">zip</span>(.\<span class="ruby-identifier">d</span><span class="ruby-operator">+</span>)<span class="ruby-operator">?</span>
+  <span class="ruby-identifier">__singleline</span>
+  <span class="ruby-identifier">access_combined</span>
+  <span class="ruby-identifier">access_combined_wcookie</span>
+  <span class="ruby-identifier">access_common</span>
+  <span class="ruby-constant">ActiveDirectory</span>
+  <span class="ruby-identifier">anaconda</span>
+  <span class="ruby-operator">...</span>
+</pre>
+
+<h4 id="method-i-confs-label-Example+2+-+Display+a+Hash+of+configuration+lines+on+a+particular+stanza">Example 2 - Display a <a href="Hash.html">Hash</a> of configuration lines on a particular stanza</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">confs</span> = <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">confs</span>             <span class="ruby-comment">#Return a Collection of ConfCollection objects (config files)</span>
+<span class="ruby-identifier">stanzas</span> = <span class="ruby-identifier">confs</span>[<span class="ruby-string">'props'</span>]      <span class="ruby-comment">#Return a ConfCollection (stanzas in a config file)</span>
+<span class="ruby-identifier">stanza</span> = <span class="ruby-identifier">stanzas</span>[<span class="ruby-string">'manpage'</span>]   <span class="ruby-comment">#Return a Conf Object (lines in a stanza)</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">stanza</span>.<span class="ruby-identifier">read</span>
+  {<span class="ruby-string">&quot;ANNOTATE_PUNCT&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;1&quot;</span>, <span class="ruby-string">&quot;BREAK_ONLY_BEFORE&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;gooblygook&quot;</span>, <span class="ruby-string">&quot;BREAK_ONLY_BEFORE_DATE&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;1&quot;</span>,<span class="ruby-operator">...</span>}
+</pre>
+          
+
+          
+          <div class="method-source-code" id="confs-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 356</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">confs</span>
+  <span class="ruby-identifier">item</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">conf</span><span class="ruby-operator">|</span> <span class="ruby-constant">ConfCollection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-identifier">conf</span>) }
+  <span class="ruby-constant">Collection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-constant">PATH_CONFS</span>, <span class="ruby-string">&quot;confs&quot;</span>, <span class="ruby-value">:item</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">item</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- confs-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- confs-method -->
+
+    
+      <div id="method-i-indexes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">indexes</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns all indexes</p>
+
+<h4 id="method-i-indexes-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of <a
+href="Index.html">Index</a> objects</p>
+
+<h4 id="method-i-indexes-label-Example+1+-+display+the+name+of+all+indexes+along+with+various+attributes+of+each">Example 1 - display the name of all indexes along with various attributes of each</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">+</span> <span class="ruby-string">': '</span> <span class="ruby-operator">+</span> <span class="ruby-constant">String</span>(<span class="ruby-identifier">i</span>.<span class="ruby-identifier">read</span>([<span class="ruby-string">'maxTotalDataSizeMB'</span>, <span class="ruby-string">'frozenTimePeriodInSecs'</span>]))
+<span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">_audit</span><span class="ruby-operator">:</span> {<span class="ruby-string">&quot;maxTotalDataSizeMB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;500000&quot;</span>, <span class="ruby-string">&quot;frozenTimePeriodInSecs&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;188697600&quot;</span>}
+  <span class="ruby-identifier">_blocksignature</span><span class="ruby-operator">:</span> {<span class="ruby-string">&quot;maxTotalDataSizeMB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;0&quot;</span>, <span class="ruby-string">&quot;frozenTimePeriodInSecs&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;0&quot;</span>}
+  <span class="ruby-identifier">_internal</span><span class="ruby-operator">:</span> {<span class="ruby-string">&quot;maxTotalDataSizeMB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;500000&quot;</span>, <span class="ruby-string">&quot;frozenTimePeriodInSecs&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;2419200&quot;</span>}
+  <span class="ruby-identifier">_thefishbucket</span><span class="ruby-operator">:</span> {<span class="ruby-string">&quot;maxTotalDataSizeMB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;500000&quot;</span>, <span class="ruby-string">&quot;frozenTimePeriodInSecs&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;2419200&quot;</span>}
+  <span class="ruby-identifier">history</span><span class="ruby-operator">:</span> {<span class="ruby-string">&quot;maxTotalDataSizeMB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;500000&quot;</span>, <span class="ruby-string">&quot;frozenTimePeriodInSecs&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;604800&quot;</span>}
+  <span class="ruby-operator">...</span>
+</pre>
+
+<h4 id="method-i-indexes-label-Example+2+-+clean+%28removed+all+data+from%29+the+index+%27main%27">Example 2 - clean (removed all data from) the index ‘main’</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">main</span> = <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>[<span class="ruby-string">'main'</span>] <span class="ruby-comment">#Return Entity object for index 'main'</span>
+<span class="ruby-identifier">main</span>.<span class="ruby-identifier">clean</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="indexes-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 229</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">indexes</span>
+  <span class="ruby-identifier">item</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-constant">Index</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span>)}
+  <span class="ruby-identifier">ctor</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span>, <span class="ruby-identifier">args</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">new_args</span> = <span class="ruby-identifier">args</span>
+    <span class="ruby-identifier">new_args</span>[<span class="ruby-value">:name</span>] = <span class="ruby-identifier">name</span>
+    <span class="ruby-identifier">service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">post</span>(<span class="ruby-constant">PATH_INDEXES</span>, <span class="ruby-identifier">new_args</span>)
+  }
+  <span class="ruby-constant">Collection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-constant">PATH_INDEXES</span>, <span class="ruby-string">&quot;loggers&quot;</span>, <span class="ruby-value">:item</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">item</span>, <span class="ruby-value">:ctor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">ctor</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- indexes-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- indexes-method -->
+
+    
+      <div id="method-i-info" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">info</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns a ton of info about the running Splunk instance</p>
+
+<h4 id="method-i-info-label-Returns">Returns</h4>
+
+<p>A <a href="Hash.html">Hash</a> of key/value pairs</p>
+
+<h4 id="method-i-info-label-Examples">Examples</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">info</span>
+  {<span class="ruby-string">&quot;build&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;112383&quot;</span>, <span class="ruby-string">&quot;cpu_arch&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;i386&quot;</span>, <span class="ruby-string">&quot;eai:acl&quot;</span>=<span class="ruby-operator">&gt;</span>{<span class="ruby-string">&quot;app&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-keyword">nil</span>, <span class="ruby-string">&quot;can_list&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;0&quot;</span>,<span class="ruby-operator">...</span><span class="ruby-operator">...</span>}
+</pre>
+          
+
+          
+          <div class="method-source-code" id="info-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 166</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">info</span>
+  <span class="ruby-identifier">response</span> = <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">get</span>(<span class="ruby-constant">PATH_INFO</span>)
+  <span class="ruby-identifier">record</span> = <span class="ruby-constant">AtomResponseLoader</span><span class="ruby-operator">::</span><span class="ruby-identifier">load_text_as_record</span>(<span class="ruby-identifier">response</span>, <span class="ruby-constant">MATCH_ENTRY_CONTENT</span>, <span class="ruby-constant">NAMESPACES</span>)
+  <span class="ruby-identifier">record</span>.<span class="ruby-identifier">content</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- info-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- info-method -->
+
+    
+      <div id="method-i-jobs" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">jobs</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns a new <a href="Jobs.html">Jobs</a> object</p>
+
+<h4 id="method-i-jobs-label-Returns">Returns</h4>
+
+<p>A new <a href="Jobs.html">Jobs</a> object</p>
+
+<h4 id="method-i-jobs-label-Example+-+Display+the+disk+usage+of+all+jobs">Example - Display the disk usage of all jobs</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">jobs</span> = <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">jobs</span>.<span class="ruby-identifier">list</span>
+<span class="ruby-identifier">jobs</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">job</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">job</span>[<span class="ruby-string">'diskUsage'</span>] }
+  <span class="ruby-value">177445</span>
+  <span class="ruby-value">489999</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="jobs-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 281</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">jobs</span>
+  <span class="ruby-constant">Jobs</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- jobs-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- jobs-method -->
+
+    
+      <div id="method-i-loggers" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">loggers</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns all loggers in the system.  Each logger logs errors, warnings,
+debug info, or informational information about a specific part of the
+Splunk system</p>
+
+<h4 id="method-i-loggers-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of loggers</p>
+
+<h4 id="method-i-loggers-label-Example+-+display+each+logger+along+with+it%27s+minimum+log+level+%28ERROR%2C+WARN%2C+INFO%2C+DEBUG%29">Example - display each logger along with it’s minimum log level (ERROR, WARN, INFO, DEBUG)</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">loggers</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">logger</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;:&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">logger</span>[<span class="ruby-string">'level'</span>]}
+  <span class="ruby-operator">...</span>
+  <span class="ruby-constant">DedupProcessor</span>:<span class="ruby-constant">WARN</span>
+  <span class="ruby-constant">DeployedApplication</span>:<span class="ruby-constant">INFO</span>
+  <span class="ruby-constant">DeployedServerClass</span>:<span class="ruby-constant">WARN</span>
+  <span class="ruby-constant">DeploymentClient</span>:<span class="ruby-constant">WARN</span>
+  <span class="ruby-constant">DeploymentClientAdminHandler</span>:<span class="ruby-constant">WARN</span>
+  <span class="ruby-constant">DeploymentMetrics</span>:<span class="ruby-constant">INFO</span>
+  <span class="ruby-operator">...</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="loggers-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 189</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">loggers</span>
+  <span class="ruby-identifier">item</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-constant">Entity</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">service</span>, <span class="ruby-constant">PATH_LOGGER</span> <span class="ruby-operator">+</span> <span class="ruby-string">'/'</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">name</span>)}
+  <span class="ruby-constant">Collection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-constant">PATH_LOGGER</span>, <span class="ruby-string">&quot;loggers&quot;</span>, <span class="ruby-value">:item</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">item</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- loggers-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- loggers-method -->
+
+    
+      <div id="method-i-login" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">login</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Log into Splunk</p>
+
+<h4 id="method-i-login-label-Examples">Examples</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">login</span> <span class="ruby-comment">#Now we can make other calls to Splunk via svc</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="login-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 101</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">login</span>
+  <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">login</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- login-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- login-method -->
+
+    
+      <div id="method-i-logout" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">logout</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Log out of Splunk</p>
+          
+
+          
+          <div class="method-source-code" id="logout-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 106</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">logout</span>
+  <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">logout</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- logout-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- logout-method -->
+
+    
+      <div id="method-i-messages" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">messages</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a collection of <a href="Message.html">Message</a> objects</p>
+
+<h4 id="method-i-messages-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of <a
+href="Message.html">Message</a> objects</p>
+
+<h4 id="method-i-messages-label-Example+1+-+list+all+message+names">Example 1 - list all message names</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">messages</span>.<span class="ruby-identifier">list</span>
+  <span class="ruby-identifier">test</span>
+</pre>
+
+<h4 id="method-i-messages-label-Example+2+-+display+the+message+named+%27test%27">Example 2 - display the message named ‘test’</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">s</span>.<span class="ruby-identifier">messages</span>[<span class="ruby-string">'test'</span>].<span class="ruby-identifier">value</span>
+  <span class="ruby-identifier">my</span> <span class="ruby-identifier">message</span>
+</pre>
+          
+
+          
+          <div class="method-source-code" id="messages-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 375</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">messages</span>
+  <span class="ruby-identifier">item</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-constant">Message</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span>)}
+  <span class="ruby-identifier">ctor</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span>, <span class="ruby-identifier">args</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">new_args</span> = <span class="ruby-identifier">args</span>
+    <span class="ruby-identifier">new_args</span>[<span class="ruby-value">:name</span>] = <span class="ruby-identifier">name</span>
+    <span class="ruby-identifier">service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">post</span>(<span class="ruby-constant">PATH_MESSAGES</span>, <span class="ruby-identifier">new_args</span>)
+  }
+
+  <span class="ruby-identifier">dtor</span> = <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-identifier">service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">path</span> <span class="ruby-operator">+</span> <span class="ruby-string">'/'</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">name</span>) }
+  <span class="ruby-constant">Collection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-constant">PATH_MESSAGES</span>, <span class="ruby-string">&quot;messages&quot;</span>, <span class="ruby-value">:item</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">item</span>, <span class="ruby-value">:ctor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">ctor</span>, <span class="ruby-value">:dtor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">dtor</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- messages-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- messages-method -->
+
+    
+      <div id="method-i-parse" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parse</span><span
+            class="method-args">(query, args={})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Parse a search into it’s components</p>
+
+<h4 id="method-i-parse-label-Returns">Returns</h4>
+
+<p>A <a href="JSON.html">JSON</a> structure with information about the search</p>
+
+<h4 id="method-i-parse-label-Example+-+Parse+a+simple+search">Example - Parse a simple search</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-string">&quot;search error&quot;</span>)
+  {
+    <span class="ruby-string">&quot;remoteSearch&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;litsearch error | fields  keepcolorder=t \&quot;host\&quot; \&quot;index\&quot; \&quot;linecount\&quot; \&quot;source\&quot; \&quot;sourcetype\&quot; \&quot;splunk_server\&quot;&quot;</span>,
+    <span class="ruby-string">&quot;remoteTimeOrdered&quot;</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+    <span class="ruby-string">&quot;eventsSearch&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;search error&quot;</span>,
+    <span class="ruby-string">&quot;eventsTimeOrdered&quot;</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+    <span class="ruby-string">&quot;eventsStreaming&quot;</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+    <span class="ruby-string">&quot;reportsSearch&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>,
+    <span class="ruby-string">&quot;commands&quot;</span><span class="ruby-operator">:</span> [
+   {
+           <span class="ruby-string">&quot;command&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;search&quot;</span>,
+           <span class="ruby-string">&quot;rawargs&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;error&quot;</span>,
+           <span class="ruby-string">&quot;pipeline&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;streaming&quot;</span>,
+           <span class="ruby-string">&quot;args&quot;</span><span class="ruby-operator">:</span> {
+                   <span class="ruby-string">&quot;search&quot;</span><span class="ruby-operator">:</span> [<span class="ruby-string">&quot;error&quot;</span>],
+           }
+           <span class="ruby-string">&quot;isGenerating&quot;</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+           <span class="ruby-string">&quot;streamType&quot;</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;SP_STREAM&quot;</span>,
+   },
+  ]
+  }
+</pre>
+          
+
+          
+          <div class="method-source-code" id="parse-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 321</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parse</span>(<span class="ruby-identifier">query</span>, <span class="ruby-identifier">args</span>={})
+  <span class="ruby-identifier">args</span>[<span class="ruby-string">'q'</span>] = <span class="ruby-identifier">query</span>
+  <span class="ruby-identifier">args</span>[<span class="ruby-string">'output_mode'</span>] = <span class="ruby-string">'json'</span>
+  <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">get</span>(<span class="ruby-constant">PATH_PARSE</span>, <span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- parse-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- parse-method -->
+
+    
+      <div id="method-i-restart" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">restart</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Restart the Splunk Server</p>
+
+<h4 id="method-i-restart-label-Returns">Returns</h4>
+
+<pre>A bunch of crappy XML that makes little sense</pre>
+          
+
+          
+          <div class="method-source-code" id="restart-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 289</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">restart</span>
+  <span class="ruby-ivar">@context</span>.<span class="ruby-identifier">get</span>(<span class="ruby-constant">PATH_RESTART</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- restart-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- restart-method -->
+
+    
+      <div id="method-i-roles" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">roles</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns all roles</p>
+
+<h4 id="method-i-roles-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of roles</p>
+
+<h4 id="method-i-roles-label-Example+-+List+every+role+along+with+it%27s+list+of+capabilities">Example - List every role along with it’s list of capabilities</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">roles</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">+</span> <span class="ruby-string">': '</span> <span class="ruby-operator">+</span> <span class="ruby-constant">String</span>(<span class="ruby-identifier">i</span>.<span class="ruby-identifier">read</span>.<span class="ruby-identifier">capabilities</span>) }
+  <span class="ruby-identifier">admin</span><span class="ruby-operator">:</span> [<span class="ruby-string">&quot;admin_all_objects&quot;</span>, <span class="ruby-string">&quot;change_authentication&quot;</span>, <span class="ruby-operator">...</span> ]
+  <span class="ruby-identifier">can_delete</span><span class="ruby-operator">:</span> [<span class="ruby-string">&quot;delete_by_keyword&quot;</span>]
+  <span class="ruby-identifier">power</span><span class="ruby-operator">:</span> [<span class="ruby-string">&quot;rtsearch&quot;</span>, <span class="ruby-string">&quot;schedule_search&quot;</span>]
+  <span class="ruby-identifier">user</span><span class="ruby-operator">:</span> [<span class="ruby-string">&quot;change_own_password&quot;</span>, <span class="ruby-string">&quot;get_metadata&quot;</span>, <span class="ruby-operator">...</span> ]
+</pre>
+          
+
+          
+          <div class="method-source-code" id="roles-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 251</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">roles</span>
+  <span class="ruby-identifier">create_collection</span>(<span class="ruby-constant">PATH_ROLES</span>, <span class="ruby-string">&quot;roles&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- roles-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- roles-method -->
+
+    
+      <div id="method-i-settings" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">settings</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns Splunk server settings</p>
+
+<h4 id="method-i-settings-label-Returns">Returns</h4>
+
+<p>An <a href="Entity.html">Entity</a> with all server settings</p>
+
+<h4 id="method-i-settings-label-Example+-+get+a+Hash+of+all+server+settings">Example - get a <a href="Hash.html">Hash</a> of all server settings</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">settings</span>.<span class="ruby-identifier">read</span>
+  {<span class="ruby-string">&quot;SPLUNK_DB&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;/opt/4.3/splunkbeta/var/lib/splunk&quot;</span>, <span class="ruby-string">&quot;SPLUNK_HOME&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;/opt/4.3/splunkbeta&quot;</span>,<span class="ruby-operator">...</span>}
+</pre>
+          
+
+          
+          <div class="method-source-code" id="settings-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 203</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">settings</span>
+  <span class="ruby-constant">Entity</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-constant">PATH_SETTINGS</span>, <span class="ruby-string">&quot;settings&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- settings-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- settings-method -->
+
+    
+      <div id="method-i-users" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">users</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns all users</p>
+
+<h4 id="method-i-users-label-Returns">Returns</h4>
+
+<p>A <a href="Collection.html">Collection</a> of users</p>
+
+<h4 id="method-i-users-label-Example+-+Create+a+new+user%2C+then+list+all+users">Example - Create a new user, then list all users</h4>
+
+<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">users</span>.<span class="ruby-identifier">create</span>(<span class="ruby-string">'jack'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'mypassword'</span>, :<span class="ruby-identifier">realname</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'Jack_be_nimble'</span>, :<span class="ruby-identifier">roles</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-string">'user'</span>])
+<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">users</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">+</span> <span class="ruby-string">':'</span> <span class="ruby-operator">+</span> <span class="ruby-constant">String</span>(<span class="ruby-identifier">i</span>.<span class="ruby-identifier">read</span>) }
+  <span class="ruby-identifier">admin</span>:{<span class="ruby-string">&quot;defaultApp&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;launcher&quot;</span>, <span class="ruby-string">&quot;defaultAppIsUserOverride&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;1&quot;</span>, <span class="ruby-string">&quot;defaultAppSourceRole&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;system&quot;</span>,
+  <span class="ruby-identifier">jack</span>:{<span class="ruby-string">&quot;defaultApp&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;launcher&quot;</span>, <span class="ruby-string">&quot;defaultAppIsUserOverride&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;0&quot;</span>, <span class="ruby-string">&quot;defaultAppSourceRole&quot;</span>=<span class="ruby-operator">&gt;</span><span class="ruby-string">&quot;system&quot;</span>,
+</pre>
+          
+
+          
+          <div class="method-source-code" id="users-source">
+            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 266</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">users</span>
+  <span class="ruby-identifier">create_collection</span>(<span class="ruby-constant">PATH_USERS</span>, <span class="ruby-string">&quot;users&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- users-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- users-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.11.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+
