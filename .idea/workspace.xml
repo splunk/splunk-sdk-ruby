@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="189a8314-34c8-4181-ba79-5f2c4c898fc2" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LICENSE" afterPath="$PROJECT_DIR$/LICENSE" />
-    </list>
+    <list default="true" id="189a8314-34c8-4181-ba79-5f2c4c898fc2" name="Default" comment="" />
     <ignored path="splunk-sdk.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -66,7 +64,7 @@
           <file leaf-file-name="LICENSE" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/LICENSE">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="36" column="46" selection-start="1693" selection-end="1693" vertical-scroll-proportion="0.37128714">
+                <state line="52" column="80" selection-start="2704" selection-end="2704" vertical-scroll-proportion="0.54101837">
                   <folding />
                 </state>
               </provider>
@@ -597,7 +595,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="27" y="22" width="2035" height="1535" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18439226" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32902032" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -719,7 +717,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/LICENSE">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="46" selection-start="1693" selection-end="1693" vertical-scroll-proportion="0.37128714">
+        <state line="52" column="80" selection-start="2704" selection-end="2704" vertical-scroll-proportion="0.54101837">
           <folding />
         </state>
       </provider>
