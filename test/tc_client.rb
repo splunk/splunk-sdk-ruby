@@ -7,7 +7,7 @@ require "ostruct"
 require "splunk-sdk-ruby/client"
 
 ADMIN_LOGIN = "admin"
-ADMIN_PSW = "sk8free"
+ADMIN_PSW = "password"
 TEST_APP_NAME = "sdk-tests"
 TEST_INDEX_NAME = "sdk-tests"
 

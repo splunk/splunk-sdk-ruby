@@ -7,13 +7,15 @@ require "splunk-sdk-ruby/aloader"
 require "splunk-sdk-ruby/context"
 require "uuid"
 
+$my_argv = ARGV.dup
+
 class TcContext < Test::Unit::TestCase
   NAMESPACE_ATOM = "atom:http://www.w3.org/2005/Atom"
   NAMESPACE_REST = "s:http://dev.splunk.com/ns/rest"
   NAMESPACE_OPENSEARCH = "opensearch:http://a9.com/-/spec/opensearch/1.1"
   PATH_USERS = "authentication/users"
   ADMIN_LOGIN = "admin"
-  ADMIN_PSW = "sk8free"
+  ADMIN_PSW = "password"
 
   def random_uname
     UUID.new.generate
@@ -127,13 +129,13 @@ class TcContext < Test::Unit::TestCase
   end
 
   def test_get_user
-    c = Splunk::Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
+    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https')
     c.login
     assert(c.get(PATH_USERS + '/admin').code == 200)
   end
 
   def test_get_users
-    c = Splunk::Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
+    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https')
     c.login
     assert(c.get(PATH_USERS).code == 200)
   end

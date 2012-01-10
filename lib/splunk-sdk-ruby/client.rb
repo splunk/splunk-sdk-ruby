@@ -1094,7 +1094,7 @@ end
 
 =begin
 
-s = Splunk::Service::connect(:username => 'admin', :password => 'sk8free')
+s = Splunk::Service::connect(:username => 'admin', :password => 'password')
 
 p s.apps.list
 
@@ -1193,10 +1193,10 @@ props.delete('sdk-tests')
 p props.contains? 'sdk-tests'
 
 =end
-s = Splunk::Service::connect(:username => 'admin', :password => 'sk8free')
+#s = Splunk::Service::connect(:username => 'admin', :password => 'password')
 
-reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
-reader.each {|event| puts event}
+#reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
+#reader.each {|event| puts event}
 
 #index =  s.indexes['main']
 #puts index.update('rotatePeriodInSecs' => '61')
@@ -1230,4 +1230,4 @@ reader.each {|event| puts event}
 #result.each {|row| puts row['_raw']}
 #puts result.count
 
-s.jobs.list.each {|job| puts job['diskUsage'] }
+#s.jobs.list.each {|job| puts job['diskUsage'] }

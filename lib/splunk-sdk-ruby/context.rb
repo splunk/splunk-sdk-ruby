@@ -203,7 +203,7 @@ module Splunk
   end
 end
 =begin
-c = Context.new(:username => 'admin', :password => 'sk8free', :protocol => 'https')
+c = Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
 c.login
 response = c.get('apps/local')
 result = AtomResponseLoader::load_text_as_record(response)
@@ -226,7 +226,7 @@ end
 
 PATH_USERS = "authentication/users"
 
-c = Context.new(:username => 'admin', :password => 'sk8free')
+c = Context.new(:username => 'admin', :password => 'password')
 c.login
 
 #create a random user
