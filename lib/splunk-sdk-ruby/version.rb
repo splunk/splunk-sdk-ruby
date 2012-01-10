@@ -1,3 +1,3 @@
-module SplunkSdkRuby
+module Splunk
   VERSION = "0.0.1"
 end

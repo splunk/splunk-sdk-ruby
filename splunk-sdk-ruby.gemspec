@@ -4,14 +4,15 @@ require File.expand_path('../lib/splunk-sdk-ruby/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["rdas"]
   gem.email         = ["rob@splunk.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{Splunk SDK for Ruby}
+  gem.summary       = %q{Ruby bindings to Splunk REST layer}
+  gem.homepage      = "http://dev.splunk.com"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "splunk-sdk-ruby"
   gem.require_paths = ["lib"]
-  gem.version       = Splunk::Sdk::Ruby::VERSION
+  gem.version       = Splunk::VERSION
+  #gem.version       = '0.0.1' 
 end
