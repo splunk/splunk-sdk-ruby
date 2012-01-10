@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="189a8314-34c8-4181-ba79-5f2c4c898fc2" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/splunk-sdk.iml" afterPath="$PROJECT_DIR$/.idea/splunk-sdk.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile.lock" afterPath="$PROJECT_DIR$/Gemfile.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile" afterPath="$PROJECT_DIR$/Gemfile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_aloader.rb" afterPath="$PROJECT_DIR$/test/tc_aloader.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_client.rb" afterPath="$PROJECT_DIR$/test/tc_client.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_context.rb" afterPath="$PROJECT_DIR$/test/tc_context.rb" />
     </list>
     <ignored path="splunk-sdk.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,10 +27,10 @@
     <splitter split-orientation="horizontal" split-proportion="0.54080224">
       <split-first>
         <leaf>
-          <file leaf-file-name="tc_context.rb" pinned="false" current="true" current-in-tab="true">
+          <file leaf-file-name="tc_context.rb" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/test/tc_context.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.2652051">
+                <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -53,10 +45,10 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="client.rb" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="client.rb" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="38" column="60" selection-start="986" selection-end="986" vertical-scroll-proportion="-17.038462">
+                <state line="1170" column="60" selection-start="39976" selection-end="39976" vertical-scroll-proportion="0.26124197">
                   <folding />
                 </state>
               </provider>
@@ -105,7 +97,7 @@
           <file leaf-file-name="tc_client.rb" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/tc_client.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="81" column="0" selection-start="2461" selection-end="2461" vertical-scroll-proportion="0.10590778">
+                <state line="28" column="10" selection-start="566" selection-end="566" vertical-scroll-proportion="0.30259365">
                   <folding />
                 </state>
               </provider>
@@ -150,8 +142,8 @@
         <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
         <option value="$PROJECT_DIR$/test/tc_aloader.rb" />
         <option value="$PROJECT_DIR$/test/tc_client.rb" />
-        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
         <option value="$PROJECT_DIR$/test/tc_context.rb" />
+        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
       </list>
     </option>
   </component>
@@ -707,21 +699,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/tc_client.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="81" column="0" selection-start="2461" selection-end="2461" vertical-scroll-proportion="0.10590778">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="60" selection-start="986" selection-end="986" vertical-scroll-proportion="-17.038462">
+        <state line="28" column="10" selection-start="566" selection-end="566" vertical-scroll-proportion="0.30259365">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/tc_context.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.2652051">
+        <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1170" column="60" selection-start="39976" selection-end="39976" vertical-scroll-proportion="0.26124197">
           <folding />
         </state>
       </provider>

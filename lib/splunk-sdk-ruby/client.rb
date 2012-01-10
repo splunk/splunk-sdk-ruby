@@ -89,8 +89,8 @@ module Splunk
     # instance of a Service class - must call login to use
     #
     # ==== Examples
-    #   svc = Service.new(:username => 'admin', :password => 'foo')
-    #   svc = Service.new(:username => 'admin', :password => 'foo', :host => '10.1.1.1', :port = '9999')
+    #   svc = Splunk::Service.new(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.new(:username => 'admin', :password => 'foo', :host => '10.1.1.1', :port = '9999')
     def initialize(args)
       @context = Context.new(args)
     end
@@ -104,7 +104,7 @@ module Splunk
     # instance of a Service class, logged into Splunk
     #
     # ==== Examples
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.apps #get a list of apps (we can do this because we are logged in)
     def self.connect(args)
       svc = Service.new args
@@ -115,7 +115,7 @@ module Splunk
     # Log into Splunk
     #
     # ==== Examples
-    #   svc = Service.new(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.new(:username => 'admin', :password => 'foo')
     #   svc.login #Now we can make other calls to Splunk via svc
     #
     def login
@@ -134,7 +134,7 @@ module Splunk
     # Collection of all apps
     #
     # ==== Example 1 - list all apps
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.apps.each {|app| puts app['name']}
     #     gettingstarted
     #     launcher
@@ -146,11 +146,11 @@ module Splunk
     #     ...
     #
     # ==== Example 2 - delete the sample app
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.apps.delete('sample_app')
     #
     # ==== Example 3 - display permissions for the sample app
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   sapp = svc.apps['sample_app']
     #   puts sapp['eai:acl']['perms']
     #     {"read"=>["*"], "write"=>["*"]}
@@ -180,7 +180,7 @@ module Splunk
     # A Hash of key/value pairs
     #
     # ==== Examples
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.info
     #     {"build"=>"112383", "cpu_arch"=>"i386", "eai:acl"=>{"app"=>nil, "can_list"=>"0",......}
     def info
@@ -196,7 +196,7 @@ module Splunk
     # A Collection of loggers
     #
     # ==== Example - display each logger along with it's minimum log level (ERROR, WARN, INFO, DEBUG)
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
     #     ...
     #     DedupProcessor:WARN
@@ -217,7 +217,7 @@ module Splunk
     # An Entity with all server settings
     #
     # ==== Example - get a Hash of all server settings
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.settings.read
     #     {"SPLUNK_DB"=>"/opt/4.3/splunkbeta/var/lib/splunk", "SPLUNK_HOME"=>"/opt/4.3/splunkbeta",...}
     def settings
@@ -230,7 +230,7 @@ module Splunk
     # A Collection of Index objects
     #
     # ==== Example 1 - display the name of all indexes along with various attributes of each
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.indexes.each do |i|
     #     puts i.name + ': ' + String(i.read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs']))
     #   end
@@ -243,7 +243,7 @@ module Splunk
     #     ...
     #
     # ==== Example 2 - clean (removed all data from) the index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   main = svc.indexes['main'] #Return Entity object for index 'main'
     #   main.clean
     def indexes
@@ -262,7 +262,7 @@ module Splunk
     # A Collection of roles
     #
     # ==== Example - List every role along with it's list of capabilities
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.roles.each {|i| puts i.name + ': ' + String(i.read.capabilities) }
     #     admin: ["admin_all_objects", "change_authentication", ... ]
     #     can_delete: ["delete_by_keyword"]
@@ -278,7 +278,7 @@ module Splunk
     # A Collection of users
     #
     # ==== Example - Create a new user, then list all users
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.users.create('jack', :password => 'mypassword', :realname => 'Jack_be_nimble', :roles => ['user'])
     #   svc.users.each {|i| puts i.name + ':' + String(i.read) }
     #     admin:{"defaultApp"=>"launcher", "defaultAppIsUserOverride"=>"1", "defaultAppSourceRole"=>"system",
@@ -293,7 +293,7 @@ module Splunk
     # A new Jobs object
     #
     # ==== Example - Display the disk usage of all jobs
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   jobs = svc.jobs.list
     #   jobs.each {|job| puts job['diskUsage'] }
     #     177445
@@ -316,7 +316,7 @@ module Splunk
     # A JSON structure with information about the search
     #
     # ==== Example - Parse a simple search
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.parse("search error")
     #     {
     #       "remoteSearch": "litsearch error | fields  keepcolorder=t \"host\" \"index\" \"linecount\" \"source\" \"sourcetype\" \"splunk_server\"",
@@ -355,7 +355,7 @@ module Splunk
     # they can look nasty, thus breaking Ruby's idea of an accessor
     #
     # ==== Example 1 - Display a list of stanzas in the props.conf file
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts s.confs['props'].list
     #     (?i)source::....zip(.\d+)?
     #     __singleline
@@ -367,7 +367,7 @@ module Splunk
     #     ...
     #
     # ==== Example 2 - Display a Hash of configuration lines on a particular stanza
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   confs = svc.confs             #Return a Collection of ConfCollection objects (config files)
     #   stanzas = confs['props']      #Return a ConfCollection (stanzas in a config file)
     #   stanza = stanzas['manpage']   #Return a Conf Object (lines in a stanza)
@@ -384,12 +384,12 @@ module Splunk
     # A Collection of Message objects
     #
     # ==== Example 1 - list all message names
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.messages.list
     #     test
     #
     # ==== Example 2 - display the message named 'test'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts s.messages['test'].value
     #     my message
     def messages
@@ -446,7 +446,7 @@ module Splunk
     # Calls block once for each item in the collection
     #
     # ==== Example - display the name and level of each logger
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
     def each(&block)  # :yields: item
       self.list().each do |name|
@@ -457,7 +457,7 @@ module Splunk
     # Deletes an item named <b>+name+</b>
     #
     # ==== Example - delete stanza _sdk-tests_ from _props.conf_
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   props = svc.confs['props']
     #   props.delete('sdk-tests')
     def delete(name)
@@ -469,7 +469,7 @@ module Splunk
     # Creates an item in this collection named <b>+name+</b> with optional args
     #
     # ==== Example - create a user named _jack_ and assign a password, a real name and a role
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.users.create('jack', :password => 'mypassword', :realname => 'Jack_be_nimble', :roles => ['user'])
     def create(name, args={})
       raise NotImplementedError if @ctor.nil?
@@ -480,7 +480,7 @@ module Splunk
     # Returns an item in this collection given <b>+key+</b>
     #
     # ==== Example - get an Index object called _main_
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   main = svc.indexes['main']
     def [](key)
       raise NotImplmentedError if @item.nil?
@@ -491,7 +491,7 @@ module Splunk
     # Returns _true_ if an item called <b>+name</b> exists in the Collection
     #
     # ==== Example - does an index called _main_ exist?
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   if svc.indexes.contains?('main')
     #     puts 'index main exists'
     #   else
@@ -506,7 +506,7 @@ module Splunk
     # Returns an Array of item names contained in this Collection
     #
     # ==== Example - list all roles
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.roles.list
     def list
       retval = []
@@ -544,7 +544,7 @@ module Splunk
     # A String representing the attribute fetched
     #
     # ==== Example - Display the cold path for index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   index = svc.indexes['main']
     #   puts index['coldPath']
     def [](key)
@@ -559,7 +559,7 @@ module Splunk
     # The new value
     #
     # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   index =  svc.indexes['main']
     #   index['rotatePeriodInSecs'] = '61'  #Note that you cannot use the number 61.  It must be a String.
     def []=(key, value)
@@ -573,12 +573,12 @@ module Splunk
     # only those fields are returned.  If a field does not exist, nil is returned for it's value.
     #
     # ==== Example 1 - Return a Hash of all attribute/values for index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.indexes['main'].read
     #     {"assureUTF8"=>"0", "blockSignSize"=>"0", "blockSignatureDatabase"=>"_blocksignature",....}
     #
     # ==== Example 2 - Return a Hash of only the specified attribute/values for index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.indexes['main'],read(['coldPath', 'blockSignSize'])
     #     {"coldPath"=>"$SPLUNK_DB/defaultdb/colddb", "blockSignSize"=>"0"}
     def read(field_list=nil)
@@ -594,7 +594,7 @@ module Splunk
     # A Hash of this entities attributes/values for 'eai:acl' and 'eai:attributes'
     #
     # ==== Example: Get metadata information for the index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.indexes['main'].readmeta
     #     {"eai:acl"=>{"app"=>"search", "can_list"=>"1",...},"eai:attributes"=>{"optionalFields"=>["assureUTF8"...]}}
     def readmeta()
@@ -607,7 +607,7 @@ module Splunk
     # The Entity object after it's been updated
     #
     # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   index =  svc.indexes['main']
     #   index.update('rotatePeriodInSecs' => '61')  #Note that you cannot use the number 61.  It must be a String.
     def update(args)
@@ -658,7 +658,7 @@ module Splunk
     # Either an encrypted or non-encrypted stream Socket depending on if Service.connect is http or https
     #
     # ==== Example - Index 5 events written to the stream and assign a sourcetype 'mysourcetype' to each event
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   stream = svc.indexes['main'].attach(nil, nil, 'mysourcetype')
     #   (1..5).each { stream.write("This is a cheezy event\r\n") }
     #   stream.close
@@ -687,7 +687,7 @@ module Splunk
     # The original 'maxTotalDataSizeMB' and 'frozenTimePeriodInSecs' parameters in a Hash
     #
     # ==== Example - clean the 'main' index
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.indexes['main'].clean
     def clean
       saved = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
@@ -704,7 +704,7 @@ module Splunk
     # <b>+host+</b>, <b>+source+</b> or <b>+sourcetype+</b> fields which will apply to all events.
     #
     # Example - Index a single event into the 'main' index with source 'baz' and sourcetype 'foo'
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.indexes['main'].submit("this is an event", nil, "baz", "foo")
     #
     # Example 2 - Index multiple events into the 'main' index with default metadata
@@ -733,7 +733,7 @@ module Splunk
     # * +:sourcetype+ - The value of the 'sourcetype' field to be applied to data from this file
     #
     # ==== Example - Upload a file using defaults
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.indexes['main'].upload("/Users/rdas/myfile.log")
     def upload(filename, args={})
       args['index'] = @name
@@ -749,7 +749,7 @@ module Splunk
       super(service, path, name)
     end
     # ==== Example 2 - Display a Hash of configuration lines on a particular stanza
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   confs = svc.confs             #Return a Collection of ConfCollection objects (config files)
     #   stanzas = confs['props']      #Return a ConfCollection (stanzas in a config file)
     #   stanza = stanzas['manpage']   #Return a Conf object (lines in a stanza)
@@ -797,20 +797,20 @@ module Splunk
     # either synchronous or asynchronous is called <b>+:exec_mode+</b>.
     #
     # ==== Example 1 - Execute a synchronous search returning XML (XML is the default output mode )
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'oneshot')
     #
     # ==== Example 2 - Execute a synchronous search returning a JSON String
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'oneshot', :output_mode => 'json')
     #
     # ==== Example 3 - Execute a synchronous search returning a Job object with the results as a JSON String
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   job = svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'blocking')
     #   puts job.results(:output_mode => 'json')
     #
     # ==== Example 4 - Execute an asynchronous search and wait for all the results
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   job = svc.jobs.create("search error", :max_count => 10, :max_results => 10)
     #   while true
     #     stats = job.read(['isDone'])
@@ -835,7 +835,7 @@ module Splunk
     #but ':exec_mode' and ':output_mode' will always be set to 'oneshot' and 'json' respectively.
     #
     #==== Example - Execute a search and show just the raw events followed by the event count
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   results = svc.jobs.create("search error", :max_count => 10, :max_results => 10)
     #   results.each {|event| puts event['_raw']}
     #   puts results.count
@@ -856,12 +856,12 @@ module Splunk
     # will always be 'json' because results are always in JSON.
     #
     # ==== Example 1 - Simple streamed search
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   reader = svc.jobs.create_stream('search host="45.2.94.5" | timechart count')
     #   reader.each {|event| puts event}
     #
     # ==== Example 2 - Real time streamed search
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   reader = svc.jobs.create_stream('search index=_internal',\
     #   :search_mode => 'realtime', :earliest_time => 'rt-1m', :latest_time => 'rt')
     #   reader.each {|event| puts event} #will block until events show up in real-time
@@ -889,7 +889,7 @@ module Splunk
     # Return an Array of Jobs
     #
     # ==== Example - Display the disk usage of each job
-    #   svc = Service.connect(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.jobs.list.each {|job| puts job['diskUsage'] }
     def list
       response = @service.context.get(PATH_JOBS)
@@ -1094,7 +1094,7 @@ end
 
 =begin
 
-s = Service::connect(:username => 'admin', :password => 'sk8free')
+s = Splunk::Service::connect(:username => 'admin', :password => 'sk8free')
 
 p s.apps.list
 
