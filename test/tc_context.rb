@@ -3,8 +3,8 @@ require "rubygems"
 require "bundler/setup"
 
 require "test/unit"
-require "splunk-sdk/aloader"
-require "splunk-sdk/context"
+require "splunk-sdk-ruby/aloader"
+require "splunk-sdk-ruby/context"
 require "uuid"
 
 class TcContext < Test::Unit::TestCase
@@ -23,7 +23,7 @@ class TcContext < Test::Unit::TestCase
     begin
       retval = yield
       retval
-    rescue SplunkHTTPError => e
+    rescue Splunk::SplunkHTTPError => e
       assert(allowed_error_codes.include?(e.code))
     rescue Exception => e
       p "SplunkHTTPError not caught.  Caught #{e.class} instead"
@@ -48,7 +48,7 @@ class TcContext < Test::Unit::TestCase
 
   #Test to make sure that certain endpoints return what looks like an ATOM feed
   def test_protocol
-    c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+    c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
     c.login
 
     ['/services', PATH_USERS, 'search/jobs'].each do |endpoint|
@@ -59,7 +59,7 @@ class TcContext < Test::Unit::TestCase
   #Test to make sure that we can login & logout
   def test_authentication
     #Test good login
-    c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+    c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
     c.login
 
     #Test a get with the above context - should work
@@ -69,26 +69,26 @@ class TcContext < Test::Unit::TestCase
     c.logout
 
     #Test a get with the above context - should fail
-    assert_raise SplunkHTTPError do
+    assert_raise Splunk::SplunkHTTPError do
       is_atom(c, PATH_USERS)
     end
 
     #Test bad login (bad user)
-    assert_raise SplunkHTTPError do
-      c = Context.new(:username => 'baduser', :password => ADMIN_PSW, :protocol => 'https')
+    assert_raise Splunk::SplunkHTTPError do
+      c = Splunk::Context.new(:username => 'baduser', :password => ADMIN_PSW, :protocol => 'https')
       c.login
     end
 
     #Test bad login (bad password)
-    assert_raise SplunkHTTPError do
-      c = Context.new(:username => ADMIN_LOGIN, :password => 'badpsw', :protocol => 'https')
+    assert_raise Splunk::SplunkHTTPError do
+      c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => 'badpsw', :protocol => 'https')
       c.login
     end
   end
 
   def test_create_user
     begin
-      c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+      c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
       c.login
 
       uname = random_uname
@@ -108,7 +108,7 @@ class TcContext < Test::Unit::TestCase
       end
 
       #Connect as a newly created user
-      user_ctx = Context.new(:username => uname, :password => 'changeme', :protocol => 'https')
+      user_ctx = Splunk::Context.new(:username => uname, :password => 'changeme', :protocol => 'https')
       user_ctx.login
 
       #Ensure that this user actually works
@@ -127,13 +127,13 @@ class TcContext < Test::Unit::TestCase
   end
 
   def test_get_user
-    c = Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
+    c = Splunk::Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
     c.login
     assert(c.get(PATH_USERS + '/admin').code == 200)
   end
 
   def test_get_users
-    c = Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
+    c = Splunk::Context.new(:username => "admin", :password => 'sk8free', :protocol => 'https')
     c.login
     assert(c.get(PATH_USERS).code == 200)
   end
@@ -144,14 +144,14 @@ class TcContext < Test::Unit::TestCase
 
     begin
       #login as admin
-      c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+      c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
       c.login
 
       #create a random user
       response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
       assert(response.code == 201)
 
-      userctx = Context.new(:username => uname, :password => "changeme", :protocol => 'https')
+      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => 'https')
       userctx.login
 
       #set the random user's default app to 'search'
@@ -183,14 +183,14 @@ def test_password
 
     begin
       #login as admin
-      c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+      c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
       c.login
 
       #create a random user
       response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
       assert(response.code == 201)
 
-      userctx = Context.new(:username => uname, :password => "changeme", :protocol => 'https')
+      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => 'https')
       userctx.login
 
       #user changes their own password
@@ -200,14 +200,14 @@ def test_password
       assert(userctx.post(user_path, :password => 'again').code == 200)
 
       #try to connect with the original password should error out
-      userctx = Context.new(:username => uname, :password => "changeme", :protocol => 'https')
-      assert_raise SplunkHTTPError do
+      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => 'https')
+      assert_raise Splunk::SplunkHTTPError do
         userctx.login
       end
 
       #admin changes it back and login should work
       assert(c.post(user_path, :password => 'changeme').code == 200)
-      userctx = Context.new(:username => uname, :password => "changeme", :protocol => 'https')
+      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => 'https')
       userctx.login
 
     ensure
@@ -222,7 +222,7 @@ def test_password
 
     begin
       #login as admin
-      c = Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
+      c = Splunk::Context.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW, :protocol => 'https')
       c.login
 
       #create a random user

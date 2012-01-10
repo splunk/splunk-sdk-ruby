@@ -2,33 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="189a8314-34c8-4181-ba79-5f2c4c898fc2" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/.name" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/.rakeTasks" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/splunk-sdk.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/restclient" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/rdas.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/context.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/splunk-sdk-ruby.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/version.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/splunk-sdk-ruby.gemspec" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/foo.rb" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/splunk-sdk/aloader.rb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/splunk-sdk/client.rb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/splunk-sdk/context.rb" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/splunk-sdk/splunk_error.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/splunk_error.rb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/splunk-sdk/splunk_http_error.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/splunk_http_error.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LICENSE" afterPath="$PROJECT_DIR$/LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/splunk-sdk.iml" afterPath="$PROJECT_DIR$/.idea/splunk-sdk.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile.lock" afterPath="$PROJECT_DIR$/Gemfile.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile" afterPath="$PROJECT_DIR$/Gemfile" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" afterPath="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_aloader.rb" afterPath="$PROJECT_DIR$/test/tc_aloader.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_client.rb" afterPath="$PROJECT_DIR$/test/tc_client.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/tc_context.rb" afterPath="$PROJECT_DIR$/test/tc_context.rb" />
     </list>
     <ignored path="splunk-sdk.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -53,10 +35,10 @@
     <splitter split-orientation="horizontal" split-proportion="0.54080224">
       <split-first>
         <leaf>
-          <file leaf-file-name="tc_context.rb" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="tc_context.rb" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/tc_context.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="8" column="0" selection-start="149" selection-end="149" vertical-scroll-proportion="0.0">
+                <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.2652051">
                   <folding />
                 </state>
               </provider>
@@ -65,16 +47,7 @@
           <file leaf-file-name="aloader.rb" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="7" column="56" selection-start="134" selection-end="134" vertical-scroll-proportion="0.0">
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="splunk-sdk-ruby.rb" pinned="false" current="true" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/splunk-sdk-ruby.rb">
-              <provider selected="true" editor-type-id="text-editor">
-                <state line="5" column="62" selection-start="87" selection-end="87" vertical-scroll-proportion="0.07302824">
+                <state line="31" column="69" selection-start="868" selection-end="868" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -83,7 +56,7 @@
           <file leaf-file-name="client.rb" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="22" column="66" selection-start="678" selection-end="678" vertical-scroll-proportion="0.0">
+                <state line="38" column="60" selection-start="986" selection-end="986" vertical-scroll-proportion="-17.038462">
                   <folding />
                 </state>
               </provider>
@@ -119,7 +92,7 @@
           <file leaf-file-name="tc_aloader.rb" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/test/tc_aloader.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="3" column="0" selection-start="55" selection-end="55" vertical-scroll-proportion="0.0">
+                <state line="49" column="62" selection-start="2321" selection-end="2322" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -129,34 +102,19 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="tc_client.rb" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="tc_client.rb" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/tc_client.rb">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="28" column="28" selection-start="553" selection-end="553" vertical-scroll-proportion="0.0">
-                  <folding>
-                    <marker date="1325786134000" expanded="true" signature="266:392" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="284:388" placeholder="while ... end" />
-                    <marker date="1325786134000" expanded="true" signature="408:5662" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="443:545" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="547:1124" placeholder="=begin ... =end" />
-                    <marker date="1325786134000" expanded="true" signature="1148:2154" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="2089:2148" placeholder="do ... end" />
-                    <marker date="1325786134000" expanded="true" signature="2171:2446" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="2407:2440" placeholder="{ ... }" />
-                    <marker date="1325786134000" expanded="true" signature="2466:4581" placeholder=" ... end" />
-                    <marker date="1325786134000" expanded="true" signature="2493:2513" placeholder="{ ... }" />
-                    <marker date="1325786134000" expanded="true" signature="3590:3690" placeholder="do ... end" />
-                    <marker date="1325786134000" expanded="true" signature="3644:3682" placeholder="{ ... }" />
-                    <marker date="1325786134000" expanded="true" signature="4599:5658" placeholder=" ... end" />
-                  </folding>
+                <state line="81" column="0" selection-start="2461" selection-end="2461" vertical-scroll-proportion="0.10590778">
+                  <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Gemfile" pinned="false" current="false" current-in-tab="true">
+          <file leaf-file-name="Gemfile" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/Gemfile">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="1" column="22" selection-start="39" selection-end="39" vertical-scroll-proportion="0.014326648">
+                <state line="7" column="0" selection-start="174" selection-end="174" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -183,17 +141,17 @@
         <option value="$PROJECT_DIR$/test/foo" />
         <option value="$USER_HOME$/.rvm/gems/ruby-1.9.2-p290/gems/rest-client-1.6.7/lib/restclient/resource.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk/aloader.rb" />
-        <option value="$PROJECT_DIR$/test/tc_client.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk/client.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk/context.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk/splunk_error.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk/splunk_http_error.rb" />
-        <option value="$PROJECT_DIR$/test/tc_aloader.rb" />
         <option value="$PROJECT_DIR$/Gemfile" />
-        <option value="$PROJECT_DIR$/test/tc_context.rb" />
-        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
-        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
         <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/context.rb" />
+        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb" />
+        <option value="$PROJECT_DIR$/test/tc_aloader.rb" />
+        <option value="$PROJECT_DIR$/test/tc_client.rb" />
+        <option value="$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb" />
+        <option value="$PROJECT_DIR$/test/tc_context.rb" />
       </list>
     </option>
   </component>
@@ -239,6 +197,8 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Favorites" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -291,18 +251,16 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Favorites" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="org.jetbrains.plugins.ruby.settings.RubyIdeSdkConfigurable" />
     <property name="recentsLimit" value="5" />
+    <property name="options.lastSelected" value="org.jetbrains.plugins.ruby.settings.RubyIdeSdkConfigurable" />
     <property name="RakeTaksPopup.undocumentedIncluded" value="false" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RunManager" selected="Ruby.client">
     <configuration default="false" name="test" type="RakeRunConfigurationType" factoryName="Rake" temporary="true">
@@ -469,13 +427,6 @@
       <RTESTSPEC_RUN_CONFIG_SETTINGS_ID NAME="SPEC_ARGS" VALUE="" />
       <method />
     </configuration>
-    <configuration default="true" type="JavascriptDebugSession" factoryName="Remote">
-      <JSRemoteDebuggerConfigurationSettings>
-        <option name="engineId" value="embedded" />
-        <option name="fileUrl" />
-      </JSRemoteDebuggerConfigurationSettings>
-      <method />
-    </configuration>
     <configuration default="true" type="CucumberRunConfigurationType" factoryName="Cucumber">
       <predefined_log_file id="RUBY_CUCUMBER" enabled="true" />
       <module name="" />
@@ -509,17 +460,18 @@
       <CUCUMBER_RUN_CONFIG_SETTINGS_ID NAME="SETTINGS_VERSION" VALUE="2" />
       <method />
     </configuration>
+    <configuration default="true" type="JavascriptDebugSession" factoryName="Remote">
+      <JSRemoteDebuggerConfigurationSettings>
+        <option name="engineId" value="embedded" />
+        <option name="fileUrl" />
+      </JSRemoteDebuggerConfigurationSettings>
+      <method />
+    </configuration>
     <configuration default="true" type="JavascriptDebugSession" factoryName="Local">
       <JSDebuggerConfigurationSettings>
         <option name="engineId" value="embedded" />
         <option name="fileUrl" />
       </JSDebuggerConfigurationSettings>
-      <method />
-    </configuration>
-    <configuration default="true" type="com.intellij.persistence.run.ConsoleRunConfigurationType" factoryName="Query Language Console">
-      <option name="VM_PARAMETERS" value="" />
-      <option name="USER_CFG_CLASS" />
-      <option name="CONTEXT_PROVIDER" />
       <method />
     </configuration>
     <configuration default="true" type="TestUnitRunConfigurationType" factoryName="Test::Unit/Shoulda">
@@ -545,6 +497,12 @@
       <RTEST_RUN_CONFIG_SETTINGS_ID NAME="TEST_TEST_TYPE" VALUE="TEST_SCRIPT" />
       <RTEST_RUN_CONFIG_SETTINGS_ID NAME="INHERITANCE_CHECK_DISABLED" VALUE="false" />
       <RTEST_RUN_CONFIG_SETTINGS_ID NAME="DRB" VALUE="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="com.intellij.persistence.run.ConsoleRunConfigurationType" factoryName="Query Language Console">
+      <option name="VM_PARAMETERS" value="" />
+      <option name="USER_CFG_CLASS" />
+      <option name="CONTEXT_PROVIDER" />
       <method />
     </configuration>
     <configuration default="false" name="context" type="RubyRunConfigurationType" factoryName="Ruby">
@@ -646,14 +604,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-12" y="22" width="1597" height="1168" extended-state="0" />
-    <editor active="false" />
+    <frame x="495" y="22" width="2035" height="1535" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18439226" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32902032" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14234875" sideWeight="0.17467652" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.08455181" sideWeight="0.99907917" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.084535055" sideWeight="0.99907917" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3780037" sideWeight="0.9994684" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20979533" sideWeight="0.99593735" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32872927" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -711,85 +669,59 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/context.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="46" selection-start="418" selection-end="418" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/foo.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Rakefile">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="57" selection-start="524" selection-end="524" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/tc_aloader.rb">
+    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="0" selection-start="55" selection-end="55" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/tc_client.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="28" selection-start="553" selection-end="553" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1325786134000" expanded="true" signature="266:392" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="284:388" placeholder="while ... end" />
-            <marker date="1325786134000" expanded="true" signature="408:5662" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="443:545" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="547:1124" placeholder="=begin ... =end" />
-            <marker date="1325786134000" expanded="true" signature="1148:2154" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="2089:2148" placeholder="do ... end" />
-            <marker date="1325786134000" expanded="true" signature="2171:2446" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="2407:2440" placeholder="{ ... }" />
-            <marker date="1325786134000" expanded="true" signature="2466:4581" placeholder=" ... end" />
-            <marker date="1325786134000" expanded="true" signature="2493:2513" placeholder="{ ... }" />
-            <marker date="1325786134000" expanded="true" signature="3590:3690" placeholder="do ... end" />
-            <marker date="1325786134000" expanded="true" signature="3644:3682" placeholder="{ ... }" />
-            <marker date="1325786134000" expanded="true" signature="4599:5658" placeholder=" ... end" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/foo.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="31" column="69" selection-start="868" selection-end="868" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Gemfile">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="22" selection-start="39" selection-end="39" vertical-scroll-proportion="0.014326648">
+        <state line="7" column="0" selection-start="174" selection-end="174" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/tc_context.rb">
+    <entry file="file://$PROJECT_DIR$/test/tc_aloader.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="0" selection-start="149" selection-end="149" vertical-scroll-proportion="0.0">
+        <state line="49" column="62" selection-start="2321" selection-end="2322" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/tc_client.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="81" column="0" selection-start="2461" selection-end="2461" vertical-scroll-proportion="0.10590778">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/client.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="66" selection-start="678" selection-end="678" vertical-scroll-proportion="0.0">
+        <state line="38" column="60" selection-start="986" selection-end="986" vertical-scroll-proportion="-17.038462">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/context.rb">
+    <entry file="file://$PROJECT_DIR$/test/tc_context.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="46" selection-start="418" selection-end="418" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/aloader.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="56" selection-start="134" selection-end="134" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/splunk-sdk-ruby/splunk-sdk-ruby.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="62" selection-start="87" selection-end="87" vertical-scroll-proportion="0.07302824">
+        <state line="25" column="60" selection-start="636" selection-end="636" vertical-scroll-proportion="0.2652051">
           <folding />
         </state>
       </provider>

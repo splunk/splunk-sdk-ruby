@@ -4,59 +4,38 @@ require 'bundler/setup'
 require 'libxml'
 require 'netrc'
 
+
+#Some bitchin metaprogramming to allow "dot notation" reading from a Hash
+class Hash
+  def add_attrs
+    self.each do |k, v|
+      #Replace any embedded : with an _
+      key = k.gsub(':','_')
+      key.gsub!('.','_')
+      if v.is_a? Hash
+        instance_variable_set("@#{key}", v.add_attrs)
+      else
+        instance_variable_set("@#{key}", v)
+      end
+      class << self; self; end.instance_eval do # do this on obj's metaclass
+        attr_reader key.to_sym # add getter method for this ivar
+      end
+    end
+  end
+
+  def urlencode
+    output = ''
+    each do |k,v|
+      output += '&' if !output.empty?
+      output += URI.escape(k.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+      output += '=' + URI.escape(v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+    end
+    output
+  end
+end
+
 module Splunk
   XML_NS = 'http://dev.splunk.com/ns/rest'
-
-  #Some bitchin metaprogramming to allow "dot notation" reading from a Hash
-  =begin
-  class Hash
-    def add_attrs
-      self.inject(Object.new) do |obj, ary| # ary is [:key, "value"]
-        #Replace any embedded : with an _
-        key = ary[0].gsub(':','_')
-        if ary[1].is_a? Hash
-          obj.instance_variable_set("@#{key}", ary[1].add_attrs)
-        else
-          obj.instance_variable_set("@#{key}", ary[1])
-        end
-        class << obj; self; end.instance_eval do # do this on obj's metaclass
-          attr_reader key.to_sym # add getter method for this ivar
-        end
-
-        obj # return obj for next iteration
-      end
-    end
-  end
-  =end
-
-  class Hash
-    def add_attrs
-      self.each do |k, v|
-        #Replace any embedded : with an _
-        key = k.gsub(':','_')
-        key.gsub!('.','_')
-        if v.is_a? Hash
-          instance_variable_set("@#{key}", v.add_attrs)
-        else
-          instance_variable_set("@#{key}", v)
-        end
-        class << self; self; end.instance_eval do # do this on obj's metaclass
-          attr_reader key.to_sym # add getter method for this ivar
-        end
-      end
-    end
-
-    def urlencode
-      output = ''
-      each do |k,v|
-        output += '&' if !output.empty?
-        output += URI.escape(k.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-        output += '=' + URI.escape(v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-      end
-      output
-    end
-  end
-
 
   class AtomResponseLoader
   public

@@ -8,6 +8,39 @@ require 'cgi'
 require 'json/pure' #TODO: Please get me working with json/ext - it SO much faster
 require 'json/stream'
 
+#I'm an idiot because I couldn't find any way to pass local context variables to
+#a block in the parser.  Thus the hideous monkey-patch and the 'obj' param
+
+class JSON::Stream::Parser
+  def initialize(obj, &block)
+    @state = :start_document
+    @utf8 = JSON::Stream::Buffer.new
+    @listeners = Hash.new {|h, k| h[k] = [] }
+    @stack, @unicode, @buf, @pos = [], "", "", -1
+    @obj = obj
+    instance_eval(&block) if block_given?
+  end
+end
+
+
+# :stopdoc:
+def _filter_content(content, key_list=nil, add_attrs=true)
+  if key_list.nil?
+    return content.add_attrs if add_attrs
+    return content
+  end
+  result = {}
+  key_list.each {|key| result[key] = content[key]}
+
+  return result.add_attrs if add_attrs
+  result
+end
+
+def _path_stanza(conf, stanza)
+  Splunk::PATH_STANZA % [conf, CGI::escape(stanza)]
+end
+# :startdoc:
+
 module Splunk
   PATH_APPS_LOCAL = 'apps/local'
   PATH_CAPABILITIES = 'authorization/capabilities'
@@ -30,23 +63,6 @@ module Splunk
   MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
 
-  # :stopdoc:
-  def _filter_content(content, key_list=nil, add_attrs=true)
-    if key_list.nil?
-      return content.add_attrs if add_attrs
-      return content
-    end
-    result = {}
-    key_list.each {|key| result[key] = content[key]}
-
-    return result.add_attrs if add_attrs
-    result
-  end
-
-  def _path_stanza(conf, stanza)
-    PATH_STANZA % [conf, CGI::escape(stanza)]
-  end
-  # :startdoc:
 
   ##
   # This class is the main place for clients to access and control Splunk.
@@ -988,20 +1004,6 @@ module Splunk
     end
   end
 
-  #I'm an idiot because I couldn't find any way to pass local context variables to
-  #a block in the parser.  Thus the hideous monkey-patch and the 'obj' param
-
-  class JSON::Stream::Parser
-    def initialize(obj, &block)
-      @state = :start_document
-      @utf8 = JSON::Stream::Buffer.new
-      @listeners = Hash.new {|h, k| h[k] = [] }
-      @stack, @unicode, @buf, @pos = [], "", "", -1
-      @obj = obj
-      instance_eval(&block) if block_given?
-    end
-  end
-
   class ResultsReader
     include Enumerable
 
@@ -1191,7 +1193,7 @@ props.delete('sdk-tests')
 p props.contains? 'sdk-tests'
 
 =end
-s = Service::connect(:username => 'admin', :password => 'sk8free')
+s = Splunk::Service::connect(:username => 'admin', :password => 'sk8free')
 
 reader = s.jobs.create_stream('search host="45.2.94.5" | timechart count')
 reader.each {|event| puts event}

@@ -4,7 +4,9 @@ require "bundler/setup"
 
 require "test/unit"
 require "ostruct"
-require "splunk-sdk/aloader"
+require "splunk-sdk-ruby/aloader"
+
+AtomResponseLoader = Splunk::AtomResponseLoader
 
 class TcAloader < Test::Unit::TestCase
 
