@@ -99,8 +99,6 @@ can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
 
 ## Overview 
 
-### Hello Splunk
-
 The Splunk library included in this SDK consists of two layers of API that 
 can be used to interact with splunkd - the _binding_ layer and the _client_ layer.
 
@@ -119,14 +117,14 @@ to Splunk returning an Atom feed of all users defined in the system:
     require 'splunk-sdk-ruby'
 
     c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
-    puts c.get(PATH_USERS) #Will spit out an ATOM feed in XML
+    puts c.get('authentication/users') #Will spit out an ATOM feed in XML
 
 Here is another example, but this time we convert the Atom feed to much cleaner JSON:
 
     require 'splunk-sdk-ruby'
 
     c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
-    users = Splunk::AtomResponseLoader::load_text(c.get(PATH_USERS)) #Will spit out JSON
+    users = Splunk::AtomResponseLoader::load_text(c.get('authentication/users')) #Will spit out JSON
     puts users['feed']['updated']
 
 If you wish you can use _dot accessors_ to access the individual elements as long as they aren't in 
@@ -135,10 +133,12 @@ an Array:
     require 'splunk-sdk-ruby'
 
     c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
-    users =  Splunk::AtomResponseLoader::load_text_as_record(c.get(PATH_USERS)) #Will spit out clean JSON
+    users =  Splunk::AtomResponseLoader::load_text_as_record(c.get('authentication/users')) #Will spit out clean JSON
     puts users.feed.updated             #Works
     puts users.feed.entry[0].title      #Throws exception
     puts users.feed.entry[0]['title']   #Works 
+
+#### The Client Layer
     
 
 
