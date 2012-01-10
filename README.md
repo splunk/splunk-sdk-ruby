@@ -102,8 +102,10 @@ can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
 ### Hello Splunk
 
 The Splunk library included in this SDK consists of two layers of API that 
-can be used to interact with splunkd. The lower layer is referred to as the
-_binding_ layer. It is a thin wrapper around low-level HTTP capabilities, 
+can be used to interact with splunkd - the _binding_ layer and the _client_ layer.
+
+#### The Binding Layer
+This is the lowest layer of the Splunk Ruby SDK. It is a thin wrapper around low-level HTTP capabilities, 
 including:
 
 * Handles authentication and namespace URL management
@@ -111,9 +113,33 @@ including:
     to be close to the wire.
 * Atom Response parser
 
-Here is a simple example of using the binding layer:
+Here is a simple example of using the binding layer. This example makes a REST call
+to Splunk returning an Atom feed of all users defined in the system:
 
-require 'splunk-sdk-ruby'
+    require 'splunk-sdk-ruby'
+
+    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    puts c.get(PATH_USERS) #Will spit out an ATOM feed in XML
+
+Here is another example, but this time we convert the Atom feed to much cleaner JSON:
+
+    require 'splunk-sdk-ruby'
+
+    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    users = Splunk::AtomResponseLoader::load_text(c.get(PATH_USERS)) #Will spit out JSON
+    puts users['feed']['updated']
+
+If you wish you can use _dot accessors_ to access the individual elements as long as they aren't in 
+an Array: 
+
+    require 'splunk-sdk-ruby'
+
+    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    users =  Splunk::AtomResponseLoader::load_text_as_record(c.get(PATH_USERS)) #Will spit out clean JSON
+    puts users.feed.updated             #Works
+    puts users.feed.entry[0].title      #Throws exception
+    puts users.feed.entry[0]['title']   #Works 
+    
 
 
 
