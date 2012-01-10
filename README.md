@@ -116,14 +116,14 @@ to Splunk returning an Atom feed of all users defined in the system:
 
     require 'splunk-sdk-ruby'
 
-    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    c = Splunk::Context.new(:username => "admin", :password => 'password', :protocol => 'https').login
     puts c.get('authentication/users') #Will spit out an ATOM feed in XML
 
 Here is another example, but this time we convert the Atom feed to much cleaner JSON:
 
     require 'splunk-sdk-ruby'
 
-    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    c = Splunk::Context.new(:username => "admin", :password => 'password', :protocol => 'https').login
     users = Splunk::AtomResponseLoader::load_text(c.get('authentication/users')) #Will spit out JSON
     puts users['feed']['updated']
 
@@ -132,7 +132,7 @@ an Array:
 
     require 'splunk-sdk-ruby'
 
-    c = Splunk::Context.new(:username => "admin", :password => ADMIN_PSW, :protocol => 'https').login
+    c = Splunk::Context.new(:username => "admin", :password => 'password', :protocol => 'https').login
     users =  Splunk::AtomResponseLoader::load_text_as_record(c.get('authentication/users')) #Will spit out clean JSON
     puts users.feed.updated             #Works
     puts users.feed.entry[0].title      #Throws exception
