@@ -1,34 +1,3 @@
-# Splunk::Sdk::Ruby
-
-TODO: Write a gem description
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'splunk-sdk-ruby'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install splunk-sdk-ruby
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
-
-
 # The Splunk Software Development Kit for Ruby (Preview Release)
 
 This SDK contains library code and examples designed to enable developers to
@@ -49,7 +18,7 @@ that are enabled by Splunk's unique capabilities.
 
 ## License
 
-The Splunk Software Development Kit for Java is licensed under the Apache
+The Splunk Software Development Kit for Ruby is licensed under the Apache
 License 2.0. Details can be found in the file LICENSE.
 
 ## This SDK is a Preview Release
@@ -57,7 +26,7 @@ License 2.0. Details can be found in the file LICENSE.
 1.  This Preview release a pre-beta release.  There will also be a beta 
     release prior to a general release. It is incomplete and may^H^H^Hwill have bugs.
 
-2.  The Apache license only applies to the SDK and no other Software provided 
+2.  The Apache license only applies to this SDK and no other Software provided 
     by Splunk.
 
 3.  Splunk in using the Apache license is not providing any warranties, 
@@ -90,10 +59,12 @@ and system requirements, see Installing & Running Splunk
 Get the Splunk Ruby SDK from GitHub (https://github.com) and clone the
 resources to your computer.  Use the following commands:
 
-cd <whatever directory you want to place the SDK directory into>
+cd <i>whatever directory you want to place the SDK directory into</i>
 git clone https://github.com/splunk/splunk-sdk-ruby.git
 
 #### Installing
+
+We highly recommend that you use <bundler>
 
 Add this line to your application's Gemfile:
 
@@ -113,15 +84,36 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 
 #### Running the Unit Tests
 
-In the base directory where you installed the Splunk Ruby SDK, run
+1. Make sure that the password for Splunk user <b>admin</b> is <b>"password"</b>.  The unit
+tests are hard-coded to that user/psw pair.  Make sure to put this back the way you had it
+when you are done running the unit tests.
+
+2. In the base directory where you installed the Splunk Ruby SDK, run
 
     $ rake test
 
 It should run many tests without error.
 
 Note that currently, the only examples are documented in-line with the code.  They
-can be seen by pointing your browser to <SDK_HOME>/doc/index.html.  Look at the 
-<b>Service</b> class for examples.
+can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
+
+## Overview 
+
+### Hello Splunk
+
+The Splunk library included in this SDK consists of two layers of API that 
+can be used to interact with splunkd. The lower layer is referred to as the
+_binding_ layer. It is a thin wrapper around low-level HTTP capabilities, 
+including:
+
+* Handles authentication and namespace URL management
+* Accessible low-level HTTP interface for use by developers who want
+    to be close to the wire.
+* Atom Response parser
+
+Here is a simple example of using the binding layer:
+
+require 'splunk-sdk-ruby'
 
 
 
