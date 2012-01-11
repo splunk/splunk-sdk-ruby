@@ -164,4 +164,39 @@ It returns all users in the system and displays their names:
     svc = Splunk::Service.connect(:username => 'admin', :password => 'password')
     svc.users.each {|user| puts user.name}
 
+## Resources
+
+You can find anything having to do with developing on Splunk at the Splunk developer portal:
+
+* http://dev.splunk.com
+
+Splunk REST API reference documentation:
+
+* http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI
+
+## Community
+
+* Email: Stay connected with other developers building on Splunk: 
+    https://groups.google.com/forum/#!forum/splunkdev 
+* Issues: https://github.com/splunk/splunk-sdk-python/issues
+* Answers: Check out this tag on Splunk answers for:  
+    http://splunk-base.splunk.com/tags/python/
+* Blog:  http://blogs.splunk.com/dev/
+* Twitter: [@splunkdev](http://twitter.com/#!/splunkdev)
+
+### How to contribute
+
+We aren't ready to accept code contributions yet, but will be shortly.  Check 
+this README for more updates soon.
+
+### Support
+
+* SDKs in Preview will not be Splunk supported.  Once the Ruby SDK moves to 
+an Open Beta we will provide more detail on support.  
+
+* Issues should be filed here:  https://github.com/splunk/splunk-sdk-ruby/issues
+
+### Contact Us
+You can reach the Dev Platform team at devinfo@splunk.com
+
 
