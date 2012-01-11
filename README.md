@@ -75,6 +75,7 @@ And then execute:
 
 If you are not using bundler, than you can install it like this:
 
+    $ gem build splunk-sdk-ruby.gemspec
     $ gem install splunk-sdk-ruby
 
 #### Requirements
