@@ -1,459 +1,320 @@
-<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-
-<title>Class: Index</title>
-
-<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
-
-<script type="text/javascript">
-  var rdoc_rel_prefix = "./";
-</script>
-
-<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
-
-
-<body id="top" class="class">
-<nav id="metadata">
-  <nav id="home-section" class="section">
-  <h3 class="section-header">
-    <a href="./index.html">Home</a>
-    <a href="./table_of_contents.html#classes">Classes</a>
-    <a href="./table_of_contents.html#methods">Methods</a>
-  </h3>
-</nav>
-
-
-  <nav id="search-section" class="section project-section" class="initially-hidden">
-  <form action="#" method="get" accept-charset="utf-8">
-    <h3 class="section-header">
-      <input type="text" name="search" placeholder="Search" id="search-field"
-             title="Type to search, Up and Down to navigate, Enter to load">
-    </h3>
-  </form>
-
-  <ul id="search-results" class="initially-hidden"></ul>
-</nav>
-
-
-  <div id="file-metadata">
-    <nav id="file-list-section" class="section">
-  <h3 class="section-header">Defined In</h3>
-  <ul>
-    <li>lib/splunk-sdk/client.rb
-  </ul>
-</nav>
-
-    
-  </div>
-
-  <div id="class-metadata">
-    
-    <nav id="parent-class-section" class="section">
-  <h3 class="section-header">Parent</h3>
-  
-  <p class="link"><a href="Entity.html">Entity</a>
-  
-</nav>
-
-    
-    <!-- Method Quickref -->
-<nav id="method-list-section" class="section">
-  <h3 class="section-header">Methods</h3>
-
-  <ul class="link-list">
-    
-    <li><a href="#method-c-new">::new</a>
-    
-    <li><a href="#method-i-attach">#attach</a>
-    
-    <li><a href="#method-i-clean">#clean</a>
-    
-    <li><a href="#method-i-submit">#submit</a>
-    
-    <li><a href="#method-i-upload">#upload</a>
-    
-  </ul>
-</nav>
-
-  </div>
-
-  <div id="project-metadata">
-    <nav id="fileindex-section" class="section project-section">
-  <h3 class="section-header">Pages</h3>
-
-  <ul>
-  
-    <li class="file"><a href="./LICENSE.html">LICENSE</a>
-  
-    <li class="file"><a href="./README_rdoc.html">README</a>
-  
-    <li class="file"><a href="./Rakefile.html">Rakefile</a>
-  
-    <li class="file"><a href="./TODO.html">TODO</a>
-  
-    <li class="file"><a href="./test/testfile_txt.html">testfile</a>
-  
-  </ul>
-</nav>
-
-    <nav id="classindex-section" class="section project-section">
-  <h3 class="section-header">Class and Module Index</h3>
-
-  <ul class="link-list">
-  
-    <li><a href="./JSON.html">JSON</a>
-  
-    <li><a href="./JSON/Stream.html">JSON::Stream</a>
-  
-    <li><a href="./JSON/Stream/Parser.html">JSON::Stream::Parser</a>
-  
-    <li><a href="./AtomResponseLoader.html">AtomResponseLoader</a>
-  
-    <li><a href="./Collection.html">Collection</a>
-  
-    <li><a href="./Conf.html">Conf</a>
-  
-    <li><a href="./ConfCollection.html">ConfCollection</a>
-  
-    <li><a href="./Context.html">Context</a>
-  
-    <li><a href="./Entity.html">Entity</a>
-  
-    <li><a href="./Hash.html">Hash</a>
-  
-    <li><a href="./Index.html">Index</a>
-  
-    <li><a href="./Job.html">Job</a>
-  
-    <li><a href="./Jobs.html">Jobs</a>
-  
-    <li><a href="./Message.html">Message</a>
-  
-    <li><a href="./Object.html">Object</a>
-  
-    <li><a href="./ResultsReader.html">ResultsReader</a>
-  
-    <li><a href="./SearchResults.html">SearchResults</a>
-  
-    <li><a href="./Service.html">Service</a>
-  
-    <li><a href="./SplunkError.html">SplunkError</a>
-  
-    <li><a href="./SplunkHTTPError.html">SplunkHTTPError</a>
-  
-  </ul>
-</nav>
-
-  </div>
-</nav>
-
-<div id="documentation">
-  <h1 class="class">class Index</h1>
-
-  <div id="description" class="description">
-    
-<p>Splunk can have many indexes.  Each index is represented by an <a
-href="Index.html">Index</a> object.</p>
-
-  </div><!-- description -->
-
-  
-  
-  
-  <section id="5Buntitled-5D" class="documentation-section">
-    
-
-    
-
-    
-
-    
-
-    <!-- Methods -->
-    
-     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
-      <h3 class="section-header">Public Class Methods</h3>
-
-    
-      <div id="method-c-new" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">new</span><span
-            class="method-args">(service, name)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 629</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">service</span>, <span class="ruby-identifier">name</span>)
-  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">service</span>, <span class="ruby-constant">PATH_INDEXES</span> <span class="ruby-operator">+</span> <span class="ruby-string">'/'</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">name</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- new-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- new-method -->
-
-    
-    </section><!-- public-class-method-details -->
-  
-     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
-      <h3 class="section-header">Public Instance Methods</h3>
-
-    
-      <div id="method-i-attach" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">attach</span><span
-            class="method-args">(host=nil, source=nil, sourcetype=nil)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Streaming HTTP(S) input for Splunk. Write to the returned stream Socket,
-and Splunk will index the data. Optionally, you can assign a
-<strong><code>host</code></strong>, <strong><code>source</code></strong> or
-<strong><code>sourcetype</code></strong> that will apply to every event
-sent on the socket. Note that the client is responsible for closing the
-socket when finished.</p>
-
-<h4 id="method-i-attach-label-Returns">Returns</h4>
-
-<p>Either an encrypted or non-encrypted stream Socket depending on if <a
-href="Service.html#method-c-connect">Service.connect</a> is http or https</p>
-
-<h4 id="method-i-attach-label-Example+-+Index+5+events+written+to+the+stream+and+assign+a+sourcetype+%27mysourcetype%27+to+each+event">Example - <a href="Index.html">Index</a> 5 events written to the stream and assign a sourcetype ‘mysourcetype’ to each event</h4>
-
-<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
-<span class="ruby-identifier">stream</span> = <span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>[<span class="ruby-string">'main'</span>].<span class="ruby-identifier">attach</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-string">'mysourcetype'</span>)
-(<span class="ruby-value">1</span><span class="ruby-operator">..</span><span class="ruby-value">5</span>).<span class="ruby-identifier">each</span> { <span class="ruby-identifier">stream</span>.<span class="ruby-identifier">write</span>(<span class="ruby-string">&quot;This is a cheezy event\r\n&quot;</span>) }
-<span class="ruby-identifier">stream</span>.<span class="ruby-identifier">close</span>
-</pre>
-          
-
-          
-          <div class="method-source-code" id="attach-source">
-            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 645</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">attach</span>(<span class="ruby-identifier">host</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">source</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">sourcetype</span>=<span class="ruby-keyword">nil</span>)
-  <span class="ruby-identifier">args</span> = {<span class="ruby-value">:index</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@name</span>}
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'host'</span>] = <span class="ruby-identifier">host</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">host</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'source'</span>] = <span class="ruby-identifier">source</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">source</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'sourcetype'</span>] = <span class="ruby-identifier">sourcetype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">sourcetype</span>
-  <span class="ruby-identifier">path</span> = <span class="ruby-node">&quot;receivers/stream?#{args.urlencode}&quot;</span>
-
-  <span class="ruby-identifier">cn</span> = <span class="ruby-ivar">@service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">connect</span>
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-node">&quot;POST #{@service.context.fullpath(path)} HTTP/1.1\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-node">&quot;Host: #{@service.context.host}:#{@service.context.port}\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-string">&quot;Accept-Encoding: identity\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-node">&quot;Authorization: Splunk #{@service.context.token}\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-string">&quot;X-Splunk-Input-Mode: Streaming\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>.<span class="ruby-identifier">write</span>(<span class="ruby-string">&quot;\r\n&quot;</span>)
-  <span class="ruby-identifier">cn</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- attach-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- attach-method -->
-
-    
-      <div id="method-i-clean" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">clean</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Nuke all events in this index.  This is done by setting
-<strong><code>maxTotalDataSizeMG</code></strong> and
-<strong><code>frozenTimePeriodInSecs</code></strong> both to 1. The call
-will then block until <strong><code>totalEventCount</code></strong> == 0.
-When the call is completed, the original parameters are restored.</p>
-
-<h4 id="method-i-clean-label-Returns">Returns</h4>
-
-<p>The original ‘maxTotalDataSizeMB’ and ‘frozenTimePeriodInSecs’
-parameters in a <a href="Hash.html">Hash</a></p>
-
-<h4 id="method-i-clean-label-Example+-+clean+the+%27main%27+index">Example - clean the ‘main’ index</h4>
-
-<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
-<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>[<span class="ruby-string">'main'</span>].<span class="ruby-identifier">clean</span>
-</pre>
-          
-
-          
-          <div class="method-source-code" id="clean-source">
-            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 672</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">clean</span>
-  <span class="ruby-identifier">saved</span> = <span class="ruby-identifier">read</span>([<span class="ruby-string">'maxTotalDataSizeMB'</span>, <span class="ruby-string">'frozenTimePeriodInSecs'</span>])
-  <span class="ruby-identifier">update</span>(<span class="ruby-value">:maxTotalDataSizeMB</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>, <span class="ruby-value">:frozenTimePeriodInSecs</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>)
-  <span class="ruby-comment">#@service.context.post(@path, {})</span>
-  <span class="ruby-keyword">until</span> <span class="ruby-keyword">self</span>[<span class="ruby-string">'totalEventCount'</span>] <span class="ruby-operator">==</span> <span class="ruby-string">'0'</span> <span class="ruby-keyword">do</span>
-    <span class="ruby-identifier">sleep</span>(<span class="ruby-value">1</span>)
-    <span class="ruby-identifier">puts</span> <span class="ruby-keyword">self</span>[<span class="ruby-string">'totalEventCount'</span>]
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">update</span>(<span class="ruby-identifier">saved</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- clean-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- clean-method -->
-
-    
-      <div id="method-i-submit" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">submit</span><span
-            class="method-args">(events, host=nil, source=nil, sourcetype=nil)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Batch HTTP(S) input for Splunk. Specify one or more events in a String
-along with optional <strong><code>host</code></strong>,
-<strong><code>source</code></strong> or
-<strong><code>sourcetype</code></strong> fields which will apply to all
-events.</p>
-
-<p>Example - <a href="Index.html">Index</a> a single event into the ‘main’
-index with source ‘baz’ and sourcetype ‘foo’</p>
-
-<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
-<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>[<span class="ruby-string">'main'</span>].<span class="ruby-identifier">submit</span>(<span class="ruby-string">&quot;this is an event&quot;</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-string">&quot;baz&quot;</span>, <span class="ruby-string">&quot;foo&quot;</span>)
-</pre>
-
-<p>Example 2 - <a href="Index.html">Index</a> multiple events into the
-‘main’ index with default metadata TODO: Fill me in</p>
-          
-
-          
-          <div class="method-source-code" id="submit-source">
-            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 692</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">submit</span>(<span class="ruby-identifier">events</span>, <span class="ruby-identifier">host</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">source</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">sourcetype</span>=<span class="ruby-keyword">nil</span>)
-  <span class="ruby-identifier">args</span> = {<span class="ruby-value">:index</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@name</span>}
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'host'</span>] = <span class="ruby-identifier">host</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">host</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'source'</span>] = <span class="ruby-identifier">source</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">source</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'sourcetype'</span>] = <span class="ruby-identifier">sourcetype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">sourcetype</span>
-
-  <span class="ruby-identifier">path</span> = <span class="ruby-node">&quot;receivers/simple?#{args.urlencode}&quot;</span>
-  <span class="ruby-ivar">@service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">post</span>(<span class="ruby-identifier">path</span>, <span class="ruby-identifier">events</span>, {})
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- submit-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- submit-method -->
-
-    
-      <div id="method-i-upload" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">upload</span><span
-            class="method-args">(filename, args={})</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Upload a file accessible by the Splunk server.  The full path of the file
-is specified by <strong><code>filename</code></strong>.</p>
-
-<h4 id="method-i-upload-label-Optional+Arguments">Optional Arguments</h4>
-
-<p><code>args</code> - Valid optional args are listed below.  Note that they
-are all Strings:</p>
-<ul><li>
-<p><code>:host</code> - The host for the events</p>
-</li><li>
-<p><code>:host_regex</code> - A regex to be used to extract a ‘host’ field
-from the path. If the path matches this regular expression, the captured
-value is used to populate the ‘host’ field or events from this data
-input.  The regular expression must have one capture group.</p>
-</li><li>
-<p><code>:host_segment</code> - Use the specified slash-seperated segment of
-the path as the host field value.</p>
-</li><li>
-<p><code>:rename-source</code> - The value of the ‘source’ field to be
-applied to the data from this file</p>
-</li><li>
-<p><code>:sourcetype</code> - The value of the ‘sourcetype’ field to be
-applied to data from this file</p>
-</li></ul>
-
-<h4 id="method-i-upload-label-Example+-+Upload+a+file+using+defaults">Example - Upload a file using defaults</h4>
-
-<pre class="ruby"><span class="ruby-identifier">svc</span> = <span class="ruby-constant">Service</span>.<span class="ruby-identifier">connect</span>(:<span class="ruby-identifier">username</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'admin'</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'foo'</span>)
-<span class="ruby-identifier">svc</span>.<span class="ruby-identifier">indexes</span>[<span class="ruby-string">'main'</span>].<span class="ruby-identifier">upload</span>(<span class="ruby-string">&quot;/Users/rdas/myfile.log&quot;</span>)
-</pre>
-          
-
-          
-          <div class="method-source-code" id="upload-source">
-            <pre><span class="ruby-comment"># File lib/splunk-sdk/client.rb, line 718</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">upload</span>(<span class="ruby-identifier">filename</span>, <span class="ruby-identifier">args</span>={})
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'index'</span>] = <span class="ruby-ivar">@name</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-string">'name'</span>] = <span class="ruby-identifier">filename</span>
-  <span class="ruby-identifier">path</span> = <span class="ruby-string">&quot;data/inputs/oneshot&quot;</span>
-  <span class="ruby-ivar">@service</span>.<span class="ruby-identifier">context</span>.<span class="ruby-identifier">post</span>(<span class="ruby-identifier">path</span>, <span class="ruby-identifier">args</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- upload-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- upload-method -->
-
-    
-    </section><!-- public-instance-method-details -->
-  
-  </section><!-- 5Buntitled-5D -->
-
-</div><!-- documentation -->
-
-
-<footer id="validator-badges">
-  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
-  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.11.
-  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
-</footer>
-
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+	<title>RDoc Documentation</title>
+
+	<link type="text/css" media="screen" href="rdoc.css" rel="stylesheet" />
+
+	<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body class="indexpage">
+
+	
+	<h1>RDoc Documentation</h1>
+
+	
+	<p>This is the API documentation for 'RDoc Documentation'.</p>
+	
+
+	
+	
+	<h2>Files</h2>
+	<ul>
+		
+			<li class="file"><a href="Gemfile.html">Gemfile</a></li>
+		
+			<li class="file"><a href="LICENSE.html">LICENSE</a></li>
+		
+			<li class="file"><a href="README_rdoc.html">README.rdoc</a></li>
+		
+			<li class="file"><a href="Rakefile.html">Rakefile</a></li>
+		
+			<li class="file"><a href="TODO.html">TODO</a></li>
+		
+			<li class="file"><a href="test/testfile_txt.html">testfile.txt</a></li>
+		
+	</ul>
+	
+
+	<h2 id="classes">Classes/Modules</h2>
+	<ul>
+		
+		<li class="module"><a href="Splunk.html">Splunk</a></li>
+		
+		<li class="class"><a href="Splunk/AtomResponseLoader.html">Splunk::AtomResponseLoader</a></li>
+		
+		<li class="class"><a href="Splunk/Collection.html">Splunk::Collection</a></li>
+		
+		<li class="class"><a href="Splunk/Conf.html">Splunk::Conf</a></li>
+		
+		<li class="class"><a href="Splunk/ConfCollection.html">Splunk::ConfCollection</a></li>
+		
+		<li class="class"><a href="Splunk/Context.html">Splunk::Context</a></li>
+		
+		<li class="class"><a href="Splunk/Entity.html">Splunk::Entity</a></li>
+		
+		<li class="class"><a href="Splunk/Index.html">Splunk::Index</a></li>
+		
+		<li class="class"><a href="Splunk/Job.html">Splunk::Job</a></li>
+		
+		<li class="class"><a href="Splunk/Jobs.html">Splunk::Jobs</a></li>
+		
+		<li class="class"><a href="Splunk/Message.html">Splunk::Message</a></li>
+		
+		<li class="class"><a href="Splunk/ResultsReader.html">Splunk::ResultsReader</a></li>
+		
+		<li class="class"><a href="Splunk/SearchResults.html">Splunk::SearchResults</a></li>
+		
+		<li class="class"><a href="Splunk/Service.html">Splunk::Service</a></li>
+		
+		<li class="class"><a href="Splunk/SplunkError.html">Splunk::SplunkError</a></li>
+		
+		<li class="class"><a href="Splunk/SplunkHTTPError.html">Splunk::SplunkHTTPError</a></li>
+		
+		<li class="module"><a href="JSON.html">JSON</a></li>
+		
+		<li class="module"><a href="JSON/Stream.html">JSON::Stream</a></li>
+		
+		<li class="class"><a href="JSON/Stream/Parser.html">JSON::Stream::Parser</a></li>
+		
+		<li class="class"><a href="Hash.html">Hash</a></li>
+		
+	</ul>
+
+	<h2 id="methods">Methods</h2>
+	<ul>
+		
+			<li><a href="Splunk/Service.html#method-c-connect">::connect &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-c-load_text">::load_text &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-c-load_text_as_record">::load_text_as_record &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/Jobs.html#method-c-new">::new &mdash; Splunk::Jobs</a></li>
+		
+			<li><a href="Splunk/SplunkHTTPError.html#method-c-new">::new &mdash; Splunk::SplunkHTTPError</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-c-new">::new &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-c-new">::new &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/ResultsReader.html#method-c-new">::new &mdash; Splunk::ResultsReader</a></li>
+		
+			<li><a href="Splunk/SearchResults.html#method-c-new">::new &mdash; Splunk::SearchResults</a></li>
+		
+			<li><a href="Splunk/SplunkError.html#method-c-new">::new &mdash; Splunk::SplunkError</a></li>
+		
+			<li><a href="Splunk/Job.html#method-c-new">::new &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Context.html#method-c-new">::new &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/ConfCollection.html#method-c-new">::new &mdash; Splunk::ConfCollection</a></li>
+		
+			<li><a href="JSON/Stream/Parser.html#method-c-new">::new &mdash; JSON::Stream::Parser</a></li>
+		
+			<li><a href="Splunk/Index.html#method-c-new">::new &mdash; Splunk::Index</a></li>
+		
+			<li><a href="Splunk/Message.html#method-c-new">::new &mdash; Splunk::Message</a></li>
+		
+			<li><a href="Splunk/Service.html#method-c-new">::new &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Conf.html#method-c-new">::new &mdash; Splunk::Conf</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-c-record">::record &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-%5B%5D">#[] &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-%5B%5D">#[] &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-%5B%5D">#[] &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-%5B%5D%3D">#[]= &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Hash.html#method-i-add_attrs">#add_attrs &mdash; Hash</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-apps">#apps &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Index.html#method-i-attach">#attach &mdash; Splunk::Index</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-build_stream">#build_stream &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-cancel">#cancel &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-capabilities">#capabilities &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-check_for_error_return">#check_for_error_return &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Index.html#method-i-clean">#clean &mdash; Splunk::Index</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-confs">#confs &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-connect">#connect &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-contains%3F">#contains? &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-create">#create &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/Jobs.html#method-i-create">#create &mdash; Splunk::Jobs</a></li>
+		
+			<li><a href="Splunk/Jobs.html#method-i-create_oneshot">#create_oneshot &mdash; Splunk::Jobs</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-create_resource">#create_resource &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Jobs.html#method-i-create_stream">#create_stream &mdash; Splunk::Jobs</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-delete">#delete &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-delete">#delete &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-disable">#disable &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-disable_preview">#disable_preview &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/ResultsReader.html#method-i-each">#each &mdash; Splunk::ResultsReader</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-each">#each &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/SearchResults.html#method-i-each">#each &mdash; Splunk::SearchResults</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-enable">#enable &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-enable_preview">#enable_preview &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-events">#events &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-finalize">#finalize &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-flatten_params">#flatten_params &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-flatten_params_array">#flatten_params_array &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-fullpath">#fullpath &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-get">#get &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-handle_key">#handle_key &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-indexes">#indexes &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-info">#info &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-init_default">#init_default &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-is_dict">#is_dict &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-is_item">#is_item &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-is_key">#is_key &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-is_list">#is_list &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-is_special">#is_special &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-jobs">#jobs &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Collection.html#method-i-list">#list &mdash; Splunk::Collection</a></li>
+		
+			<li><a href="Splunk/Jobs.html#method-i-list">#list &mdash; Splunk::Jobs</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load">#load &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_attrs">#load_attrs &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_dict">#load_dict &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_elem">#load_elem &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_list">#load_list &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_root">#load_root &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-load_value">#load_value &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/AtomResponseLoader.html#method-i-localname">#localname &mdash; Splunk::AtomResponseLoader</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-loggers">#loggers &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-login">#login &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-login">#login &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-logout">#logout &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-logout">#logout &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-messages">#messages &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-parse">#parse &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-pause">#pause &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-post">#post &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-preview">#preview &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-read">#read &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Conf.html#method-i-read">#read &mdash; Splunk::Conf</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-read">#read &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-readmeta">#readmeta &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-reload">#reload &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-restart">#restart &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-results">#results &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-roles">#roles &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-searchlog">#searchlog &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-setpriority">#setpriority &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-settings">#settings &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-setttl">#setttl &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Conf.html#method-i-submit">#submit &mdash; Splunk::Conf</a></li>
+		
+			<li><a href="Splunk/Index.html#method-i-submit">#submit &mdash; Splunk::Index</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-summary">#summary &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-timeline">#timeline &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-touch">#touch &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Job.html#method-i-unpause">#unpause &mdash; Splunk::Job</a></li>
+		
+			<li><a href="Splunk/Entity.html#method-i-update">#update &mdash; Splunk::Entity</a></li>
+		
+			<li><a href="Splunk/Index.html#method-i-upload">#upload &mdash; Splunk::Index</a></li>
+		
+			<li><a href="Splunk/Context.html#method-i-url">#url &mdash; Splunk::Context</a></li>
+		
+			<li><a href="Hash.html#method-i-urlencode">#urlencode &mdash; Hash</a></li>
+		
+			<li><a href="Splunk/Service.html#method-i-users">#users &mdash; Splunk::Service</a></li>
+		
+			<li><a href="Splunk/Message.html#method-i-value">#value &mdash; Splunk::Message</a></li>
+		
+	</ul>
+
+	<div id="validator-badges">
+		<p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+		<p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+			Rdoc Generator</a> 1.1.6</small>.</p>
+	</div>
+</body>
+</html>
