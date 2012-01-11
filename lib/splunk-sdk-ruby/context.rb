@@ -15,6 +15,11 @@ require_relative 'splunk_error'
 require_relative 'splunk_http_error'
 
 module Splunk
+  ##
+  # The <b>Binding Layer</b><br>.
+  # This class is used for lower level REST-based control of Splunk.
+  # To get started by logging in, create a Context instance and call
+  # Context::login on it.
   class Context
     attr_reader :protocol, :host, :port, :key_file, :cert_file, :token
 
