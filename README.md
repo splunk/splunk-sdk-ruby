@@ -57,14 +57,13 @@ and system requirements, see Installing & Running Splunk
 #### Splunk Ruby SDK
 
 Get the Splunk Ruby SDK from GitHub (https://github.com) and clone the
-resources to your computer.  Use the following commands:
+resources to your computer.  Use the following command:
 
-cd <i>whatever directory you want to place the SDK directory into</i>
-git clone https://github.com/splunk/splunk-sdk-ruby.git
+    git clone https://github.com/splunk/splunk-sdk-ruby.git
 
 #### Installing
 
-We highly recommend that you use <bundler>
+We highly recommend that you use _bundler_. See http://gembundler.com/ for more info.
 
 Add this line to your application's Gemfile:
 
@@ -74,7 +73,7 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
+If you are not using bundler, than you can install it like this:
 
     $ gem install splunk-sdk-ruby
 
@@ -106,7 +105,7 @@ can be used to interact with splunkd - the _binding_ layer and the _client_ laye
 This is the lowest layer of the Splunk Ruby SDK. It is a thin wrapper around low-level HTTP capabilities, 
 including:
 
-* Handles authentication and namespace URL management
+* Authentication and namespace URL management
 * Accessible low-level HTTP interface for use by developers who want
     to be close to the wire.
 * Atom Response parser
@@ -139,7 +138,30 @@ an Array:
     puts users.feed.entry[0]['title']   #Works 
 
 #### The Client Layer
-    
+The _client_ layer builds on the _binding_ layer to provide a friendlier interface to Splunk
+that abstracts away many of the lower level details of the _binding_ layer.  It currently
+abstracts the following (with more to come):
 
+* Authentication
+* Apps
+* Capabilities
+* Server Info
+* Loggers
+* Settings
+* Indexes
+* Roles
+* Users
+* Jobs
+* Searching (One-shot, Asynchronous, Real-Time, etc.)
+* Restarting
+* Configuration
+* Messages
+* Collections and Entities
+
+Here is a simple example of using the binding layer.  This example is the same as in the _binding_ layer.
+It returns all users in the system and displays their names:
+
+    svc = Splunk::Service.connect(:username => 'admin', :password => 'password')
+    svc.users.each {|user| puts user.name}
 
 
