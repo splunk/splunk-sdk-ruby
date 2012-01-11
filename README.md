@@ -84,6 +84,8 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 
 #### Running the Unit Tests
 
+We are adding more unit tests all the time.  For now, run what we have.
+
 1. Make sure that the password for Splunk user <b>admin</b> is <b>"password"</b>.  The unit
 tests are hard-coded to that user/psw pair.  Make sure to put this back the way you had it
 when you are done running the unit tests.
