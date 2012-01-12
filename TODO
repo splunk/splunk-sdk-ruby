@@ -3,3 +3,5 @@ Fix Index unit test
 Examples (simple code , Rails code)
 More detailed docs somewhere
 Inline docs should have links to REST anchor docs
+InLine Documentation of binding layer
+Better and consistent error handling

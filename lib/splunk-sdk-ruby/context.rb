@@ -27,7 +27,26 @@ module Splunk
     DEFAULT_PORT = "8089"
     DEFAULT_PROTOCOL = "https"
 
-
+    # Create an instance of a Context object used for logging in to Splunk
+    #
+    # ==== Attributes
+    # +args+ - Valid args are listed below.  Note that they are all Strings:
+    # * +:username+ - log in to Splunk as this user (no default)
+    # * +:password+ - password for user 'username' (no default)
+    # * +:host+ - Splunk host (e.g. '10.1.2.3') (defaults to 'localhost')
+    # * +:port+ - the Splunk management port (defaults to '8089')
+    # * +:protocol+ - either 'https' or 'http' (defaults to 'https')
+    # * +:namespace+ - application namespace option.  'username:appname' (defaults to nil)
+    # * +:key_file+ - the full path to a SSL key file (defaults to nil)
+    # * +:cert_file+ - the full path to a SSL certificate file (defaults to nil)
+    #
+    # ==== Returns
+    # instance of a Context class - must call login to use
+    #
+    # ==== Examples
+    #   svc = Splunk::Context.new(:username => 'admin', :password => 'foo')
+    #   svc = Splunk::Context.new(:username => 'admin', :password => 'foo', :host => '10.1.1.1', :port = '9999')
+    #   svc.login
     def initialize(args)
       @args = args
       @token = nil
@@ -43,6 +62,9 @@ module Splunk
       @headers = nil
     end
 
+    # Login to Splunk. The _token_ attribute will be filled with the
+    # Splunk authentication token upon successful login.
+    # Raises SplunkError if problem loggin in.
     def login
       #Note that this will throw it's own exception and we want to pass it up
       response = post("/services/auth/login", {:username=>@username, :password=>@password})
@@ -55,6 +77,7 @@ module Splunk
       end
     end
 
+    # Log out of Splunk.  For now this simply nil's out the _token_ attribute
     def logout
       @token = nil
       @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
