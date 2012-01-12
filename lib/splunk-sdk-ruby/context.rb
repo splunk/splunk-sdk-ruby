@@ -83,6 +83,22 @@ module Splunk
       @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
     end
 
+    # Make a POST REST call.
+    # _path_ is a partial path to the URL.  For example: 'authentication/roles'.
+    # If _body_ is a Hash, then all key/values of
+    # it are flattened, escaped, etc.  This is the typical use case.  _params_
+    # are not generally used (they are for lower level control).
+    #
+    # ==== Returns
+    #   The body of the response or throws SplunkHTTPError if the error >= 400
+    #
+    # ==== Examples - Issue a oneshot search and return the results in json
+    #  ctx = Splunk::Context.new(:username => 'admin', :password => password, :protocol => 'https')
+    #  ctx.login
+    #  args[:search] = "search error"
+    #  args[:exec_mode] = "oneshot"
+    #  args[:output_mode] = "json"
+    #  response = ctx.post("search/jobs", args)
     def post(path, body, params={})
       #Warning - kludge alert!
       #because rest-client puts '[]' after repeated params, we need to process them special by
