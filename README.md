@@ -63,7 +63,8 @@ resources to your computer.  Use the following command:
 
 #### Installing
 
-We highly recommend that you use _bundler_. See http://gembundler.com/ for more info.
+We highly recommend that you use _bundler_. See http://gembundler.com/ for more 
+info.
 
 Add this line to your application's Gemfile:
 
@@ -86,9 +87,10 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 
 We are adding more unit tests all the time.  For now, run what we have.
 
-1. Make sure that the password for Splunk user <b>admin</b> is <b>"password"</b>.  The unit
-tests are hard-coded to that user/psw pair.  Make sure to put this back the way you had it
-when you are done running the unit tests.
+1. Make sure that the password for Splunk user 
+   <b>admin</b> is <b>"password"</b>.  The unit tests are hard-coded to that 
+   user/psw pair.  Make sure to put this back the way you had it when you are 
+   done running the unit tests.
 
 2. In the base directory where you installed the Splunk Ruby SDK, run
 
@@ -96,32 +98,34 @@ when you are done running the unit tests.
 
 It should run many tests without error.
 
-Note that currently, the only examples are documented in-line with the code.  They
-can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
+Note that currently, the only examples are documented in-line with the code.  
+They can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
 
 ## Overview 
 
 The Splunk library included in this SDK consists of two layers of API that 
-can be used to interact with splunkd - the _binding_ layer and the _client_ layer.
+can be used to interact with splunkd - the _binding_ layer and the 
+_client_ layer.
 
 #### The Binding Layer
-This is the lowest layer of the Splunk Ruby SDK. It is a thin wrapper around low-level HTTP capabilities, 
-including:
+This is the lowest layer of the Splunk Ruby SDK. It is a thin wrapper around 
+low-level HTTP capabilities, including:
 
 * Authentication and namespace URL management
 * Accessible low-level HTTP interface for use by developers who want
     to be close to the wire.
 * Atom Response parser
 
-Here is a simple example of using the binding layer. This example makes a REST call
-to Splunk returning an Atom feed of all users defined in the system:
+Here is a simple example of using the binding layer. This example makes a REST 
+call to Splunk returning an Atom feed of all users defined in the system:
 
     require 'splunk-sdk-ruby'
 
     c = Splunk::Context.new(:username => "admin", :password => 'password', :protocol => 'https').login
     puts c.get('authentication/users') #Will spit out an ATOM feed in XML
 
-Here is another example, but this time we convert the Atom feed to much cleaner JSON:
+Here is another example, but this time we convert the Atom feed to much cleaner
+JSON:
 
     require 'splunk-sdk-ruby'
 
@@ -129,8 +133,8 @@ Here is another example, but this time we convert the Atom feed to much cleaner 
     users = Splunk::AtomResponseLoader::load_text(c.get('authentication/users')) #Will spit out JSON
     puts users['feed']['updated']
 
-If you wish you can use _dot accessors_ to access the individual elements as long as they aren't in 
-an Array: 
+If you wish you can use _dot accessors_ to access the individual elements as 
+long as they aren't in an Array: 
 
     require 'splunk-sdk-ruby'
 
@@ -141,9 +145,9 @@ an Array:
     puts users.feed.entry[0]['title']   #Works 
 
 #### The Client Layer
-The _client_ layer builds on the _binding_ layer to provide a friendlier interface to Splunk
-that abstracts away many of the lower level details of the _binding_ layer.  It currently
-abstracts the following (with more to come):
+The _client_ layer builds on the _binding_ layer to provide a friendlier 
+interface to Splunk that abstracts away many of the lower level details of the 
+_binding_ layer.  It currently abstracts the following (with more to come):
 
 * Authentication
 * Apps
@@ -161,15 +165,17 @@ abstracts the following (with more to come):
 * Messages
 * Collections and Entities
 
-Here is a simple example of using the binding layer.  This example is the same as in the _binding_ layer.
-It returns all users in the system and displays their names:
+Here is a simple example of using the binding layer.  This example is the same 
+as in the _binding_ layer. It returns all users in the system and displays 
+their names:
 
     svc = Splunk::Service.connect(:username => 'admin', :password => 'password')
     svc.users.each {|user| puts user.name}
 
 ## Resources
 
-You can find anything having to do with developing on Splunk at the Splunk developer portal:
+You can find anything having to do with developing on Splunk at the Splunk 
+developer portal:
 
 * http://dev.splunk.com
 
