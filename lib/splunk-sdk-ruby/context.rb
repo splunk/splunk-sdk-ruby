@@ -246,38 +246,3 @@ module Splunk
 
   end
 end
-=begin
-c = Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
-c.login
-response = c.get('apps/local')
-result = AtomResponseLoader::load_text_as_record(response)
-p result.feed.title
-p result.feed.author.name
-result.feed.entry.each do |entry|
-  e = AtomResponseLoader::record(entry)
-  p e.content.eai_acl.perms.read
-end
-=end
-
-=begin
-
-c.post()
-
-#login as admin
-def random_uname
-  UUID.new.generate
-end
-
-PATH_USERS = "authentication/users"
-
-c = Context.new(:username => 'admin', :password => 'password')
-c.login
-
-#create a random user
-uname = random_uname
-p uname
-response = c.post(PATH_USERS, :name => uname, :password => 'changeme', :roles => ['power','user'])
-=end
-
-
-
