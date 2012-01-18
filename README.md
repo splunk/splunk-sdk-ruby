@@ -114,7 +114,7 @@ In the base directory where you installed the Splunk Ruby SDK, run
 It should run many tests without error.
 
 Note that currently, the only examples are documented in-line with the code.  
-They can be seen by pointing your browser to splunk-sdk-ruby/doc/Service.html.
+They can be seen by pointing your browser to http://splunk.github.com/splunk-sdk-ruby/doc/Splunk/Service.html
 
 ## Overview 
 
