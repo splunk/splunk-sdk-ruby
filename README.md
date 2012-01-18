@@ -174,7 +174,7 @@ their names:
 
 ## Resources
 
-You can find many examples throughout he Ruby SDK class documentation:
+You can find many examples throughout the Ruby SDK class documentation:
 
 * http://splunk.github.com/splunk-sdk-ruby/doc/
 
