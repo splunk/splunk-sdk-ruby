@@ -174,6 +174,10 @@ their names:
 
 ## Resources
 
+You can find many examples throughout he Ruby SDK class documentation:
+
+* http://splunk.github.com/splunk-sdk-ruby/doc/
+
 You can find anything having to do with developing on Splunk at the Splunk 
 developer portal:
 
