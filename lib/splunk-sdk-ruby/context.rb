@@ -21,7 +21,23 @@ module Splunk
   # To get started by logging in, create a Context instance and call
   # Context::login on it.
   class Context
-    attr_reader :protocol, :host, :port, :key_file, :cert_file, :token
+    # 'https' or 'http' - String
+    attr_reader :protocol
+
+    # host were Splunk Server lives - String
+    attr_reader :host
+
+    # port number of the Splunk Server's management port - String
+    attr_reader :port
+
+    # the full path to a SSL key file - String
+    attr_reader :key_file
+
+    # the full path to a SSL certificate file - String
+    attr_reader :cert_file
+
+    # the authentication for this session.  nil if logged out. - String
+    atrr_reader :token
 
     DEFAULT_HOST = "localhost"
     DEFAULT_PORT = "8089"
@@ -93,7 +109,7 @@ module Splunk
     #   The body of the response or throws SplunkHTTPError if the error >= 400
     #
     # ==== Examples - Issue a oneshot search and return the results in json
-    #  ctx = Splunk::Context.new(:username => 'admin', :password => password, :protocol => 'https')
+    #  ctx = Splunk::Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
     #  ctx.login
     #  args[:search] = "search error"
     #  args[:exec_mode] = "oneshot"
@@ -119,6 +135,25 @@ module Splunk
       end
     end
 
+    # Make a GET REST call.
+    # _path_ is a partial path to the URL.  For example: 'server/info'.
+    # _params_ are not generally used (they are for lower level control)
+    #
+    # ==== Returns
+    #   The body of the response or throws SplunkHTTPError if the error >= 400
+    #
+    # ==== Example - Get Server Information as an ATOM XML response
+    #   ctx = Splunk::Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
+    #   ctx.login
+    #   response = ctx.get('server/info')
+    #
+    # ==== Example - Get Server Information, but conver the ATOM response into json and enable
+    # dot accessors.
+    #   ctx = Splunk::Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
+    #   ctx.login
+    #   response = ctx.get('server/info')
+    #   record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+    #   puts record.content #Display the json
     def get(path, params={})
       headers = {} #we don't allow additional headers for now
 
@@ -136,7 +171,19 @@ module Splunk
       end
     end
 
-    #TODO: Make this the same as 'get'.  In other words, params are not headers
+    # Make a DELETE REST call.
+    # _path_ is a partial path to the URL.  For example 'authentication/users/rob',
+    # _params_ are not generally used (they are for lower level control)
+    #
+    # ==== Returns
+    #   The body of the response or throws SplunkHTTPError if the error >= 400
+    #
+    # ==== Example - Delete the user 'rob'
+    #   ctx = Splunk::Context.new(:username => 'admin', :password => 'password', :protocol => 'https')
+    #   ctx.login
+    #   response = ctx.delete('authentication/users/rob')
+    #
+    # TODO: Make this the same as 'get'.  In other words, params are not headers
     def delete(path, params={})
       resource = create_resource(path, params)
       resource.delete params do |response, request, result, &block|
@@ -145,6 +192,9 @@ module Splunk
       end
     end
 
+    # Open a socket to the Splunk HTTP server.  If the Context protocol is 'https', then
+    # an SSL wrapped socket is returned.  If the Context protocol is 'http', then a
+    # regular socket is returned.
     def connect
       cn = TCPSocket.new @host, @port
       if protocol == 'https'
@@ -158,7 +208,7 @@ module Splunk
       return cn
     end
 
-    def fullpath(path)
+    def fullpath(path) # :nodoc:
       return path if path[0].eql?('/')
       return "/services/#{path}" if @namespace.nil?
       username, appname = @namespace.split(':')
@@ -167,18 +217,18 @@ module Splunk
       "/servicesNS/#{username}/#{appname}/#{path}"
     end
 
-    def init_default(key, deflt)
+    def init_default(key, deflt) # :nodoc:
       if @args.has_key?(key)
         return @args[key]
       end
       deflt
     end
 
-    def url(path)
+    def url(path) # :nodoc:
       "#{@prefix}#{fullpath(path)}"
     end
 
-    def create_resource(path, params={})
+    def create_resource(path, params={}) # :nodoc:
       params.merge!(@headers) if !@headers.nil?
       if @key_file.nil? or @cert_file.nil?
         resource = RestClient::Resource.new url(path)
@@ -193,14 +243,14 @@ module Splunk
       resource
     end
 
-    def check_for_error_return(response)
+    def check_for_error_return(response) # :nodoc:
       if response.code >= 400
         raise SplunkHTTPError.new(response)
       end
     end
 
     #ripped directly from rest-client
-    def build_stream(params = nil)
+    def build_stream(params = nil) # :nodoc:
       r = flatten_params(params)
       stream = StringIO.new(r.collect do |entry|
         "#{entry[0]}=#{handle_key(entry[1])}"
@@ -210,11 +260,11 @@ module Splunk
     end
 
     # for UrlEncoded escape the keys
-    def handle_key key
+    def handle_key key # :nodoc:
       URI.escape(key.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
     end
 
-    def flatten_params(params, parent_key = nil)
+    def flatten_params(params, parent_key = nil) # :nodoc:
       result = []
       params.each do |key, value|
         calculated_key = parent_key ? "#{parent_key}[#{handle_key(key)}]" : handle_key(key)
@@ -229,7 +279,7 @@ module Splunk
       result
     end
 
-    def flatten_params_array value, calculated_key
+    def flatten_params_array value, calculated_key # :nodoc:
       result = []
       value.each do |elem|
         if elem.is_a? Hash
