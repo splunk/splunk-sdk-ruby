@@ -87,7 +87,7 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 
 We are adding more unit tests all the time.  For now, run what we have.
 
-1. Edit the ~/.splunkrc file (/home/_username_/.splunkrc) to use
+Edit the ~/.splunkrc file (/home/_username_/.splunkrc) to use
 the Splunk admin role's username and password, and the management port, host and protocol of your Splunk Server.
 The format is a Ruby Hash:
 
@@ -99,10 +99,9 @@ The format is a Ruby Hash:
         :protocol => 'https'        #String - can be 'https' or 'http'; defaults to 'https' if missing.
     }
 
-To protect your password You might want to delete this file after you are done running the unit tests.
+To protect your Splunk password, you may want to delete this file when you are done running the unit tests.
 
-
-2. In the base directory where you installed the Splunk Ruby SDK, run
+In the base directory where you installed the Splunk Ruby SDK, run
 
     $ rake test
 
