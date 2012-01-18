@@ -3,19 +3,15 @@ Fix Index unit test
 Examples (simple code , Rails code)
 More detailed docs somewhere
 Inline docs should have links to REST anchor docs
-InLine Documentation of binding layer
+InLine Documentation AtomLoader
 Better and consistent error handling
 
 ------------------------
 
-Implement .splunkrc file (like in Python)
 
 Add some example docs at a higher level web page.  Andrea.
 
 Try fixing json-stream to work with 1.87
 
-Place rdocs on github wiki - github pages (gh-pages branch) - upload to it (see github admin
-  to enable - it'll create the branch for you.  Pull from repo and checkout gh-pages,
-  etc...)
 
 
