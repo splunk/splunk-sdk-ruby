@@ -92,11 +92,17 @@ the Splunk admin role's username and password, and the management port, host and
 The format is a Ruby Hash:
 
     {
-        :username => 'admin',       #String - required
-        :password => 'password',    #String - required
-        :port => '8089',            #String - defaults to 8089 if missing
-        :host => 'localhost',       #String - defaults to 'localhost' if missing
-        :protocol => 'https'        #String - can be 'https' or 'http'; defaults to 'https' if missing.
+        #The user name (String) of a Splunk administrator. Required.
+        :username => 'admin',
+        #The password (String) of the above user. Required.
+        :password => 'password',
+        #The management port (String) of the Splunk Server. Defaults to '8089'.
+        :port => '8089',
+        #The host (String) where the Splunk Server is running. Defaults to 'localhost'
+        :host => 'localhost',
+        #The protocol that the Splunk Server's management port is using.
+        #Can be 'https' or 'http'. Defaults to 'https'.
+        :protocol => 'https'
     }
 
 To protect your Splunk password, you may want to delete this file when you are done running the unit tests.
