@@ -37,7 +37,7 @@ module Splunk
     attr_reader :cert_file
 
     # the authentication for this session.  nil if logged out. - String
-    atrr_reader :token
+    attr_reader :token
 
     DEFAULT_HOST = "localhost"
     DEFAULT_PORT = "8089"

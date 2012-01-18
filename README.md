@@ -87,10 +87,20 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 
 We are adding more unit tests all the time.  For now, run what we have.
 
-1. Make sure that the password for Splunk user 
-   <b>admin</b> is <b>"password"</b>.  The unit tests are hard-coded to that 
-   user/psw pair.  Make sure to put this back the way you had it when you are 
-   done running the unit tests.
+1. Edit the ~/.splunkrc file (/home/_username_/.splunkrc) to use
+the Splunk admin role's username and password, and the management port, host and protocol of your Splunk Server.
+The format is a Ruby Hash:
+
+    {
+        :username => 'admin',       #String - required
+        :password => 'password',    #String - required
+        :port => '8089',            #String - defaults to 8089 if missing
+        :host => 'localhost',       #String - defaults to 'localhost' if missing
+        :protocol => 'https'        #String - can be 'https' or 'http'; defaults to 'https' if missing.
+    }
+
+To protect your password You might want to delete this file after you are done running the unit tests.
+
 
 2. In the base directory where you installed the Splunk Ruby SDK, run
 

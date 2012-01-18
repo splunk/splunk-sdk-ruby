@@ -6,10 +6,11 @@ require "test/unit"
 require "ostruct"
 require "splunk-sdk-ruby/client"
 
-ADMIN_LOGIN = "admin"
-ADMIN_PSW = "password"
 TEST_APP_NAME = "sdk-tests"
 TEST_INDEX_NAME = "sdk-tests"
+
+rc_file = File.new(File.expand_path('~/.splunkrc'), "r")
+$config = eval(rc_file.read)
 
 def wait_event_count(index, count, secs)
   done = false
@@ -22,7 +23,7 @@ end
 
 class TcClient < Test::Unit::TestCase
   def setup
-    @service = Splunk::Service.new(:username => ADMIN_LOGIN, :password => ADMIN_PSW)
+    @service = Splunk::Service.new($config)
     @service.login
   end
 
