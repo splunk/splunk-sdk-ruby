@@ -872,7 +872,7 @@ module Splunk
       args[:search] = query
       args[:output_mode] = "json"
 
-      path = PATH_JOBS + "/export?#{args.urlencode}"
+      path = PATH_EXPORT + "?#{args.urlencode}"
 
       cn = @service.context.connect
       cn.write("GET #{@service.context.fullpath(path)} HTTP/1.1\r\n")
