@@ -1,18 +1,18 @@
-require "rubygems"
-require "bundler/setup"
+require 'rubygems'
+require 'bundler/setup'
 
-require 'rest-client'
 require 'libxml'
+require 'netrc'
 require 'openssl'
 require 'pathname'
-require 'stringio'
-require 'netrc'
+require 'rest-client'
 require 'socket'
-#require 'uuid'
+require 'stringio'
 
 require_relative 'aloader'
 require_relative 'splunk_error'
 require_relative 'splunk_http_error'
+
 
 module Splunk
   ##
@@ -39,9 +39,9 @@ module Splunk
     # the authentication for this session.  nil if logged out. - String
     attr_reader :token
 
-    DEFAULT_HOST = "localhost"
-    DEFAULT_PORT = "8089"
-    DEFAULT_PROTOCOL = "https"
+    DEFAULT_HOST = 'localhost'
+    DEFAULT_PORT = '8089'
+    DEFAULT_PROTOCOL = 'https'
 
     # Create an instance of a Context object used for logging in to Splunk
     #
@@ -82,12 +82,16 @@ module Splunk
     # Splunk authentication token upon successful login.
     # Raises SplunkError if problem loggin in.
     def login
-      #Note that this will throw it's own exception and we want to pass it up
-      response = post("/services/auth/login", {:username=>@username, :password=>@password})
+      # Note that this will throw it's own exception and we want to pass it up
+      response = post(
+        '/services/auth/login', {:username=>@username, :password=>@password})
       begin
         doc = LibXML::XML::Parser.string(response.to_s).parse
         @token = doc.find('//sessionKey').last.content
-        @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
+        # TODO(gba) Change '0.1' magic version below.
+        @headers = {
+          'Authorization' => "Splunk #{@token}",
+          'User-Agent' => 'splunk-sdk-ruby/0.1'}
       rescue => e
         raise SplunkError, e.message
       end
@@ -96,7 +100,10 @@ module Splunk
     # Log out of Splunk.  For now this simply nil's out the _token_ attribute
     def logout
       @token = nil
-      @headers = {'Authorization' => "Splunk #{@token}", 'User-Agent' => 'splunk-sdk-ruby/0.1'}
+      # TODO(gba) Change '0.1' magic version below.
+      @headers = {
+        'Authorization' => "Splunk #{@token}",
+        'User-Agent' => 'splunk-sdk-ruby/0.1'}
     end
 
     # Make a POST REST call.
@@ -116,9 +123,9 @@ module Splunk
     #  args[:output_mode] = "json"
     #  response = ctx.post("search/jobs", args)
     def post(path, body, params={})
-      #Warning - kludge alert!
-      #because rest-client puts '[]' after repeated params, we need to process them special by
-      #prepending them to any body we have
+      # Warning - kludge alert!
+      # because rest-client puts '[]' after repeated params, we need to
+      # process them special by prepending them to any body we have.
       if body.is_a? Hash
         body.each do |k, v|
           if v.is_a? Array
@@ -233,12 +240,13 @@ module Splunk
       if @key_file.nil? or @cert_file.nil?
         resource = RestClient::Resource.new url(path)
       else
+        # TODO(gba) File.read() before we're inside an OpenSSL call.
         resource = RestClient::Resource.new(
-            url(path),
-            :ssl_client_cert => OpenSSL::X509::Certificate.new(File.read(@cert_file)),
-            :ssl_client_key => OpenSSL::PKey::RSA.new(File.read(@key_file))
-            #:verify_ssl => OpenSSL::SSL::VERIFY_PEER
-        )
+          url(path),
+          :ssl_client_cert => OpenSSL::X509::Certificate.new(
+            File.read(@cert_file)),
+          :ssl_client_key => OpenSSL::PKey::RSA.new(
+            File.read(@key_file)))
       end
       resource
     end
@@ -249,7 +257,7 @@ module Splunk
       end
     end
 
-    #ripped directly from rest-client
+    # ripped directly from rest-client
     def build_stream(params = nil) # :nodoc:
       r = flatten_params(params)
       stream = StringIO.new(r.collect do |entry|
@@ -267,10 +275,14 @@ module Splunk
     def flatten_params(params, parent_key = nil) # :nodoc:
       result = []
       params.each do |key, value|
-        calculated_key = parent_key ? "#{parent_key}[#{handle_key(key)}]" : handle_key(key)
-        if value.is_a? Hash
+        calculated_key = if parent_key
+                           "#{parent_key}[#{handle_key(key)}]"
+                         else
+                           handle_key(key)
+                         end
+        if value.is_a?(Hash)
           result += flatten_params(value, calculated_key)
-        elsif value.is_a? Array
+        elsif value.is_a?(Array)
           result += flatten_params_array(value, calculated_key)
         else
           result << [calculated_key, value]
@@ -279,12 +291,12 @@ module Splunk
       result
     end
 
-    def flatten_params_array value, calculated_key # :nodoc:
+    def flatten_params_array(value, calculated_key)  # :nodoc:
       result = []
       value.each do |elem|
-        if elem.is_a? Hash
+        if elem.is_a?(Hash)
           result += flatten_params(elem, calculated_key)
-        elsif elem.is_a? Array
+        elsif elem.is_a?(Array)
           result += flatten_params_array(elem, calculated_key)
         else
           result << ["#{calculated_key}", elem]
@@ -292,7 +304,5 @@ module Splunk
       end
       result
     end
-
-
   end
 end
