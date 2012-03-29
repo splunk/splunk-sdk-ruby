@@ -1,22 +1,25 @@
-require "rubygems"
-require "bundler/setup"
+require 'bundler/setup'
+require 'cgi'
+#TODO: Please get me working with json/ext - it SO much faster
+require 'json/pure'
+require 'json/stream'
+require 'libxml'
+require 'rubygems'
 
 require_relative 'aloader'
 require_relative 'context'
-require 'libxml'
-require 'cgi'
-require 'json/pure' #TODO: Please get me working with json/ext - it SO much faster
-require 'json/stream'
 
-#I'm an idiot because I couldn't find any way to pass local context variables to
-#a block in the parser.  Thus the hideous monkey-patch and the 'obj' param
+
+# FIXME(rdas) I'm an idiot because I couldn't find any way to pass local
+# context variables to a block in the parser.  Thus the hideous monkey-patch
+# and the 'obj' param.
 
 class JSON::Stream::Parser
   def initialize(obj, &block)
     @state = :start_document
     @utf8 = JSON::Stream::Buffer.new
-    @listeners = Hash.new {|h, k| h[k] = [] }
-    @stack, @unicode, @buf, @pos = [], "", "", -1
+    @listeners = Hash.new{ |h, k| h[k] = [] }
+    @stack, @unicode, @buf, @pos = [], '', '', -1
     @obj = obj
     instance_eval(&block) if block_given?
   end
@@ -30,16 +33,18 @@ def _filter_content(content, key_list=nil, add_attrs=true)
     return content
   end
   result = {}
-  key_list.each {|key| result[key] = content[key]}
+  key_list.each{ |key| result[key] = content[key] }
 
   return result.add_attrs if add_attrs
   result
 end
 
+
 def _path_stanza(conf, stanza)
   Splunk::PATH_STANZA % [conf, CGI::escape(stanza)]
 end
 # :startdoc:
+
 
 module Splunk
   PATH_APPS_LOCAL = 'apps/local'
@@ -51,15 +56,16 @@ module Splunk
   PATH_INFO = 'server/info'
   PATH_SETTINGS = 'server/settings'
   PATH_INDEXES = 'data/indexes'
-  PATH_CONFS = "properties"
-  PATH_CONF = "configs/conf-%s"
-  PATH_STANZA = "configs/conf-%s/%s" #[file, stanza]
-  PATH_JOBS = "search/jobs"
-  PATH_EXPORT = "search/jobs/export"
-  PATH_RESTART = "server/control/restart"
-  PATH_PARSE = "search/parser"
+  PATH_CONFS = 'properties'
+  PATH_CONF = 'configs/conf-%s'
+  PATH_STANZA = 'configs/conf-%s/%s'
+  PATH_JOBS = 'search/jobs'
+  PATH_EXPORT = 'search/jobs/export'
+  PATH_RESTART = 'server/control/restart'
+  PATH_PARSE = 'search/parser'
 
-  NAMESPACES = ['ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
+  NAMESPACES = [
+    'ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
   MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
 
@@ -108,7 +114,7 @@ module Splunk
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.apps #get a list of apps (we can do this because we are logged in)
     def self.connect(args)
-      svc = Service.new args
+      svc = Service.new(args)
       svc.login
       svc
     end
@@ -186,7 +192,8 @@ module Splunk
     #     {"build"=>"112383", "cpu_arch"=>"i386", "eai:acl"=>{"app"=>nil, "can_list"=>"0",......}
     def info
       response = @context.get(PATH_INFO)
-      record = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+      record = AtomResponseLoader::load_text_as_record(
+        response, MATCH_ENTRY_CONTENT, NAMESPACES)
       record.content
     end
 
@@ -208,8 +215,10 @@ module Splunk
     #     DeploymentMetrics:INFO
     #     ...
     def loggers
-      item = Proc.new {|service, name| Entity.new(service, PATH_LOGGER + '/' + name, name)}
-      Collection.new(self, PATH_LOGGER, "loggers", :item => item)
+      item = Proc.new do |service, name|
+        Entity.new(service, PATH_LOGGER + '/' + name, name)
+      end
+      Collection.new(self, PATH_LOGGER, 'loggers', :item => item)
     end
 
     # Returns Splunk server settings
@@ -222,7 +231,7 @@ module Splunk
     #   puts svc.settings.read
     #     {"SPLUNK_DB"=>"/opt/4.3/splunkbeta/var/lib/splunk", "SPLUNK_HOME"=>"/opt/4.3/splunkbeta",...}
     def settings
-      Entity.new(self, PATH_SETTINGS, "settings")
+      Entity.new(self, PATH_SETTINGS, 'settings')
     end
 
     # Returns all indexes
@@ -248,13 +257,14 @@ module Splunk
     #   main = svc.indexes['main'] #Return Entity object for index 'main'
     #   main.clean
     def indexes
-      item = Proc.new {|service, name| Index.new(service, name)}
-      ctor = Proc.new { |service, name, args|
+      item = Proc.new{ |service, name| Index.new(service, name) }
+      ctor = Proc.new do |service, name, args|
         new_args = args
         new_args[:name] = name
         service.context.post(PATH_INDEXES, new_args)
-      }
-      Collection.new(self, PATH_INDEXES, "loggers", :item => item, :ctor => ctor)
+      end
+      Collection.new(
+        self, PATH_INDEXES, 'loggers', :item => item, :ctor => ctor)
     end
 
     # Returns all roles
@@ -270,7 +280,7 @@ module Splunk
     #     power: ["rtsearch", "schedule_search"]
     #     user: ["change_own_password", "get_metadata", ... ]
     def roles
-      create_collection(PATH_ROLES, "roles")
+      create_collection(PATH_ROLES, 'roles')
     end
 
     # Returns all users
@@ -285,7 +295,7 @@ module Splunk
     #     admin:{"defaultApp"=>"launcher", "defaultAppIsUserOverride"=>"1", "defaultAppSourceRole"=>"system",
     #     jack:{"defaultApp"=>"launcher", "defaultAppIsUserOverride"=>"0", "defaultAppSourceRole"=>"system",
     def users
-      create_collection(PATH_USERS, "users")
+      create_collection(PATH_USERS, 'users')
     end
 
     # Returns a new Jobs object
@@ -375,8 +385,8 @@ module Splunk
     #   puts stanza.read
     #     {"ANNOTATE_PUNCT"=>"1", "BREAK_ONLY_BEFORE"=>"gooblygook", "BREAK_ONLY_BEFORE_DATE"=>"1",...}
     def confs
-      item = Proc.new {|service, conf| ConfCollection.new(self, conf) }
-      Collection.new(self, PATH_CONFS, "confs", :item => item)
+      item = Proc.new{ |service, conf| ConfCollection.new(self, conf) }
+      Collection.new(self, PATH_CONFS, 'confs', :item => item)
     end
 
     # Return a collection of Message objects
@@ -394,28 +404,39 @@ module Splunk
     #   puts s.messages['test'].value
     #     my message
     def messages
-      item = Proc.new {|service, name| Message.new(service, name)}
-      ctor = Proc.new { |service, name, args|
+      item = Proc.new{ |service, name| Message.new(service, name) }
+      ctor = Proc.new do |service, name, args|
         new_args = args
         new_args[:name] = name
         service.context.post(PATH_MESSAGES, new_args)
-      }
+      end
 
-      dtor = Proc.new { |service, name| service.context.delete(path + '/' + name) }
-      Collection.new(self, PATH_MESSAGES, "messages", :item => item, :ctor => ctor, :dtor => dtor)
+      dtor = Proc.new do |service, name|
+        service.context.delete(path + '/' + name)
+      end
+
+      Collection.new(
+        self, PATH_MESSAGES, 'messages', :item => item, :ctor => ctor,
+        :dtor => dtor)
     end
 
     def create_collection(path, collection_name=nil) # :nodoc:
-      item = Proc.new { |service, name| Entity.new(service, path + '/' + name, name) }
+      item = Proc.new do |service, name|
+        Entity.new(service, path + '/' + name, name)
+      end
 
-      ctor = Proc.new { |service, name, args|
+      ctor = Proc.new do |service, name, args|
         new_args = args
         new_args[:name] = name
         service.context.post(path, new_args)
-      }
+      end
 
-      dtor = Proc.new { |service, name| service.context.delete(path + '/' + name) }
-      Collection.new(self, path, collection_name, :item => item, :ctor => ctor, :dtor => dtor)
+      dtor = Proc.new do |service, name|
+        service.context.delete(path + '/' + name)
+      end
+      Collection.new(
+        self, path, collection_name, :item => item, :ctor => ctor,
+        :dtor => dtor)
     end
   end
 
@@ -511,12 +532,13 @@ module Splunk
     #   puts svc.roles.list
     def list
       retval = []
-      response = @service.context.get(@path + "?count=-1")
+      response = @service.context.get(@path + '?count=-1')
       record = AtomResponseLoader::load_text_as_record(response)
       return retval if !record.feed.instance_variable_defined?('@entry')
       if record.feed.entry.is_a?(Array)
         record.feed.entry.each do |entry|
-          retval << entry["title"] #because 'entry' is an array we don't allow dots
+          # because 'entry' is an array we don't allow dots
+          retval << entry['title']
         end
       else
         retval << record.feed.entry.title
@@ -550,8 +572,7 @@ module Splunk
     #   puts index['coldPath']
     def [](key)
       obj = read([key])
-      #obj.send(key)
-      return obj[key]
+      obj[key]
     end
 
     # Updates an individual attribute named <b>+key+</b> with String <b>+value+</b>
@@ -584,8 +605,9 @@ module Splunk
     #     {"coldPath"=>"$SPLUNK_DB/defaultdb/colddb", "blockSignSize"=>"0"}
     def read(field_list=nil)
       response = @service.context.get(@path)
-      data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
-      _filter_content(data["content"], field_list)
+      data = AtomResponseLoader::load_text(
+        response, MATCH_ENTRY_CONTENT, NAMESPACES)
+      _filter_content(data['content'], field_list)
     end
 
     # Return metadata information for this Entity. This is the same as:
@@ -598,7 +620,7 @@ module Splunk
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   puts svc.indexes['main'].readmeta
     #     {"eai:acl"=>{"app"=>"search", "can_list"=>"1",...},"eai:attributes"=>{"optionalFields"=>["assureUTF8"...]}}
-    def readmeta()
+    def readmeta
       read(['eai:acl', 'eai:attributes'])
     end
 
@@ -617,17 +639,16 @@ module Splunk
     end
 
     def disable
-      @service.context.post(@path + "/disable", '')
+      @service.context.post(@path + '/disable', '')
     end
 
     def enable
-      @service.context.post(@path + "/enable", '')
+      @service.context.post(@path + '/enable', '')
     end
 
     def reload
-      @service.context.post(@path + "/_reload", '')
+      @service.context.post(@path + '/_reload', '')
     end
-
   end
 
   # Message objects represent system-wide messages
@@ -675,8 +696,8 @@ module Splunk
       cn.write("Host: #{@service.context.host}:#{@service.context.port}\r\n")
       cn.write("Accept-Encoding: identity\r\n")
       cn.write("Authorization: Splunk #{@service.context.token}\r\n")
-      cn.write("X-Splunk-Input-Mode: Streaming\r\n")
-      cn.write("\r\n")
+      cn.write('X-Splunk-Input-Mode: Streaming\r\n')
+      cn.write('\r\n')
       cn
     end
 
@@ -739,7 +760,7 @@ module Splunk
     def upload(filename, args={})
       args['index'] = @name
       args['name'] = filename
-      path = "data/inputs/oneshot"
+      path = 'data/inputs/oneshot'
       @service.context.post(path, args)
     end
   end
@@ -758,8 +779,9 @@ module Splunk
     #     {"ANNOTATE_PUNCT"=>"1", "BREAK_ONLY_BEFORE"=>"gooblygook", "BREAK_ONLY_BEFORE_DATE"=>"1",...}
     def read(field_list=nil)
       response = @service.context.get(@path)
-      data = AtomResponseLoader::load_text(response, MATCH_ENTRY_CONTENT, NAMESPACES)
-      _filter_content(data["content"], field_list, false)
+      data = AtomResponseLoader::load_text(
+        response, MATCH_ENTRY_CONTENT, NAMESPACES)
+      _filter_content(data['content'], field_list, false)
     end
 
     #Populate a stanza in the .conf file
@@ -771,14 +793,20 @@ module Splunk
   # A Collection of Conf objects
   class ConfCollection < Collection
     def initialize(svc, conf)
-      item = Proc.new {|service, stanza| Conf.new(service, _path_stanza(conf, stanza), stanza)}
-      ctor = Proc.new {|service, stanza, args|
-            new_args = args
-            new_args[:name] = stanza
-            service.context.post(PATH_CONF % conf, new_args)
-          }
-      dtor = Proc.new {|service, stanza| service.context.delete(_path_stanza(conf, stanza))}
-      super(svc, PATH_CONF % [conf, conf], conf, :item => item, :ctor => ctor, :dtor => dtor)
+      item = Proc.new do |service, stanza|
+        Conf.new(service, _path_stanza(conf, stanza), stanza)
+      end
+      ctor = Proc.new do |service, stanza, args|
+        new_args = args
+        new_args[:name] = stanza
+        service.context.post(PATH_CONF % conf, new_args)
+      end
+      dtor = Proc.new do |service, stanza|
+        service.context.delete(_path_stanza(conf, stanza))
+      end
+      super(
+        svc, PATH_CONF % [conf, conf], conf, :item => item, :ctor => ctor,
+        :dtor => dtor)
     end
   end
 
@@ -787,7 +815,7 @@ module Splunk
     def initialize(svc)
       @service = svc
       item = Proc.new {|service, sid| Job.new(service, sid)}
-      super(svc, PATH_JOBS, "jobs", :item => item)
+      super(svc, PATH_JOBS, 'jobs', :item => item)
     end
 
     # Run a search.  This search can be either synchronous (oneshot) or asynchronous.  A synchronous search
@@ -820,7 +848,7 @@ module Splunk
     #   end
     #   puts job.results(:output_mode => 'json')
     def create(query, args={})
-      args["search"] = query
+      args['search'] = query
       response = @service.context.post(PATH_JOBS, args)
 
       return response if args[:exec_mode] == 'oneshot'
@@ -842,8 +870,8 @@ module Splunk
     #   puts results.count
     def create_oneshot(query, args={})
       args[:search] = query
-      args[:exec_mode] = "oneshot"
-      args[:output_mode] = "json"
+      args[:exec_mode] = 'oneshot'
+      args[:output_mode] = 'json'
       response = @service.context.post(PATH_JOBS, args)
 
       json = JSON.parse(response)
@@ -870,7 +898,7 @@ module Splunk
     #   reader.each {|event| puts event} #will block until events show up in real-time
     def create_stream(query, args={})
       args[:search] = query
-      args[:output_mode] = "json"
+      args[:output_mode] = 'json'
 
       path = PATH_EXPORT + "?#{args.urlencode}"
 
@@ -879,12 +907,12 @@ module Splunk
       cn.write("Host: #{@service.context.host}:#{@service.context.port}\r\n")
       cn.write("User-Agent: splunk-sdk-ruby/0.1\r\n")
       cn.write("Authorization: Splunk #{@service.context.token}\r\n")
-      cn.write("Accept: */*\r\n")
-      cn.write("\r\n")
+      cn.write('Accept: */*\r\n')
+      cn.write('\r\n')
 
-      cn.readline #return code TODO: Parse me and return error if problem
-      cn.readline #accepts
-      cn.readline #blank
+      cn.readline  # return code TODO: Parse me and return error if problem
+      cn.readline  # accepts
+      cn.readline  # blank
 
       ResultsReader.new(cn)
     end
@@ -896,11 +924,12 @@ module Splunk
     #   svc.jobs.list.each {|job| puts job['diskUsage'] }
     def list
       response = @service.context.get(PATH_JOBS)
-      entry = AtomResponseLoader::load_text_as_record(response, MATCH_ENTRY_CONTENT, NAMESPACES)
+      entry = AtomResponseLoader::load_text_as_record(
+        response, MATCH_ENTRY_CONTENT, NAMESPACES)
       return [] if entry.nil?
       entry = [entry] if !entry.is_a? Array
       retarr = []
-      entry.each { |item| retarr << Job.new(@service, item.content.sid) }
+      entry.each{ |item| retarr << Job.new(@service, item.content.sid) }
       retarr
     end
   end
@@ -941,7 +970,7 @@ module Splunk
     def read(field_list=nil)
       response = @service.context.get(@path)
       data = AtomResponseLoader::load_text(response)
-      _filter_content(data["entry"]["content"], field_list)
+      _filter_content(data['entry']['content'], field_list)
     end
 
     # Cancel this search job.  Stops the search and deletes the results cache.
@@ -1029,7 +1058,8 @@ module Splunk
 
     # Sets the priority of this search Job.  <b>+value+</b> can be 0-10.
     def setpriority(value)
-      @service.context.post(@control_path, :action => 'setpriority', :priority => value)
+      @service.context.post(
+        @control_path, :action => 'setpriority', :priority => value)
       self
     end
 
@@ -1090,24 +1120,15 @@ module Splunk
       @events = []
 
       callbacks = proc do
-        start_document {
-          #puts 'start document'
-          @array_depth = 0
-        }
+        start_document { @array_depth = 0 }
 
-        end_document {
-          #puts 'end document'
-        }
+        end_document {}
 
-        start_object {
-          @event = {}
-        }
-        end_object {
-          @obj.event_found(@event)
-        }
+        start_object { @event = {} }
+
+        end_object { @obj.event_found(@event) }
 
         start_array {
-          #puts 'start array'
           @array_depth += 1
           if @array_depth > 1
             @isarray = true
@@ -1120,14 +1141,11 @@ module Splunk
             @event[@k] = @array
             @isarray = false
           end
-          #puts 'end array'
         }
 
-        key {|k|
-          @k = k
-        }
+        key { |k| @k = k }
 
-        value {|v|
+        value { |v|
           if @isarray
             @array << v
           else
@@ -1175,4 +1193,3 @@ module Splunk
     end
   end
 end
-

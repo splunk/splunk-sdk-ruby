@@ -1,3 +1,0 @@
-== splunk
-
-A gem that provides...
