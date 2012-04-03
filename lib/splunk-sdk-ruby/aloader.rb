@@ -5,14 +5,14 @@ require 'libxml'
 require 'netrc'
 
 
-#Some bitchin metaprogramming to allow "dot notation" reading from a Hash
+# Some bitchin metaprogramming to allow "dot notation" reading from a Hash
 class Hash
   def add_attrs
     self.each do |k, v|
-      #Replace any embedded : with an _
-      key = k.gsub(':','_')
-      key.gsub!('.','_')
-      if v.is_a? Hash
+      # Replace any embedded : with an _
+      key = k.gsub(':', '_')
+      key.gsub!('.', '_')
+      if v.is_a?(Hash)
         instance_variable_set("@#{key}", v.add_attrs)
       else
         instance_variable_set("@#{key}", v)
@@ -27,8 +27,10 @@ class Hash
     output = ''
     each do |k,v|
       output += '&' if !output.empty?
-      output += URI.escape(k.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-      output += '=' + URI.escape(v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+      output += URI.escape(
+        k.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+      output += '=' + URI.escape(
+        v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
     end
     output
   end
@@ -41,9 +43,9 @@ module Splunk
   public
 
     def initialize(text, match=nil, namespaces=nil)
-      raise ArgumentError, "text is nil" if text.nil?
+      raise ArgumentError, 'text is nil' if text.nil?
       text = text.strip
-      raise ArgumentError, "text size is 0" if text.size == 0
+      raise ArgumentError, 'text size is 0' if text.size == 0
       @text = text
       @match = match
       @namespaces = namespaces
@@ -53,7 +55,7 @@ module Splunk
       parser = LibXML::XML::Parser.string(@text)
       doc = parser.parse
 
-      #if the document is empty, bail
+      # if the document is empty, bail
       return nil if not doc.child?
 
       items = []
@@ -65,7 +67,7 @@ module Splunk
         items = doc.root.find(@match, @namespaces).to_a
       end
 
-      #process just the root if there are no children or just one child.
+      # process just the root if there are no children or just one child.
       count = items.size
 
       return load_root(items[0]) if count == 1
@@ -83,7 +85,7 @@ module Splunk
 
     def self.load_text_as_record(text, match=nil, namespaces=nil)
       result = AtomResponseLoader.new(text, match, namespaces).load
-      if result.is_a? Array
+      if result.is_a?(Array)
         retarr = []
         result.each {|item| retarr << item.add_attrs}
         return retarr
@@ -91,7 +93,7 @@ module Splunk
       result.add_attrs
     end
 
-    #Method to convert a dict to a 'dot notation' accessor object
+    # Method to convert a dict to a 'dot notation' accessor object
     def self.record(hash)
       hash.add_attrs
     end
@@ -112,27 +114,24 @@ module Splunk
       return name,attrs if value.nil?
 
       if value.instance_of?(String)
-        attrs["_text"] = value
+        attrs['_text'] = value
         return name, attrs
       end
 
-      attrs.each { |k,v|
-        value[k] = v
-      }
+      attrs.each{ |k,v| value[k] = v }
       return name,value
     end
 
     def load_attrs(node)
       return nil if not node.attributes?
       attrs = {}
-      node.attributes.each { |a| attrs[a.name] = a.value}
+      node.attributes.each { |a| attrs[a.name] = a.value }
       attrs
     end
 
     def load_dict(node)
       value = {}
       node.each_element do |child|
-        #assert(is_key(node))
         name = child.attributes['name']
         value[name] = load_value(child)
       end
@@ -140,10 +139,8 @@ module Splunk
     end
 
     def load_list(node)
-      #assert(is_list(node))
       value = []
       node.each_element do |child|
-        #assert(is_item(child))
         value.push(load_value(child))
       end
       value
@@ -172,8 +169,12 @@ module Splunk
           end
         end
       end
-      return nil if value.size == 0
-      value
+
+      unless value.size == 0
+        value
+      else
+        nil
+      end
     end
 
     def is_dict(node)
@@ -196,28 +197,18 @@ module Splunk
       if node.name == verb
         return true
       end
-      nss = node.namespaces
-      nss.each { |ns|
+      node.namespaces.each do |ns|
         if ns.href == XML_NS && node.name =="#{ns.prefix}:#{verb}"
           return true
         end
-      }
+      end
       false
     end
 
     def localname(node)
       p = node.name.index(':')
-      return node.name[p+1,-1] if p
+      return node.name[p+1, -1] if p
       node.name
     end
   end
 end
-
-
-
-
-
-
-
-
-
