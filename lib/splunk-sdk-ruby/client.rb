@@ -874,8 +874,13 @@ module Splunk
       args[:output_mode] = 'json'
       response = @service.context.post(PATH_JOBS, args)
 
-      json = JSON.parse(response)
-      SearchResults.new(json)
+      begin 
+        json = JSON.parse(response)
+        SearchResults.new(json)
+      rescue JSON::ParserError
+        SearchResults.new(Array.new)
+      end
+
     end
 
     # Run a <b>streamed search</b> .  Rather than returning an object that can take up a huge amount of memory by including

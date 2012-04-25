@@ -8,9 +8,9 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{Ruby bindings to Splunk REST layer}
   gem.homepage      = 'http://dev.splunk.com'
 
-  gem.executables   = `git ls-files -- bin/*`.split('\n').map{ |f| File.basename(f) }
-  gem.files         = `git ls-files`.split('\n')
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split('\n')
+  gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  gem.files         = `git ls-files`.split("\n")
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = 'splunk-sdk-ruby'
   gem.require_paths = ['lib']
   gem.version       = Splunk::VERSION
