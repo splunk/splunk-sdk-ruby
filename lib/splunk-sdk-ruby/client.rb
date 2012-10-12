@@ -1,4 +1,4 @@
-require 'bundler/setup'
+#require 'bundler/setup'
 require 'cgi'
 #TODO: Please get me working with json/ext - it SO much faster
 require 'json/pure'
