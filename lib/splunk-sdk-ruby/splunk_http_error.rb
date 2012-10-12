@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'bundler/setup'
+#require 'bundler/setup'
 
 require_relative 'aloader'
 require_relative 'splunk_error'
