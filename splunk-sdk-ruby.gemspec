@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = 'splunk-sdk-ruby'
   gem.require_paths = ['lib']
-  gem.version       = Splunk::VERSION
+  gem.version       = '1.0.0'
   gem.required_ruby_version = '>=1.9.2'
   gem.add_dependency 'libxml-jruby', '~>1.0.0'
   gem.add_dependency 'json_pure', '~>1.6.4'
