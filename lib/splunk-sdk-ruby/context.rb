@@ -87,7 +87,7 @@ module Splunk
         '/services/auth/login', {:username=>@username, :password=>@password})
       begin
         doc = LibXML::XML::Parser.string(response.to_s).parse
-        @token = doc.find('//sessionKey').last.content
+        @token = doc.find('//sessionKey')[-1].content
         # TODO(gba) Change '0.1' magic version below.
         @headers = {
           'Authorization' => "Splunk #{@token}",
