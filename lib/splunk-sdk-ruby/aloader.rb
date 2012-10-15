@@ -64,7 +64,7 @@ module Splunk
       elsif @namespaces.nil?
         items = doc.root.find(@match).to_a
       else
-        items = doc.root.find(@match, @namespaces).to_a
+        items = doc.find(@match, @namespaces).to_a
       end
 
       # process just the root if there are no children or just one child.
