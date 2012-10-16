@@ -1,7 +1,6 @@
 require 'rubygems'
-#require 'bundler/setup'
 
-require 'libxml'
+require 'nokogiri'
 require 'netrc'
 require 'openssl'
 require 'pathname'
@@ -86,8 +85,8 @@ module Splunk
       response = post(
         '/services/auth/login', {:username=>@username, :password=>@password})
       begin
-        doc = LibXML::XML::Parser.string(response.to_s).parse
-        @token = doc.find('//sessionKey')[-1].content
+        doc = Nokogiri::XML(response.to_s)
+        @token = doc.xpath('//sessionKey').last.content
         # TODO(gba) Change '0.1' magic version below.
         @headers = {
           'Authorization' => "Splunk #{@token}",

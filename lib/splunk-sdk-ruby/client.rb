@@ -1,9 +1,8 @@
-#require 'bundler/setup'
 require 'cgi'
 #TODO: Please get me working with json/ext - it SO much faster
 require 'json/pure'
 require 'json/stream'
-require 'libxml'
+require 'nokogiri'
 require 'rubygems'
 
 require_relative 'client/collection'
@@ -72,8 +71,8 @@ module Splunk
   PATH_RESTART = 'server/control/restart'
   PATH_PARSE = 'search/parser'
 
-  NAMESPACES = [
-    'ns0:http://www.w3.org/2005/Atom', 'ns1:http://dev.splunk.com/ns/rest']
+  NAMESPACES = { 'ns0' => 'http://www.w3.org/2005/Atom',
+                 'ns1' => 'http://dev.splunk.com/ns/rest' }
   MATCH_ENTRY_CONTENT = '/ns0:feed/ns0:entry/ns0:content'
 
 end

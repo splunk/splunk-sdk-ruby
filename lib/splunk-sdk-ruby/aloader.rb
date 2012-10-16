@@ -1,7 +1,6 @@
 require 'rubygems'
-#require 'bundler/setup'
 
-require 'libxml'
+require 'nokogiri'
 require 'netrc'
 
 
@@ -52,31 +51,24 @@ module Splunk
     end
 
     def load()
-      parser = LibXML::XML::Parser.string(@text)
-      doc = parser.parse
+      doc = Nokogiri::XML(@text)
 
       # if the document is empty, bail
-      return nil if not doc.child?
+      return nil unless doc.root
 
-      items = []
       if @match.nil?
-        items << doc.root
+        items = [doc.root]
       elsif @namespaces.nil?
-        items = doc.root.find(@match).to_a
+        items = doc.root.xpath(@match)
       else
-        items = doc.find(@match, @namespaces).to_a
+        items = doc.root.xpath(@match, @namespaces)
       end
 
-      # process just the root if there are no children or just one child.
-      count = items.size
+      return load_root(items[0]) if items.size == 1
 
-      return load_root(items[0]) if count == 1
-
-      arr = []
-      items.each do |item|
-        arr << load_root(item)
+      items.collect do |item|
+        load_root(item)
       end
-      arr
     end
 
     def self.load_text(text, match=nil, namespaces=nil)
@@ -86,11 +78,10 @@ module Splunk
     def self.load_text_as_record(text, match=nil, namespaces=nil)
       result = AtomResponseLoader.new(text, match, namespaces).load
       if result.is_a?(Array)
-        retarr = []
-        result.each {|item| retarr << item.add_attrs}
-        return retarr
+        result.collect {|item| item.add_attrs }
+      else
+        result.add_attrs
       end
-      result.add_attrs
     end
 
     # Method to convert a dict to a 'dot notation' accessor object
@@ -118,63 +109,58 @@ module Splunk
         return name, attrs
       end
 
-      attrs.each{ |k,v| value[k] = v }
-      return name,value
+      attrs.each {|k,v| value[k] = v }
+      [name, value]
     end
 
     def load_attrs(node)
-      return nil if not node.attributes?
+      return nil if node.attributes.empty?
       attrs = {}
-      node.attributes.each { |a| attrs[a.name] = a.value }
+      node.attributes.each {|k,v| attrs[k] = v.value }
       attrs
     end
 
     def load_dict(node)
       value = {}
-      node.each_element do |child|
-        name = child.attributes['name']
-        value[name] = load_value(child)
+      node.element_children.each do |child|
+        if is_key(child)
+          name = child.attributes['name'].value
+        else
+          name = child.name
+        end
+        value[name] = load_value(child) if name
       end
       value
     end
 
     def load_list(node)
-      value = []
-      node.each_element do |child|
-        value.push(load_value(child))
-      end
-      value
+      node.element_children.collect {|child| load_value(child) }
     end
 
     def load_value(node)
       value = {}
-      for child in node.children
-        if child.node_type_name.eql?('text')
-          text = child.content
+      node.children.each do |child|
+        if child.text?
+          text = child.text
           return nil if text.nil?
           text.strip!
-          next if text.size == 0
+          next if text.empty?
+          # This would be a malformed doc
           next if node.children.size > 1
           return text
-        elsif child.node_type_name.eql?('element')
+        elsif child.element?
           return load_dict(child) if is_dict(child)
           return load_list(child) if is_list(child)
           name, item = load_elem(child)
           if value.has_key?(name)
-            current = value[name]
-            value[name] = [current] if not current.instance_of?(Array)
-            value[name].push(item)
+            value[name] = [value[name]] unless value[name].instance_of?(Array)
+            value[name] << item
           else
             value[name] = item
           end
         end
       end
-
-      unless value.size == 0
-        value
-      else
-        nil
-      end
+      value.empty? ? nil : value
     end
 
     def is_dict(node)
@@ -194,21 +180,15 @@ module Splunk
     end
 
     def is_special(node, verb)
-      if node.name == verb
-        return true
+      return true if  node.name == verb
+      node.namespace_scopes.any? do |ns|
+        ns.href == XML_NS && node.name == "#{ns.prefix}:#{verb}"
       end
-      node.namespaces.each do |ns|
-        if ns.href == XML_NS && node.name =="#{ns.prefix}:#{verb}"
-          return true
-        end
-      end
-      false
     end
 
     def localname(node)
       p = node.name.index(':')
-      return node.name[p+1, -1] if p
-      node.name
+      p ? node.name[p+1, -1] : node.name
     end
   end
 end

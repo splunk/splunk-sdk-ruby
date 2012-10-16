@@ -1,5 +1,4 @@
 require 'rubygems'
-#require 'bundler/setup'
 
 require_relative 'aloader'
 require_relative 'splunk_error'
@@ -11,8 +10,8 @@ module Splunk
 
     def initialize(response)
       @body = response.body
-      doc = LibXML::XML::Parser.string(@body).parse
-      temp_detail = doc.find('//msg').last
+      doc = Nokogiri::XML(@body)
+      temp_detail = doc.xpath('//msg').last
 
       if temp_detail.nil?
         @detail = nil
@@ -23,13 +22,11 @@ module Splunk
       al = AtomResponseLoader::load_text(@body)
 
       @code = response.code
-      @status = al['status']
-      @status = '' if @status.nil?
-      @reason = al['reason']
-      @reason = '' if @reason.nil?
+      @status = al['status'] || ''
+      @reason = al['reason'] || ''
       @headers = response.headers
 
-      detail.nil? ? detail_msg = '' : detail_msg = @detail
+      detail_msg = @detail || ''
       message = "HTTP #{@status.to_str} #{@reason}#{detail_msg}"
 
       super message

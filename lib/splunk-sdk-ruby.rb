@@ -1,5 +1,4 @@
 require 'rubygems'
-#require 'bundler/setup'
 
 module Splunk
   require_relative 'splunk-sdk-ruby/aloader'
