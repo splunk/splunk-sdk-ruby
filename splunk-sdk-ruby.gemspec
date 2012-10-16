@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+require File.expand_path('./lib/splunk-sdk-ruby/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ['Rob Das']
@@ -12,9 +13,9 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = 'splunk-sdk-ruby'
   gem.require_paths = ['lib']
-  gem.version       = '0.9.0'
+  gem.version       = Splunk::VERSION
   gem.required_ruby_version = '>=1.9.2'
-  gem.add_dependency 'libxml-jruby', '~>1.0.0'
+  gem.add_dependency 'nokogiri'
   gem.add_dependency 'json_pure', '~>1.6.4'
   gem.add_dependency 'json-stream', '~>0.1.2'
   gem.add_dependency 'netrc', '~>0.5'
