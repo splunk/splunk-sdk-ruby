@@ -76,39 +76,44 @@ module Splunk
     # large numbers of search results, a streamed search buffers only a chunk at a time and provides an interface
     # that the client can use to retrieve results without taking up any more memory than just for the buffer itself.
     # The arguments are exactly the same as for the other search methods in this class except that <b>+:output_mode+</b>
-    # will always be 'json' because results are always in JSON.
+    # will always be 'json' because streamed results are always in JSON. The event passed to the block
     #
-    # Returns a Splunk::ResultsReader object
+    # Returns a Net::HTTPResponse object. The provided block will receive one event per iteration, and the event is a Hash.
     #
     # ==== Example 1 - Simple streamed search
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   reader = svc.jobs.create_stream('search host="45.2.94.5" | timechart count')
-    #   reader.each {|event| puts event}
+    #   svc.jobs.create_stream('search host="45.2.94.5" | timechart count') {|event| puts event}
     #
     # ==== Example 2 - Real time streamed search
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   reader = svc.jobs.create_stream('search index=_internal',\
-    #   :search_mode => 'realtime', :earliest_time => 'rt-1m', :latest_time => 'rt')
-    #   reader.each {|event| puts event} #will block until events show up in real-time
-    def create_stream(query, args={})
+    #   svc.jobs.create_stream('search index=_internal',\
+    #   :search_mode => 'realtime', :earliest_time => 'rt-1m', :latest_time => 'rt') do |event|
+    #     puts event
+    #   end
+    def create_stream(query, args={}, &block)
       args[:search] = query
       args[:output_mode] = 'json'
-
-      path = PATH_EXPORT + "?#{args.urlencode}"
-
-      cn = @service.context.connect
-      cn.write("GET #{@service.context.fullpath(path)} HTTP/1.1\r\n")
-      cn.write("Host: #{@service.context.host}:#{@service.context.port}\r\n")
-      cn.write("User-Agent: splunk-sdk-ruby/0.1\r\n")
-      cn.write("Authorization: Splunk #{@service.context.token}\r\n")
-      cn.write('Accept: */*\r\n')
-      cn.write('\r\n')
-
-      cn.readline  # return code TODO: Parse me and return error if problem
-      cn.readline  # accepts
-      cn.readline  # blank
-
-      ResultsReader.new(cn)
+      
+      results = nil
+      @service.context.get_stream(PATH_EXPORT, args) do |res|
+        json_doc = ''
+        res.read_body do |body_segment|
+          json_doc << body_segment.strip
+          if json_doc =~ /\]\Z/m
+            begin
+              events = JSON.parse(json_doc.gsub!("\n", ''), :quirks_mode => true)
+            rescue => error
+              STDERR.puts "\n" + error.message
+              STDERR.puts json_doc[0,20] + "..." + json_doc[-20,20]+ "\n\n"
+              events =[]
+            end
+            events.each {|e| block.call(e) }
+            json_doc = ''
+          end
+        end
+        results = res
+      end
+      results
     end
 
     # Return an Array of Jobs
