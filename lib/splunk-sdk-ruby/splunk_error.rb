@@ -1,6 +1,4 @@
 require 'rubygems'
-require 'bundler/setup'
-
 
 module Splunk
   class SplunkError < StandardError

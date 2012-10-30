@@ -1,7 +1,6 @@
 require 'rubygems'
-require 'bundler/setup'
 
-require 'libxml'
+require 'nokogiri'
 require 'netrc'
 require 'openssl'
 require 'pathname'
@@ -86,8 +85,8 @@ module Splunk
       response = post(
         '/services/auth/login', {:username=>@username, :password=>@password})
       begin
-        doc = LibXML::XML::Parser.string(response.to_s).parse
-        @token = doc.find('//sessionKey').last.content
+        doc = Nokogiri::XML(response.to_s)
+        @token = doc.xpath('//sessionKey').last.content
         # TODO(gba) Change '0.1' magic version below.
         @headers = {
           'Authorization' => "Splunk #{@token}",
@@ -178,6 +177,32 @@ module Splunk
       end
     end
 
+    # Make a GET REST call and stream response to provided block
+    # _path_ is a partial path to the URL.  For example: 'server/info'.
+    # _params_ are not generally used (they are for lower level control)
+    # _block_ is passed the body in fragments as it is read from the socket
+    #
+    # ==== Returns
+    #   The response object or throws SplunkHTTPError if the error >= 400
+    def get_stream(path, params={}, &block)
+      headers = {'Accept-Encoding' => ''} #we don't allow additional headers for now
+
+      #flatten params onto the path
+      uri = path
+      if params.count > 0
+        ext_path = build_stream(flatten_params(params)).string
+        uri << "?#{ext_path}"
+      end
+      
+      args = {:method         => :get,
+              :headers        => headers.merge!(@headers),
+              :url            => url(uri),
+              :block_response => block}
+      response = RestClient::Request::execute args
+      check_for_error_return(response)
+      response
+    end
+    
     # Make a DELETE REST call.
     # _path_ is a partial path to the URL.  For example 'authentication/users/rob',
     # _params_ are not generally used (they are for lower level control)
