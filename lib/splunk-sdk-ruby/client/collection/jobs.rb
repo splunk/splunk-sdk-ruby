@@ -98,13 +98,11 @@ module Splunk
       @service.context.get_stream(PATH_EXPORT, args) do |res|
         json_doc = ''
         res.read_body do |body_segment|
-          json_doc << body_segment.strip
+          json_doc << body_segment.strip.gsub("\n", '')
           if json_doc =~ /\]\Z/m
             begin
-              events = JSON.parse(json_doc.gsub!("\n", ''), :quirks_mode => true)
+              events = JSON.parse(json_doc, :quirks_mode => true)
             rescue => error
-              STDERR.puts "\n" + error.message
-              STDERR.puts json_doc[0,20] + "..." + json_doc[-20,20]+ "\n\n"
               events =[]
             end
             events.each {|e| block.call(e) }
@@ -126,10 +124,8 @@ module Splunk
       entry = AtomResponseLoader::load_text_as_record(
         response, MATCH_ENTRY_CONTENT, NAMESPACES)
       return [] if entry.nil?
-      entry = [entry] if !entry.is_a? Array
-      retarr = []
-      entry.each{ |item| retarr << Job.new(@service, item.content.sid) }
-      retarr
+      entry = [entry] unless entry.is_a? Array
+      entry.collect{ |item| Job.new(@service, item.content.sid) }
     end
   end
 end
