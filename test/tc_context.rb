@@ -1,6 +1,5 @@
 # :stopdoc:
 require "rubygems"
-require "bundler/setup"
 
 require "test/unit"
 require "splunk-sdk-ruby/aloader"
@@ -14,9 +13,9 @@ $config = eval(rc_file.read)
 $config[:protocol] = 'https' if !$config.key?(:protocol)
 
 class TcContext < Test::Unit::TestCase
-  NAMESPACE_ATOM = "atom:http://www.w3.org/2005/Atom"
-  NAMESPACE_REST = "s:http://dev.splunk.com/ns/rest"
-  NAMESPACE_OPENSEARCH = "opensearch:http://a9.com/-/spec/opensearch/1.1"
+  NAMESPACE_ATOM = {'atom' => 'http://www.w3.org/2005/Atom'}
+  NAMESPACE_REST = {'s' => 'http://dev.splunk.com/ns/rest'}
+  NAMESPACE_OPENSEARCH = {'opensearch' => 'http://a9.com/-/spec/opensearch/1.1'}
   PATH_USERS = "authentication/users"
 
   def random_uname
@@ -36,16 +35,20 @@ class TcContext < Test::Unit::TestCase
   end
 
   def is_atom(context, endpoint)
-    ns = [NAMESPACE_ATOM,NAMESPACE_REST,NAMESPACE_OPENSEARCH]
+    ns = NAMESPACE_ATOM.merge( NAMESPACE_REST.merge( NAMESPACE_OPENSEARCH ))
 
     r = context.get(endpoint)
 
-    doc = LibXML::XML::Parser.string(r).parse
+    doc = Nokogiri::XML(r)
 
-    return false if doc.root.name != 'feed'
-    return false if doc.find('atom:title', ns).length != 1
-    return false if doc.find('atom:author', ns).length != 1
-    return false if doc.find('atom:id', ns).length != 1
+    assert_equal(doc.root.name, 'feed')
+    #return false if doc.root.name != 'feed'
+    assert_not_equal(doc.xpath('atom:title', ns).length, 1)
+    #return false if doc.xpath('atom:title', ns).length != 1
+    assert_not_equal(doc.xpath('atom:author', ns).length, 1)
+    #return false if doc.xpath('atom:author', ns).length != 1
+    assert_not_equal(doc.xpath('atom:id', ns).length, 1)
+    #return false if doc.xpath('atom:id', ns).length != 1
 
     true
   end
@@ -79,13 +82,13 @@ class TcContext < Test::Unit::TestCase
 
     #Test bad login (bad user)
     assert_raise Splunk::SplunkHTTPError do
-      c = Splunk::Context.new(:username => 'baduser', :password => $config[:password], :protocol => $config[:protocol])
+      c = Splunk::Context.new($config.merge(:username => 'baduser'))
       c.login
     end
 
     #Test bad login (bad password)
     assert_raise Splunk::SplunkHTTPError do
-      c = Splunk::Context.new(:username => $config[:username], :password => 'badpsw', :protocol => $config[:protocol])
+      c = Splunk::Context.new($config.merge(:password => 'badpsw'))
       c.login
     end
   end
@@ -112,7 +115,7 @@ class TcContext < Test::Unit::TestCase
       end
 
       #Connect as a newly created user
-      user_ctx = Splunk::Context.new(:username => uname, :password => 'changeme', :protocol => 'https')
+      user_ctx = Splunk::Context.new($config.merge(:username => uname, :password => 'changeme'))
       user_ctx.login
 
       #Ensure that this user actually works
@@ -155,7 +158,7 @@ class TcContext < Test::Unit::TestCase
       response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
       assert(response.code == 201)
 
-      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => $config[:protocol])
+      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
       userctx.login
 
       #set the random user's default app to 'search'
@@ -194,7 +197,7 @@ def test_password
       response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
       assert(response.code == 201)
 
-      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => $config[:protocol])
+      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
       userctx.login
 
       #user changes their own password
@@ -204,14 +207,14 @@ def test_password
       assert(userctx.post(user_path, :password => 'again').code == 200)
 
       #try to connect with the original password should error out
-      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => $config[:protocol])
+      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
       assert_raise Splunk::SplunkHTTPError do
         userctx.login
       end
 
       #admin changes it back and login should work
       assert(c.post(user_path, :password => 'changeme').code == 200)
-      userctx = Splunk::Context.new(:username => uname, :password => "changeme", :protocol => $config[:protocol])
+      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
       userctx.login
 
     ensure
