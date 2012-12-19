@@ -1,15 +1,13 @@
 # :stopdoc:
-require "rubygems"
-
-require "test/unit"
 require "ostruct"
 require "splunk-sdk-ruby/client"
+
+require_relative "test_helper"
 
 TEST_APP_NAME = "sdk-tests"
 TEST_INDEX_NAME = "sdk-tests"
 
-rc_file = File.new(File.expand_path('~/.splunkrc'), "r")
-$config = eval(rc_file.read)
+$config = read_splunkrc()
 
 def wait_event_count(index, count, secs)
   done = false

@@ -1,16 +1,12 @@
-# :stopdoc:
-require "rubygems"
-
-require "test/unit"
+require_relative "test_helper"
 require "splunk-sdk-ruby/aloader"
 require "splunk-sdk-ruby/context"
 require "uuid"
 
-$my_argv = ARGV.dup
 
-rc_file = File.new(File.expand_path('~/.splunkrc'), "r")
-$config = eval(rc_file.read)
-$config[:protocol] = 'https' if !$config.key?(:protocol)
+$config = read_splunkrc()
+
+$my_argv = ARGV.dup
 
 class TcContext < Test::Unit::TestCase
   NAMESPACE_ATOM = {'atom' => 'http://www.w3.org/2005/Atom'}
