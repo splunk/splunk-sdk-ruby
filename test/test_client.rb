@@ -18,7 +18,7 @@ def wait_event_count(index, count, secs)
   end
 end
 
-class TcClient < Test::Unit::TestCase
+class TestClient < Test::Unit::TestCase
   def setup
     @service = Splunk::Service.new($config)
     @service.login

@@ -88,24 +88,13 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 We are adding more unit tests all the time.  For now, run what we have.
 
 Edit the ~/.splunkrc file (/home/_username_/.splunkrc) to use
-the Splunk admin role's username and password, and the management port, host and protocol of your Splunk Server.
-The format is a Ruby Hash:
+the Splunk admin role's username and password, and the management port,
+host and protocol of your Splunk Server.
 
-    {
-        #The user name (String) of a Splunk administrator. Required.
-        :username => 'admin',
-        #The password (String) of the above user. Required.
-        :password => 'password',
-        #The management port (String) of the Splunk Server. Defaults to '8089'.
-        :port => '8089',
-        #The host (String) where the Splunk Server is running. Defaults to 'localhost'
-        :host => 'localhost',
-        #The protocol that the Splunk Server's management port is using.
-        #Can be 'https' or 'http'. Defaults to 'https'.
-        :protocol => 'https'
-    }
+[TODO: Insert .splunkrc description from other SDK README]
 
-To protect your Splunk password, you may want to delete this file when you are done running the unit tests.
+To protect your Splunk password, you may want to delete this file when
+you are done running the unit tests.
 
 In the base directory where you installed the Splunk Ruby SDK, run
 
@@ -113,8 +102,17 @@ In the base directory where you installed the Splunk Ruby SDK, run
 
 It should run many tests without error.
 
+To generate the code coverage of the test suite, run
+
+    $ rake test COVERAGE=true
+
+It will produce a directory called coverage. Open coverage/index.html to
+see the coverage report.
+
 Note that currently, the only examples are documented in-line with the code.  
-They can be seen by pointing your browser to http://splunk.github.com/splunk-sdk-ruby/doc/Splunk/Service.html
+They can be seen by pointing your browser to
+
+    http://splunk.github.com/splunk-sdk-ruby/doc/Splunk/Service.html
 
 ## Overview 
 

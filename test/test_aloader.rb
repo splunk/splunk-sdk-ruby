@@ -5,7 +5,7 @@ require "splunk-sdk-ruby/aloader"
 
 AtomResponseLoader = Splunk::AtomResponseLoader
 
-class TcAloader < Test::Unit::TestCase
+class TestAloader < Test::Unit::TestCase
 
   def test_elems
     assert_raise(ArgumentError) { assert_equal(AtomResponseLoader::load_text(""), nil) }
@@ -184,6 +184,7 @@ class TcAloader < Test::Unit::TestCase
   end
 
   def test_real
+
     f = open("test/services.xml", 'r')
     result = AtomResponseLoader::load_text(f.read)
 

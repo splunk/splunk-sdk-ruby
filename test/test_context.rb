@@ -8,7 +8,7 @@ $config = read_splunkrc()
 
 $my_argv = ARGV.dup
 
-class TcContext < Test::Unit::TestCase
+class TestContext < Test::Unit::TestCase
   NAMESPACE_ATOM = {'atom' => 'http://www.w3.org/2005/Atom'}
   NAMESPACE_REST = {'s' => 'http://dev.splunk.com/ns/rest'}
   NAMESPACE_OPENSEARCH = {'opensearch' => 'http://a9.com/-/spec/opensearch/1.1'}

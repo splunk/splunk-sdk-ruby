@@ -1,7 +1,15 @@
-require "simplecov"
-SimpleCov.start() do
-  add_filter("test")
+if ENV.has_key?("COVERAGE")
+  require "simplecov"
+  SimpleCov.start() do
+    add_filter("test")
+  end
 end
+
+# This line is required to let RubyMine run the test suite,
+# since otherwise random packages load other random packages
+# in random order and clobber RubyMine's configuration.
+# See http://youtrack.jetbrains.com/issue/RUBY-11922
+$:.unshift($:.select {|i| i.include? '/patch/'}).flatten!
 
 require 'test/unit'
 
