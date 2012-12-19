@@ -4,7 +4,6 @@ require 'rubygems/specification'
 require 'rake/testtask'
 require 'date'
 
-
 spec = Gem::Specification.new do |s|
   s.name = 'splunk-sdk'
   s.version = '1.0.0'
@@ -36,6 +35,10 @@ task :make_spec do
   end
 end
 
+desc 'run reek on the codebase'
+task :reek do
+  sh %{find lib -name \*.rb | xargs reek}
+end
 
 Rake::TestTask.new do |t|
   t.libs << 'lib' << 'test'

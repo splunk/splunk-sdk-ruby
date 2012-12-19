@@ -1,8 +1,10 @@
 # :stopdoc:
-require "ostruct"
-require "splunk-sdk-ruby/client"
-
 require_relative "test_helper"
+
+
+require "ostruct"
+require "splunk-sdk-ruby"
+
 
 TEST_APP_NAME = "sdk-tests"
 TEST_INDEX_NAME = "sdk-tests"
