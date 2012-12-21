@@ -1,24 +1,75 @@
-  require 'nokogiri'
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
-  module Splunk
+# atomfeed.rb provides an AtomFeed class to read the Atom XML feeds returned by
+# most of Splunk's endpoints.
+require 'nokogiri'
 
+module Splunk
+
+  # Read an Atom XML feed into a Ruby object.
+  #
+  # AtomFeed.new accepts either a string or any object with a read method.
+  # It parses that as an Atom feed and exposes two read-only fields, metadata
+  # and entries. metadata is a hash of all the header fields of the feed.
+  # entries is a list of hashes giving the details of each entry in the
+  # feed.
+  #
+  # Example:
+  #
+  #     file = File.open("some_feed.xml")
+  #     feed = AtomFeed.new(file) # or AtomFeed.new(file.read())
+  #     feed.metadata.is_a?(Hash) == true
+  #     feed.entries.is_a?(Array) == true
   class AtomFeed
     public
 
+    # Hash containing all the header fields of the feed.
     attr_reader :metadata
+    # Array containing hashes representing each entry in the feed.
     attr_reader :entries
 
-    def initialize(text)
+    def initialize(text_or_stream)
+      if text_or_stream.respond_to?(:read)
+        text = text_or_stream.read()
+      else
+        text = text_or_stream
+      end
       # Sanity checks
       raise ArgumentError, 'text is nil' if text.nil?
       text = text.strip
       raise ArgumentError, 'text size is 0' if text.size == 0
 
       doc = Nokogiri::XML(text)
-      # Skip down to the content of the Atom feed. However, some of
-      # Splunk's endpoints don't include the <feed> element at the
-      # top level (notably search/jobs/<sid> in Splunk 4.3.x), so we
-      # have to check if <feed> is there or not before skipping.
+      # Skip down to the content of the Atom feed. Most of Splunk's
+      # endpoints return a feed of the form
+      #
+      #     <feed>
+      #        ...metadata...
+      #        <entry>...details of entry...</entry>
+      #        <entry>...details of entry...</entry>
+      #        <entry>...details of entry...</entry>
+      #        ...
+      #     </feed>
+      #
+      # with the exception of fetching a single job entity from Splunk 4.3,
+      # where it returns
+      #
+      #     <entry>...details of entry...</entry>
+      #
+      # To handle both, we have to check if <feed> is there
+      # or not before skipping.
       if doc.root.name == "feed"
         @metadata, @entries = read_feed(doc.root)
       elsif doc.root.name == "entry"
@@ -29,6 +80,7 @@
       end
     end
 
+    private
     def read_feed(feed)
       metadata = {"links" => {}, "messages" => []}
       entries = []
@@ -141,4 +193,4 @@
     end
   end
 
-  end
+end

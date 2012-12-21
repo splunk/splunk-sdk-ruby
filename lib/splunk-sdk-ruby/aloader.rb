@@ -1,7 +1,4 @@
-require 'rubygems'
-
 require 'nokogiri'
-require 'netrc'
 
 
 # Some bitchin metaprogramming to allow "dot notation" reading from a Hash
