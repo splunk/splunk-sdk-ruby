@@ -38,6 +38,10 @@ module Splunk
     #   puts job.results(:output_mode => 'json')
     def create(query, args={})
       args['search'] = query
+      # By default we don't want <sg> tags returned in the resulting XML.
+      if !args.has_key?("segmentation")
+        args["segmentation"] = "none"
+      end
       response = @service.context.post(PATH_JOBS, args)
 
       return response if args[:exec_mode] == 'oneshot'
@@ -61,6 +65,9 @@ module Splunk
       args[:search] = query
       args[:exec_mode] = 'oneshot'
       args[:output_mode] = 'json'
+      if !args.has_key("segmentation")
+        args["segmentation"] = "none"
+      end
       response = @service.context.post(PATH_JOBS, args)
 
       begin
@@ -93,6 +100,9 @@ module Splunk
     def create_stream(query, args={}, &block)
       args[:search] = query
       args[:output_mode] = 'json'
+      if !args.has_key?("segmentation")
+        args["segmentation"] = "none"
+      end
       
       results = nil
       @service.context.get_stream(PATH_EXPORT, args) do |res|
