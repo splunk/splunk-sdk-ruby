@@ -1,4 +1,14 @@
-require 'nokogiri'
+require 'rexml/document'
+require 'rexml/streamlistener'
+$xml_library = :rexml
+
+if !(ENV['RUBY_XML_LIBRARY'] == 'rexml')
+  begin
+    require 'nokogiri'
+    $xml_library = :nokogiri
+  rescue LoadError
+  end
+end
 
 # Note: run the SAX parser in a Fiber and have it yield events.
 # The Fiber must be run up to the first result, set all the metadata,
@@ -18,7 +28,7 @@ module Splunk
 
     attr_reader :fields
 
-    def initialize(text_or_stream)
+    def initialize(text_or_stream, xml_library=$xml_library)
       if !text_or_stream.respond_to?(:read)
         stream = StringIO(text_or_stream.strip)
       else
@@ -30,10 +40,15 @@ module Splunk
         @fields = []
       else
         listener = ResultsListener.new
-        parser = Nokogiri::XML::SAX::Parser.new(listener)
         @iteration_fiber = Fiber.new do
-          parser.parse(stream)
+          if xml_library == :nokogiri
+            parser = Nokogiri::XML::SAX::Parser.new(listener)
+            parser.parse(stream)
+          else
+            REXML::Document.parse_stream(stream, listener)
+          end
         end
+
         @is_preview, @fields = @iteration_fiber.resume
       end
     end
@@ -167,14 +182,21 @@ module Splunk
       }
     end
 
-    def start_element(name, attributes)
+    def start_element(name, attributes) # Nokogiri version
+      # attributes is an association list. Turn it into a hash
+      # that tag_start can use.
+      attribute_dict = {}
+      attributes.each do |attribute|
+        key, value = attribute
+        attribute_dict[key] = value
+      end
+      tag_start(name, attribute_dict)
+    end
+
+    def tag_start(name, attributes) # REXML version
+      # attributes is a hash.
       if @states[@state].has_key?(:start_element)
-        attribute_dict = {}
-        attributes.each do |attribute|
-          key, value = attribute
-          attribute_dict[key] = value
-        end
-        @states[@state][:start_element].call(name, attribute_dict)
+        @states[@state][:start_element].call(name, attributes)
       end
     end
 
@@ -184,74 +206,19 @@ module Splunk
       end
     end
 
+    def tag_end(name)
+      end_element(name)
+    end
+
     def characters(text)
       if @states[@state].has_key?(:characters)
         @states[@state][:characters].call(text)
       end
     end
 
-  end
+    def text(text)
+      characters(text)
+    end
 
-  #
-  #
-  #
-  #  class MyListener < Nokogiri::XML::SAX::Document
-  #    def initialize(block)
-  #      @block = block
-  #    end
-  #
-  #    def start_element(name, attrs)
-  #      if name == "section"
-  #        @section = alist_find(attrs, "name")
-  #      elsif name == "item"
-  #          @current_item = {}
-  #      elsif !@current_item.nil?
-  #        @current_field = name
-  #         
-  #      end
-  #
-  #    end
-  #
-  #
-  #    def characters(text)
-  #
-  #      if !@current_field.nil?
-  #        @current_item[@current_field] = text
-  #
-  #      end
-  #
-  #    end
-  #
-  #
-  #    def end_element(name)
-  #
-  #      if name == "section"
-  #        @section = nil
-  #
-  #      elsif name == "item"
-  #        @block.call(@current_item)
-  #        @current_item = nil
-  #
-  #      elsif !@current_item.nil?
-  #        @current_field = nil
-  #
-  #      end
-  #
-  #    end
-  #  end
-  #
-  #  class MyStreamer
-  #    def each(&block)
-  #      listener = MyListener.new(block)
-  #      parser = Nokogiri::XML::SAX::Parser.new(listener)
-  #      source = File.new("data.xml")
-  #      parser.parse(source)
-  #    end
-  #  end
-  #
-  #  s = MyStreamer.new()
-  #  s.each { |result| puts "Returned: #{result}" }
-  #
-  #
-  #end
+  end
 end
