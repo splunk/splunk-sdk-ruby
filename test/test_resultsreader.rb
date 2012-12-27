@@ -12,19 +12,20 @@ class TestResultsReader < Test::Unit::TestCase
     # and REXML. Otherwise, we'll print a warning and test only against
     # REXML. REXML is part of the standard library in Ruby 1.9, so it will
     # always be present.
-    begin
-      require 'nokogiri'
+
+    if nokogiri_available?
       xml_libraries = [:nokogiri, :rexml]
-    rescue LoadError
+    else
       xml_libraries = [:rexml]
       puts "Nokogiri not installed. Skipping."
     end
 
     xml_libraries.each do |xml_library|
-      $tests.each_entry do |filename, expected|
+      require_xml_library(xml_library)
+      $results_reader_tests.each_entry do |filename, expected|
         puts "#{xml_library}: #{filename}"
         file = File.open(filename)
-        reader = Splunk::ResultsReader.new(file, xml_library=xml_library)
+        reader = Splunk::ResultsReader.new(file)
         assert_equal(expected[:is_preview], reader.is_preview?)
         assert_equal(expected[:fields], reader.fields)
 
@@ -48,7 +49,7 @@ class TestResultsReader < Test::Unit::TestCase
   end
 end
 
-$tests = {
+$results_reader_tests = {
     "test/data/results/5.0.2/results.xml" => {
         :is_preview => false,
         :fields => ["_bkt", "_cd", "_indextime", "_kv", "_raw", "_serial",

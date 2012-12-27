@@ -15,16 +15,7 @@
 # resultsreader.rb provides ResultsReader, an object to incrementally parse
 # XML streams of results from Splunk into Ruby objects.
 
-require 'rexml/document'
-require 'rexml/streamlistener'
-$default_xml_library = :rexml
-
-# Try to load Nokogiri and use it as the default.
-begin
-  require 'nokogiri'
-  $default_xml_library = :nokogiri
-rescue LoadError
-end
+require 'splunk-sdk-ruby'
 
 module Splunk
   # ResultsReader parses Splunk's XML format for results into Ruby objects.
@@ -67,7 +58,7 @@ module Splunk
     #
     attr_reader :fields
 
-    def initialize(text_or_stream, xml_library=$default_xml_library)
+    def initialize(text_or_stream)
       if !text_or_stream.respond_to?(:read)
         stream = StringIO(text_or_stream.strip)
       else
@@ -84,7 +75,7 @@ module Splunk
         # the parser into a Fiber from which we can yield.
         listener = ResultsListener.new
         @iteration_fiber = Fiber.new do
-          if xml_library == :nokogiri
+          if $xml_library == :nokogiri
             parser = Nokogiri::XML::SAX::Parser.new(listener)
             parser.parse(stream)
           else # Use REXML
@@ -129,7 +120,7 @@ module Splunk
   # continue and thereafter call `Fiber.yield` with every result as it
   # finishes parsing it.
   #
-  class ResultsListener < Nokogiri::XML::SAX::Document
+  class ResultsListener
     def initialize()
       @fields = []
       @header_sent = false
@@ -272,8 +263,16 @@ module Splunk
       tag_start(name, attribute_dict)
     end
 
+    def start_element_namespace(name, attributes=[], prefix=nil, uri=nil, ns=[])
+      start_element(name, attributes)
+    end
+
     def end_element(name)
       tag_end(name)
+    end
+
+    def end_element_namespace(name, prefix = nil, uri = nil)
+      end_element(name)
     end
 
     def characters(text)
@@ -299,5 +298,27 @@ module Splunk
         @states[@state][:characters].call(text)
       end
     end
+
+    # Unused methods in Nokogiri
+    def cdata_block(string) end
+    def comment(string) end
+    def end_document() end
+    def error(string) end
+    def start_document() end
+    def warning(string) end
+    # xmldecl declared in REXML list below.
+
+    # Unused methods in REXML
+    def attlistdecl(element_name, attributes, raw_content) end
+    def cdata(content) end
+    def comment(comment) end
+    def doctype(name, pub_sys, long_name, uri) end
+    def doctype_end() end
+    def elementdecl(content) end
+    def entity(content) end
+    def entitydecl(content) end
+    def instruction(name, instruction) end
+    def notationdecl(content) end
+    def xmldecl(version, encoding, standalone) end
   end
 end

@@ -29,19 +29,19 @@ class TestAtomFeed < Test::Unit::TestCase
     # and REXML. Otherwise, we'll print a warning and test only against
     # REXML. REXML is part of the standard library in Ruby 1.9, so it will
     # always be present.
-    begin
-      require 'nokogiri'
+    if nokogiri_available?
       xml_libraries = [:nokogiri, :rexml]
-    rescue LoadError
+    else
       xml_libraries = [:rexml]
       puts "Nokogiri not installed. Skipping."
     end
 
     xml_libraries.each do |xml_library|
-      $tests.each_entry do |filename, expected|
+      require_xml_library(xml_library)
+      $atom_tests.each_entry do |filename, expected|
         puts "#{xml_library}: #{filename}"
         file = File.open(filename)
-        feed = Splunk::AtomFeed.new(file, xml_library=xml_library)
+        feed = Splunk::AtomFeed.new(file)
 
         # To make debugging easy, test the metadata a key at
         # a time, since Test::Unit doesn't display diffs.
@@ -67,7 +67,7 @@ class TestAtomFeed < Test::Unit::TestCase
   end
 end
 
-$tests = {
+$atom_tests = {
     'test/data/atom/atom_with_feed.xml' => {
         :metadata => {
             "title" => "localapps",

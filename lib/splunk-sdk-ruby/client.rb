@@ -1,7 +1,6 @@
 require 'cgi'
 #TODO: Please get me working with json/ext - it SO much faster
 require 'json/pure'
-require 'nokogiri'
 require 'rubygems'
 
 require_relative 'client/collection'

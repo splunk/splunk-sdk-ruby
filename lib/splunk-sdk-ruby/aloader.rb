@@ -1,4 +1,4 @@
-require 'nokogiri'
+#require 'nokogiri'
 
 
 # Some bitchin metaprogramming to allow "dot notation" reading from a Hash

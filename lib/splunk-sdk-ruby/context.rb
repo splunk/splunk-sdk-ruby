@@ -1,6 +1,4 @@
-require 'rubygems'
-
-require 'nokogiri'
+require 'rexml/document'
 require 'netrc'
 require 'openssl'
 require 'pathname'
@@ -85,12 +83,17 @@ module Splunk
       response = post(
         '/services/auth/login', {:username=>@username, :password=>@password})
       begin
-        doc = Nokogiri::XML(response.to_s)
-        @token = doc.xpath('//sessionKey').last.content
-        # TODO(gba) Change '0.1' magic version below.
+        if $xml_library == :nokogiri
+          doc = Nokogiri::XML(response.to_s)
+          @token = doc.xpath('//sessionKey').last.content
+        else
+          doc = REXML::Document.new(response.to_s)
+          @token = doc.elements["//sessionKey"][0].value
+        end
+
         @headers = {
           'Authorization' => "Splunk #{@token}",
-          'User-Agent' => 'splunk-sdk-ruby/0.1'}
+          'User-Agent' => 'splunk-sdk-ruby/#{VERSION}'}
       rescue => e
         raise SplunkError, e.message
       end
@@ -99,10 +102,9 @@ module Splunk
     # Log out of Splunk.  For now this simply nil's out the _token_ attribute
     def logout
       @token = nil
-      # TODO(gba) Change '0.1' magic version below.
       @headers = {
         'Authorization' => "Splunk #{@token}",
-        'User-Agent' => 'splunk-sdk-ruby/0.1'}
+        'User-Agent' => 'splunk-sdk-ruby/#{VERSION}'}
     end
 
     # Make a POST REST call.

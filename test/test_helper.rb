@@ -44,3 +44,12 @@ def read_splunkrc
 
   options
 end
+
+def nokogiri_available?
+  begin
+    require 'nokogiri'
+    return true
+  rescue LoadError
+    return false
+  end
+end
