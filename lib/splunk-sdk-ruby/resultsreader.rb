@@ -14,16 +14,16 @@
 
 # resultsreader.rb provides ResultsReader, an object to incrementally parse
 # XML streams of results from Splunk into Ruby objects.
+
 require 'rexml/document'
 require 'rexml/streamlistener'
-
 $default_xml_library = :rexml
-if !(ENV['RUBY_XML_LIBRARY'] == 'rexml')
-  begin
-    require 'nokogiri'
-    $default_xml_library = :nokogiri
-  rescue LoadError
-  end
+
+# Try to load Nokogiri and use it as the default.
+begin
+  require 'nokogiri'
+  $default_xml_library = :nokogiri
+rescue LoadError
 end
 
 module Splunk
