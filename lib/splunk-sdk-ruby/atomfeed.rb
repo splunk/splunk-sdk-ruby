@@ -14,10 +14,38 @@
 
 # atomfeed.rb provides an AtomFeed class to read the Atom XML feeds returned by
 # most of Splunk's endpoints.
-require 'nokogiri'
+
+require 'rexml/document'
+require 'rexml/streamlistener'
+$default_xml_library = :rexml
+
+# Try to load Nokogiri and use it as the default.
+begin
+  require 'nokogiri'
+  $default_xml_library = :nokogiri
+rescue LoadError
+end
+
+# Nokogiri returns attribute values as an object on which we have to call
+# `#text`. REXML returns Strings. To make them both work, add a `text` method to
+# String which returns itself.
+class String
+  def text
+    self
+  end
+end
+
+# For compatibility with Nokogiri, we add a method `text`
+# which, like Nokogiri's `text` method, returns the contents
+# without escaping entities. This is identical to REXML's
+# value method.
+class REXML::Text
+  def text
+    value
+  end
+end
 
 module Splunk
-
   # Read an Atom XML feed into a Ruby object.
   #
   # AtomFeed.new accepts either a string or any object with a read method.
@@ -29,7 +57,9 @@ module Splunk
   # Example:
   #
   #     file = File.open("some_feed.xml")
-  #     feed = AtomFeed.new(file) # or AtomFeed.new(file.read())
+  #     feed = AtomFeed.new(file)
+  #     # or AtomFeed.new(file.read())
+  #     # or AtomFeed.new(file, xml_library=:rexml)
   #     feed.metadata.is_a?(Hash) == true
   #     feed.entries.is_a?(Array) == true
   class AtomFeed
@@ -40,7 +70,7 @@ module Splunk
     # Array containing hashes representing each entry in the feed.
     attr_reader :entries
 
-    def initialize(text_or_stream)
+    def initialize(text_or_stream, xml_library=$default_xml_library)
       if text_or_stream.respond_to?(:read)
         text = text_or_stream.read()
       else
@@ -51,7 +81,11 @@ module Splunk
       text = text.strip
       raise ArgumentError, 'text size is 0' if text.size == 0
 
-      doc = Nokogiri::XML(text)
+      if xml_library == :nokogiri
+        doc = Nokogiri::XML(text)
+      else
+        doc = REXML::Document.new(text)
+      end
       # Skip down to the content of the Atom feed. Most of Splunk's
       # endpoints return a feed of the form
       #
@@ -81,6 +115,14 @@ module Splunk
     end
 
     private
+    def children_to_s(element)
+      result = ""
+      element.children.each do |child|
+        result << child.text
+      end
+      result
+    end
+
     def read_feed(feed)
       metadata = {"links" => {}, "messages" => []}
       entries = []
@@ -103,11 +145,15 @@ module Splunk
           rel, uri = read_link(element)
           metadata["links"][rel] = uri
         elsif element.name == "id"
-          metadata[element.name] = URI(element.children.to_s)
+          # In REXML, element.children is an Array. In Nokogiri
+          # it's a special object whose to_s method returns literal text,
+          # not an array. To work around the difference, coerce both
+          # to an Array.
+          metadata[element.name] = URI(children_to_s(element))
         elsif element.name == "messages"
           # No idea what these look like. Try to get one with messages.
         else
-          metadata[element.name] = element.children.to_s
+          metadata[element.name] = children_to_s(element)
         end
       end
 
@@ -140,16 +186,22 @@ module Splunk
     end
 
     def read_entry_field(field)
-      if field.elements.length == 0 # This is a simple text field
+      # We have to coerce this to an Array to call length,
+      # since Nokogiri defines `#length` on element sets,
+      # but REXML does not.
+      elements = Array(field.elements)
+      if elements.length == 0 # This is a simple text field
         return read_simple_entry_field(field)
-      elsif field.elements.length > 1
+      elsif elements.length > 1
         raise ArgumentError, "Entry fields should contain one element " +
-            "(found #{field.elements.length} in #{field.to_s}."
+            "(found #{elements.length} in #{field.to_s}."
       elsif field.name == "author"
         return read_author(field)
       end
 
-      value_element = field.elements[0]
+      # Coerce to Array because Nokogiri indexes from 0, and REXML from 1.
+      # Arrays always index from 0.
+      value_element = Array(field.elements)[0]
       if value_element.name == "dict"
         return read_dict(value_element)
       elsif value_element.name == "list"
@@ -158,10 +210,11 @@ module Splunk
     end
 
     def read_simple_entry_field(field)
+      value = children_to_s(field)
       if field.name == "id"
-        return URI(field.children.to_s)
+        return URI(value)
       else
-        return field.children.to_s
+        return value
       end
     end
 
@@ -189,7 +242,11 @@ module Splunk
     def read_author(author)
       # The author tag has the form <author><name>...</name></author>
       # so we have to fetch the value out of the inside of it.
-      return author.elements[0].text
+      #
+      # In REXML, sets of elements are indexed starting at 1 to match
+      # XPath. In Nokogiri they are indexed starting at 0. To work around
+      # this, we coerce it to an array, which is always indexed starting at 0.
+      return Array(author.elements)[0].text
     end
   end
 
