@@ -120,6 +120,29 @@ The Splunk library included in this SDK consists of two layers of API that
 can be used to interact with splunkd - the _binding_ layer and the 
 _client_ layer.
 
+#### A word about XML
+
+Ruby ships with the REXML library be default, but for most real world work,
+you will want to use Nokogiri, which is orders of magnitude faster. The Splunk
+Ruby SDK supports both. By default it will try to use Nokogiri, and fall back
+to REXML if Nokogiri is not available. The value of the library in use is
+kept in the global variable `$xml_library` (which will be either `:nokogiri`
+or `:rexml`).
+
+You can force your program to use a particular library by calling
+require_xml_library(_library_) (where, again, _library_ is either `:nokogiri`
+or `:rexml`). This method is in `lib/splunk_sdk_ruby/xml_shim.rb`, but will be
+included when you include the whole SDK.
+
+You can also force your programs to use a particular library by setting the
+`$RUBY_XML_LIBRARY` environment variable to either "nokogiri" or "rexml" (it
+is not case sensitive).
+
+If you force your program to use a particular library, the SDK will no longer
+try to fall back to REXML, but will issue a LoadError, on the assumption that
+if you really wanted Nokogiri that badly, we should probably tell you if you
+don't get it.
+
 #### The Binding Layer
 This is the lowest layer of the Splunk Ruby SDK. It is a thin wrapper around 
 low-level HTTP capabilities, including:
