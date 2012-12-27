@@ -146,6 +146,18 @@ module Splunk
 
                   @current_scratch = nil
                   @state = :result
+                elsif name == "sg"
+                  @current_scratch << "</sg>"
+                end
+              end,
+              :start_element => lambda do |name, attributes|
+                if name == "sg"
+                  s = ["sg"] + attributes.sort.map do |entry|
+                    key, value = entry
+                    "#{key}=\"#{value}\""
+                  end
+                  text = "<" + s.join(" ") + ">"
+                  @current_scratch << text
                 end
               end,
               :characters => lambda do |text|

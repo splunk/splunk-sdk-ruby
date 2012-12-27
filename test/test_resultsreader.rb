@@ -402,7 +402,14 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:23786",
             '_indextime' => "1355946940",
             '_kv' => "1",
-            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.296 -0800] \"POST /en-US/api/shelper HTTP/1.1\" 200 1398 \"http://localhost:8000/en-US/app/search/flashtimeline?q=search%20search%20index%3D_internal%20%7C%20head%2010&earliest=rt-1h&latest=rt\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:17.0) Gecko/20100101 Firefox/17.0\" - 50d21bbb4b5224c10 3ms",
+            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.296 -0800] " +
+                "\"POST /en-US/api/shelper HTTP/1.1\" 200 1398 \"http://" +
+                "localhost:8000/en-US/app/<sg h=\"1\">search</sg>/" +
+                "flashtimeline?q=<sg h=\"1\">search</sg>%20<sg h=\"1\">search" +
+                "</sg>%20index%3D_internal%20%7C%20head%2010&earliest=rt-1h" +
+                "&latest=rt\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7;" +
+                " rv:17.0) Gecko/20100101 Firefox/17.0\" - 50d21bbb4b5224c10" +
+                " 3ms",
             '_serial' => "0",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_access",
@@ -429,11 +436,14 @@ class TestResultsReader < Test::Unit::TestCase
             'other' => "- 50d21bbb4b5224c10 3ms",
             'punct' => "..._-__[//:::._-]_\"_/-//_/.\"___\"://:/-///?=%%%%%%%",
             'q' => "search%20search%20index%3D_internal%20%7C%20head%2010",
-            'referer' => "http://localhost:8000/en-US/app/search/flashtimeline?q=search%20search%20index%3D_internal%20%7C%20head%2010&earliest=rt-1h&latest=rt",
+            'referer' => "http://localhost:8000/en-US/app/search/" +
+                "flashtimeline?q=search%20search%20index%3D_internal%20%7C" +
+                "%20head%2010&earliest=rt-1h&latest=rt",
             'referer_domain' => "http://localhost:8000",
             'req_time' => "19/Dec/2012:11:55:39.296 -0800",
             'root' => "en-US",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_access.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk" +
+                "/web_access.log",
             'sourcetype' => "splunk_web_access",
             'spent' => "3",
             'splunk_server' => "fross-mbp15.local",
@@ -443,14 +453,17 @@ class TestResultsReader < Test::Unit::TestCase
             'uri' => "/en-US/api/shelper",
             'uri_path' => "/en-US/api/shelper",
             'user' => "admin",
-            'useragent' => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:17.0) Gecko/20100101 Firefox/17.0",
+            'useragent' => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7;" +
+                " rv:17.0) Gecko/20100101 Firefox/17.0",
             'version' => "HTTP/1.1",
         },
         {
             '_cd' => "54:23689",
             '_indextime' => "1355946940",
             '_kv' => "1",
-            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.265 -0800] \"GET /services/search/jobs/rt_1355946914.13 HTTP/1.1\" 200 10957 - - - 4ms",
+            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.265 -0800]" +
+                " \"GET /services/<sg h=\"1\">search</sg>/jobs/rt_1355946914" +
+                ".13 HTTP/1.1\" 200 10957 - - - 4ms",
             '_serial' => "1",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd_access",
@@ -477,7 +490,8 @@ class TestResultsReader < Test::Unit::TestCase
             'punct' => "..._-__[//:::._-]_\"_////._/.\"___-_-_-_",
             'req_time' => "19/Dec/2012:11:55:39.265 -0800",
             'root' => "services",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/splunkd_access.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/splunkd_access.log",
             'sourcetype' => "splunkd_access",
             'spent' => "4",
             'splunk_server' => "fross-mbp15.local",
@@ -493,7 +507,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:23682",
             '_indextime' => "1355946940",
             '_kv' => "1",
-            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.258 -0800] \"GET /servicesNS/admin/search/properties/event_renderers?fillcontents=1 HTTP/1.1\" 200 3657 - - - 1ms",
+            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.258 -0800]" +
+                " \"GET /servicesNS/admin/<sg h=\"1\">search</sg>/properties" +
+                "/event_renderers?fillcontents=1 HTTP/1.1\" 200 3657 - - - 1ms",
             '_serial' => "2",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd_access",
@@ -521,14 +537,16 @@ class TestResultsReader < Test::Unit::TestCase
             'punct' => "..._-__[//:::._-]_\"_/////?=_/.\"___-_-_-_",
             'req_time' => "19/Dec/2012:11:55:39.258 -0800",
             'root' => "servicesNS",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/splunkd_access.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/" +
+                "splunkd_access.log",
             'sourcetype' => "splunkd_access",
             'spent' => "1",
             'splunk_server' => "fross-mbp15.local",
             'status' => "200",
             'timeendpos' => "49",
             'timestartpos' => "19",
-            'uri' => "/servicesNS/admin/search/properties/event_renderers?fillcontents=1",
+            'uri' => "/servicesNS/admin/search/properties/event_renderers" +
+                "?fillcontents=1",
             'uri_path' => "/servicesNS/admin/search/properties/event_renderers",
             'uri_query' => "fillcontents=1",
             'user' => "admin",
@@ -538,7 +556,13 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:23670",
             '_indextime' => "1355946940",
             '_kv' => "1",
-            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.231 -0800] \"GET /services/search/jobs/rt_1355946914.13/events?count=0&segmentation=full&output_mode=xml&time_format=%25s.%25Q&max_lines=10&show_empty_fields=True&offset=-10&output_time_format=%25Y-%25m-%25dT%25H%3A%25M%3A%25S.%25Q%25z&field_list=&truncation_mode=abstract HTTP/1.1\" 200 32837 - - - 6ms",
+            '_raw' => "127.0.0.1 - admin [19/Dec/2012:11:55:39.231 -0800]" +
+                " \"GET /services/<sg h=\"1\">search</sg>/jobs/rt_1355946914" +
+                ".13/events?count=0&segmentation=full&output_mode=xml&" +
+                "time_format=%25s.%25Q&max_lines=10&show_empty_fields=True&" +
+                "offset=-10&output_time_format=%25Y-%25m-%25dT%25H%3A%25M" +
+                "%3A%25S.%25Q%25z&field_list=&truncation_mode=abstract" +
+                " HTTP/1.1\" 200 32837 - - - 6ms",
             '_serial' => "3",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd_access",
@@ -572,7 +596,8 @@ class TestResultsReader < Test::Unit::TestCase
             'root' => "services",
             'segmentation' => "full",
             'show_empty_fields' => "True",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/splunkd_access.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk" +
+                "/splunkd_access.log",
             'sourcetype' => "splunkd_access",
             'spent' => "6",
             'splunk_server' => "fross-mbp15.local",
@@ -581,9 +606,16 @@ class TestResultsReader < Test::Unit::TestCase
             'timeendpos' => "49",
             'timestartpos' => "19",
             'truncation_mode' => "abstract",
-            'uri' => "/services/search/jobs/rt_1355946914.13/events?count=0&segmentation=full&output_mode=xml&time_format=%25s.%25Q&max_lines=10&show_empty_fields=True&offset=-10&output_time_format=%25Y-%25m-%25dT%25H%3A%25M%3A%25S.%25Q%25z&field_list=&truncation_mode=abstract",
+            'uri' => "/services/search/jobs/rt_1355946914.13/events?count=0" +
+                "&segmentation=full&output_mode=xml&time_format=%25s.%25Q" +
+                "&max_lines=10&show_empty_fields=True&offset=-10&output_" +
+                "time_format=%25Y-%25m-%25dT%25H%3A%25M%3A%25S.%25Q%25z" +
+                "&field_list=&truncation_mode=abstract",
             'uri_path' => "/services/search/jobs/rt_1355946914.13/events",
-            'uri_query' => "count=0&segmentation=full&output_mode=xml&time_format=%25s.%25Q&max_lines=10&show_empty_fields=True&offset=-10&output_time_format=%25Y-%25m-%25dT%25H%3A%25M%3A%25S.%25Q%25z&field_list=&truncation_mode=abstract",
+            'uri_query' => "count=0&segmentation=full&output_mode=xml&time" +
+                "_format=%25s.%25Q&max_lines=10&show_empty_fields=True&" +
+                "offset=-10&output_time_format=%25Y-%25m-%25dT%25H%3A%25M" +
+                "%3A%25S.%25Q%25z&field_list=&truncation_mode=abstract",
             'user' => "admin",
             'version' => "HTTP/1.1",
         }
@@ -592,6 +624,9 @@ class TestResultsReader < Test::Unit::TestCase
     n_results = 0
     reader.each_with_index do |result, index|
       n_results += 1
+      expected_results[index].each_entry do |key, value|
+        assert_equal([key, value], [key, result[key]])
+      end
       assert_equal(expected_results[index], result)
     end
 
@@ -636,7 +671,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:8568",
             '_indextime' => "1355946537",
             '_kv' => "1",
-            '_raw' => "2012-12-19 11:48:55,424 INFO	[50d21a262616082d0] root:535 - CONFIG: mrsparkle_path (str): /Users/fross/splunks/splunk-4.3.5/share/search/mrsparkle",
+            '_raw' => "2012-12-19 11:48:55,424 INFO	[50d21a262616082d0]" +
+                " root:535 - CONFIG: mrsparkle_path (str): /Users/fross/" +
+                "splunks/splunk-4.3.5/share/<sg h=\"1\">search</sg>/mrsparkle",
             '_serial' => "731",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_service",
@@ -656,10 +693,12 @@ class TestResultsReader < Test::Unit::TestCase
             'line' => "535",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "CONFIG: mrsparkle_path (str): /Users/fross/splunks/splunk-4.3.5/share/search/mrsparkle",
+            'message' => "CONFIG: mrsparkle_path (str): /Users/fross/splunks/" +
+                "splunk-4.3.5/share/search/mrsparkle",
             'punct' => "--_::,_t[]_:_-_:__():_////-..///",
             'requestid' => "50d21a262616082d0",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_service.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/" +
+                "web_service.log",
             'sourcetype' => "splunk_web_service",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "24",
@@ -669,7 +708,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:8562",
             '_indextime' => "1355946537",
             '_kv' => "1",
-            '_raw' => "2012-12-19 11:48:55,424 INFO	[50d21a262616082d0] root:535 - CONFIG: module_dir (str): share/splunk/search_mrsparkle/modules",
+            '_raw' => "2012-12-19 11:48:55,424 INFO\t[50d21a262616082d0]" +
+                " root:535 - CONFIG: module_dir (str): share/splunk/<sg" +
+                " h=\"1\">search</sg>_mrsparkle/modules",
             '_serial' => "732",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_service",
@@ -689,10 +730,12 @@ class TestResultsReader < Test::Unit::TestCase
             'line' => "535",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "CONFIG: module_dir (str): share/splunk/search_mrsparkle/modules",
+            'message' => "CONFIG: module_dir (str): share/splunk/" +
+                "search_mrsparkle/modules",
             'punct' => "--_::,_t[]_:_-_:__():_///",
             'requestid' => "50d21a262616082d0",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_service.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/web_service.log",
             'sourcetype' => "splunk_web_service",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "24",
@@ -702,7 +745,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:8674",
             '_indextime' => "1355946537",
             '_kv' => "1",
-            '_raw' => "2012-12-19 11:48:55,425 INFO	[50d21a262616082d0] root:535 - CONFIG: template_dir (str): share/splunk/search_mrsparkle/templates",
+            '_raw' => "2012-12-19 11:48:55,425 INFO\t[50d21a262616082d0]" +
+                " root:535 - CONFIG: template_dir (str): share/splunk/" +
+                "<sg h=\"1\">search</sg>_mrsparkle/templates",
             '_serial' => "728",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_service",
@@ -722,10 +767,12 @@ class TestResultsReader < Test::Unit::TestCase
             'line' => "535",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "CONFIG: template_dir (str): share/splunk/search_mrsparkle/templates",
+            'message' => "CONFIG: template_dir (str): share/splunk/" +
+                "search_mrsparkle/templates",
             'punct' => "--_::,_t[]_:_-_:__():_///",
             'requestid' => "50d21a262616082d0",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_service.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/web_service.log",
             'sourcetype' => "splunk_web_service",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "24",
@@ -735,7 +782,10 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:8662",
             '_indextime' => "1355946537",
             '_kv' => "1",
-            '_raw' => "2012-12-19 11:48:55,425 INFO	[50d21a262616082d0] root:535 - CONFIG: staticdir (str): /Users/fross/splunks/splunk-4.3.5/share/splunk/search_mrsparkle/exposed",
+            '_raw' => "2012-12-19 11:48:55,425 INFO\t[50d21a262616082d0]" +
+                " root:535 - CONFIG: staticdir (str): /Users/fross/splunks" +
+                "/splunk-4.3.5/share/splunk/<sg h=\"1\">search</sg>_mrsparkle" +
+                "/exposed",
             '_serial' => "729",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_service",
@@ -755,10 +805,12 @@ class TestResultsReader < Test::Unit::TestCase
             'line' => "535",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "CONFIG: staticdir (str): /Users/fross/splunks/splunk-4.3.5/share/splunk/search_mrsparkle/exposed",
+            'message' => "CONFIG: staticdir (str): /Users/fross/splunks/" +
+                "splunk-4.3.5/share/splunk/search_mrsparkle/exposed",
             'punct' => "--_::,_t[]_:_-_:__():_////-..////",
             'requestid' => "50d21a262616082d0",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_service.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/web_service.log",
             'sourcetype' => "splunk_web_service",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "24",
@@ -768,7 +820,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:8651",
             '_indextime' => "1355946537",
             '_kv' => "1",
-            '_raw' => "2012-12-19 11:48:55,425 INFO	[50d21a262616082d0] root:535 - CONFIG: static_dir (str): share/splunk/search_mrsparkle/exposed",
+            '_raw' => "2012-12-19 11:48:55,425 INFO\t[50d21a262616082d0]" +
+                " root:535 - CONFIG: static_dir (str): share/splunk/" +
+                "<sg h=\"1\">search</sg>_mrsparkle/exposed",
             '_serial' => "730",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunk_web_service",
@@ -788,10 +842,12 @@ class TestResultsReader < Test::Unit::TestCase
             'line' => "535",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "CONFIG: static_dir (str): share/splunk/search_mrsparkle/exposed",
+            'message' => "CONFIG: static_dir (str): share/splunk/" +
+                "search_mrsparkle/exposed",
             'punct' => "--_::,_t[]_:_-_:__():_///",
             'requestid' => "50d21a262616082d0",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/web_service.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/web_service.log",
             'sourcetype' => "splunk_web_service",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "24",
@@ -801,7 +857,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:9267",
             '_indextime' => "1355946552",
             '_kv' => "1",
-            '_raw' => "12-19-2012 11:49:12.313 -0800 INFO  Metrics - group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            '_raw' => "12-19-2012 11:49:12.313 -0800 INFO  Metrics" +
+                " - group=<sg h=\"1\">search</sg>_concurrency, system total," +
+                " active_hist_searches=0, active_realtime_searches=0",
             '_serial' => "726",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd",
@@ -823,9 +881,11 @@ class TestResultsReader < Test::Unit::TestCase
             'index' => "_internal",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            'message' => "group=search_concurrency, system total, " +
+                "active_hist_searches=0, active_realtime_searches=0",
             'punct' => "--_::._-____-_=,__,_=,_=",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/metrics.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/metrics.log",
             'sourcetype' => "splunkd",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "29",
@@ -835,7 +895,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:9262",
             '_indextime' => "1355946552",
             '_kv' => "1",
-            '_raw' => "12-19-2012 11:49:12.313 -0800 INFO  Metrics - group=realtime_search_data, system total, drop_count=0",
+            '_raw' => "12-19-2012 11:49:12.313 -0800 INFO  Metrics" +
+                " - group=realtime_<sg h=\"1\">search</sg>_data," +
+                " system total, drop_count=0",
             '_serial' => "727",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd",
@@ -856,9 +918,11 @@ class TestResultsReader < Test::Unit::TestCase
             'index' => "_internal",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "group=realtime_search_data, system total, drop_count=0",
+            'message' => "group=realtime_search_data, system total," +
+                " drop_count=0",
             'punct' => "--_::._-____-_=,__,_=",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/metrics.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/metrics.log",
             'sourcetype' => "splunkd",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "29",
@@ -868,7 +932,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:9769",
             '_indextime' => "1355946583",
             '_kv' => "1",
-            '_raw' => "12-19-2012 11:49:43.322 -0800 INFO  Metrics - group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            '_raw' => "12-19-2012 11:49:43.322 -0800 INFO  Metrics" +
+                " - group=<sg h=\"1\">search</sg>_concurrency, system total," +
+                " active_hist_searches=0, active_realtime_searches=0",
             '_serial' => "724",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd",
@@ -890,9 +956,11 @@ class TestResultsReader < Test::Unit::TestCase
             'index' => "_internal",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            'message' => "group=search_concurrency, system total," +
+                " active_hist_searches=0, active_realtime_searches=0",
             'punct' => "--_::._-____-_=,__,_=,_=",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/metrics.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/metrics.log",
             'sourcetype' => "splunkd",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "29",
@@ -902,7 +970,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:9764",
             '_indextime' => "1355946583",
             '_kv' => "1",
-            '_raw' => "12-19-2012 11:49:43.322 -0800 INFO  Metrics - group=realtime_search_data, system total, drop_count=0",
+            '_raw' => "12-19-2012 11:49:43.322 -0800 INFO  Metrics" +
+                " - group=realtime_<sg h=\"1\">search</sg>_data, system" +
+                " total, drop_count=0",
             '_serial' => "725",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd",
@@ -923,9 +993,11 @@ class TestResultsReader < Test::Unit::TestCase
             'index' => "_internal",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "group=realtime_search_data, system total, drop_count=0",
+            'message' => "group=realtime_search_data, system total," +
+                " drop_count=0",
             'punct' => "--_::._-____-_=,__,_=",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/metrics.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/metrics.log",
             'sourcetype' => "splunkd",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "29",
@@ -935,7 +1007,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "54:10097",
             '_indextime' => "1355946614",
             '_kv' => "1",
-            '_raw' => "12-19-2012 11:50:14.351 -0800 INFO  Metrics - group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            '_raw' => "12-19-2012 11:50:14.351 -0800 INFO  Metrics" +
+                " - group=<sg h=\"1\">search</sg>_concurrency, system total," +
+                " active_hist_searches=0, active_realtime_searches=0",
             '_serial' => "722",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd",
@@ -957,9 +1031,11 @@ class TestResultsReader < Test::Unit::TestCase
             'index' => "_internal",
             'linecount' => "1",
             'log_level' => "INFO",
-            'message' => "group=search_concurrency, system total, active_hist_searches=0, active_realtime_searches=0",
+            'message' => "group=search_concurrency, system total," +
+                " active_hist_searches=0, active_realtime_searches=0",
             'punct' => "--_::._-____-_=,__,_=,_=",
-            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/splunk/metrics.log",
+            'source' => "/Users/fross/splunks/splunk-4.3.5/var/log/" +
+                "splunk/metrics.log",
             'sourcetype' => "splunkd",
             'splunk_server' => "fross-mbp15.local",
             'timeendpos' => "29",
@@ -970,6 +1046,9 @@ class TestResultsReader < Test::Unit::TestCase
     n_results = 0
     reader.each_with_index do |result, index|
       n_results += 1
+      expected_results[index].each_entry do |key, value|
+        assert_equal([index, key, value], [index, key, result[key]])
+      end
       assert_equal(expected_results[index], result)
     end
 
@@ -1034,7 +1113,7 @@ class TestResultsReader < Test::Unit::TestCase
             '_kv' => "1",
             '_raw' => "12-19-2012 12:02:18.172 -0800 INFO  IndexProcessor" +
                 " - rtsearch connection established, filter = '[ " +
-                "AND index::_internal search ]', active_streams = 1, " +
+                "AND <sg h=\"1\">index::_internal</sg> <sg h=\"1\">search</sg> ]', active_streams = 1, " +
                 "queue_size = 10000, blocking = FALSE, max_block_secs = 0",
             '_serial' => "0",
             '_sourcetype' => "splunkd",
@@ -1073,7 +1152,7 @@ class TestResultsReader < Test::Unit::TestCase
         {
             '_indextime' => "1355947338",
             '_kv' => "1",
-            '_raw' => "2012-12-19 12:02:18,066 - admin	search search " +
+            '_raw' => "2012-12-19 12:02:18,066 - admin	<sg h=\"1\">search</sg> <sg h=\"1\">search</sg> " +
                 "index=_internal | head 10",
             '_serial' => "1",
             '_sourcetype' => "searches",
@@ -1139,7 +1218,9 @@ class TestResultsReader < Test::Unit::TestCase
             '_cd' => "1:5282",
             '_indextime' => "1355947283",
             '_kv' => "1",
-            '_raw' => "127.0.0.1 - admin [19/Dec/2012:12:01:22.845 -0800] \"GET /services/search/timeparser/tz HTTP/1.1\" 200 2891 - - - 1ms",
+            '_raw' => "127.0.0.1 - admin [19/Dec/2012:12:01:22.845 -0800] " +
+                "\"GET /services/<sg h=\"1\">search</sg>/timeparser/tz " +
+                "HTTP/1.1\" 200 2891 - - - 1ms",
             '_serial' => "0",
             '_si' => ["fross-mbp15.local", "_internal"],
             '_sourcetype' => "splunkd_access",
@@ -1184,7 +1265,8 @@ class TestResultsReader < Test::Unit::TestCase
             '_raw' => "127.0.0.1 - admin [19/Dec/2012:12:01:22.762 -0800] " +
                 "\"POST /en-US/account/login HTTP/1.1\" 200 1897 \"http:" +
                 "//localhost:8000/en-US/account/login?return_to=%2Fen-US" +
-                "%2Fapp%2Fsearch%2Fflashtimeline%3Fq%3Dsearch%2520search" +
+                "%2Fapp%2Fsearch%2Fflashtimeline%3Fq%3D<sg h=\"1\">search" +
+                "</sg>%2520<sg h=\"1\">search</sg>" +
                 "%2520index%253D_internal%2520%257C%2520head%252010%26" +
                 "earliest%3D0\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X " +
                 "10.7; rv:17.0) Gecko/20100101 Firefox/17.0\" - " +
@@ -1241,6 +1323,9 @@ class TestResultsReader < Test::Unit::TestCase
     n_results = 0
     reader.each_with_index do |result, index|
       n_results += 1
+      expected_results[index].each_entry do |key, value|
+        assert_equal([key, value], [key, result[key]])
+      end
       assert_equal(expected_results[index], result)
     end
 
