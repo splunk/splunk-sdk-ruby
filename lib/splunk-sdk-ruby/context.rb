@@ -83,6 +83,10 @@ module Splunk
       response = post(
         '/services/auth/login', {:username=>@username, :password=>@password})
       begin
+        # The response looks like:
+        # <response>
+        # <sessionKey>da950729652f8255c230afe37bdf8b97</sessionKey>
+        # </response>
         if $xml_library == :nokogiri
           doc = Nokogiri::XML(response.to_s)
           @token = doc.xpath('//sessionKey').last.content
