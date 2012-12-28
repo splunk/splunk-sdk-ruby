@@ -53,3 +53,15 @@ def nokogiri_available?
     return false
   end
 end
+
+class SplunkTestCase < Test::Unit::TestCase
+  def setup
+    super
+    @splunkrc = read_splunkrc()
+  end
+
+  def teardown
+
+    super
+  end
+end

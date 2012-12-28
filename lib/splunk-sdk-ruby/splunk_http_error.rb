@@ -1,35 +1,21 @@
-require 'rubygems'
-
-require_relative 'aloader'
-require_relative 'splunk_error'
-
+require_relative 'xml_shim'
 
 module Splunk
-  class SplunkHTTPError < SplunkError
-    attr_reader :status, :reason, :code, :headers, :body, :detail
+  class SplunkHTTPError < StandardError
+    attr_reader :reason, :code, :headers, :body, :detail
 
     def initialize(response)
       @body = response.body
-      doc = Nokogiri::XML(@body)
-      temp_detail = doc.xpath('//msg').last
-
-      if temp_detail.nil?
-        @detail = nil
-      else
-        @detail = temp_detail.content
+      begin
+        @detail = text_at_xpath("//msg", response.body)
+      #rescue
+      #  @detail = nil
       end
+      @reason = response.message
+      @code = Integer(response.code)
+      @headers = response.each().to_a()
 
-      al = AtomResponseLoader::load_text(@body)
-
-      @code = response.code
-      @status = al['status'] || ''
-      @reason = al['reason'] || ''
-      @headers = response.headers
-
-      detail_msg = @detail || ''
-      message = "HTTP #{@status.to_str} #{@reason}#{detail_msg}"
-
-      super message
+      super("HTTP #{@code.to_s} #{@reason}: #{@detail || ""}")
     end
   end
 end

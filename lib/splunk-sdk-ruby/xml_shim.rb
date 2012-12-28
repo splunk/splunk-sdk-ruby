@@ -22,3 +22,22 @@ elsif ENV['RUBY_XML_LIBRARY'].downcase == "nokogiri"
 else # Default: try to use Nokogiri, and otherwise fall back on REXML.
   raise StandardError.new("Unknown XML library: #{ENV['RUBY_XML_LIBRARY']}")
 end
+
+module Splunk
+  def text_at_xpath(xpath, text)
+    if text.nil? or text.length == 0
+      return nil
+    elsif $xml_library == :nokogiri
+      doc = Nokogiri::XML(text)
+      return doc.xpath(xpath).last.content
+    else
+      doc = REXML::Document.new(text)
+      matches = doc.elements[xpath]
+      if matches
+        return matches[0].value
+      else
+        return nil
+      end
+    end
+  end
+end

@@ -1,251 +1,74 @@
 require_relative "test_helper"
-require "splunk-sdk-ruby/aloader"
-require "splunk-sdk-ruby/context"
-require "uuid"
+require "splunk-sdk-ruby"
 
+include Splunk
 
-$config = read_splunkrc()
-
-$my_argv = ARGV.dup
-
-class TestContext < Test::Unit::TestCase
-  NAMESPACE_ATOM = {'atom' => 'http://www.w3.org/2005/Atom'}
-  NAMESPACE_REST = {'s' => 'http://dev.splunk.com/ns/rest'}
-  NAMESPACE_OPENSEARCH = {'opensearch' => 'http://a9.com/-/spec/opensearch/1.1'}
-  PATH_USERS = "authentication/users"
-
-  def random_uname
-    UUID.new.generate
+class TestContext < SplunkTestCase
+  def assert_logged_in(context)
+    assert_nothing_raised do
+      # A request to data/indexes requires you to be logged in.
+      context.request(method=:GET, scheme=nil, host=nil, port=nil,
+                      namespace=Splunk::namespace(),
+                      resource=["data", "indexes"])
+    end
   end
 
-  def assertHttp(allowed_error_codes)
+  def assert_not_logged_in(context)
     begin
-      retval = yield
-      retval
-    rescue Splunk::SplunkHTTPError => e
-      assert(allowed_error_codes.include?(e.code))
-    rescue Exception => e
-      p "SplunkHTTPError not caught.  Caught #{e.class} instead"
-      assert(false)
+      context.request(method=:GET, scheme=nil, host=nil, port=nil,
+                      namespace=Splunk::namespace(),
+                      resource=["data", "indexes"])
+    rescue SplunkHTTPError => err
+      assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
+    else
+      fail("Context is logged in.")
     end
   end
 
-  def is_atom(context, endpoint)
-    ns = NAMESPACE_ATOM.merge( NAMESPACE_REST.merge( NAMESPACE_OPENSEARCH ))
-
-    r = context.get(endpoint)
-
-    doc = Nokogiri::XML(r)
-
-    assert_equal(doc.root.name, 'feed')
-    #return false if doc.root.name != 'feed'
-    assert_not_equal(doc.xpath('atom:title', ns).length, 1)
-    #return false if doc.xpath('atom:title', ns).length != 1
-    assert_not_equal(doc.xpath('atom:author', ns).length, 1)
-    #return false if doc.xpath('atom:author', ns).length != 1
-    assert_not_equal(doc.xpath('atom:id', ns).length, 1)
-    #return false if doc.xpath('atom:id', ns).length != 1
-
-    true
+  def test_login()
+    context = Context.new(@splunkrc)
+    context.login()
+    assert_logged_in(context)
   end
 
-  #Test to make sure that certain endpoints return what looks like an ATOM feed
-  def test_protocol
-    c = Splunk::Context.new($config)
-    c.login
+  def test_authenticate_with_token
+    context = Context.new(@splunkrc).login()
+    token = context.token
 
-    ['/services', PATH_USERS, 'search/jobs'].each do |endpoint|
-      assert(is_atom(c,endpoint))
-    end
+    new_arguments = @splunkrc.clone
+    new_arguments.delete(:username)
+    new_arguments.delete(:password)
+    new_arguments[:token] = token
+
+    new_context = Context.new(new_arguments)
+    assert_not_nil(new_context.token)
+    assert_logged_in(new_context)
   end
 
-  #Test to make sure that we can login & logout
-  def test_authentication
-    #Test good login
-    c = Splunk::Context.new($config)
-    c.login
+  def test_failed_login()
+    args = @splunkrc.clone()
+    args[:username] = args[:username] + "-boris"
+    context = Context.new(args)
 
-    #Test a get with the above context - should work
-    assert(is_atom(c, PATH_USERS))
-
-    #Test log out
-    c.logout
-
-    #Test a get with the above context - should fail
-    assert_raise Splunk::SplunkHTTPError do
-      is_atom(c, PATH_USERS)
-    end
-
-    #Test bad login (bad user)
-    assert_raise Splunk::SplunkHTTPError do
-      c = Splunk::Context.new($config.merge(:username => 'baduser'))
-      c.login
-    end
-
-    #Test bad login (bad password)
-    assert_raise Splunk::SplunkHTTPError do
-      c = Splunk::Context.new($config.merge(:password => 'badpsw'))
-      c.login
-    end
+    assert_raises(SplunkHTTPError) {context.login()}
   end
 
-  def test_create_user
-    begin
-      c = Splunk::Context.new($config)
-      c.login
+  def test_multiple_logins_are_nops()
+    context = Context.new(@splunkrc).login()
+    assert_logged_in(context)
 
-      uname = random_uname
-
-      #Cannot create a user w/o a role
-      assertHttp [400] do
-        c.post(PATH_USERS, :name => uname, :password => 'changeme')
-      end
-
-      #Create a test user
-      response = c.post(PATH_USERS, :name => uname, :password => 'changeme', :roles => 'user')
-      assert(response.code == 201)
-
-      #Can't create the same user twice
-      assertHttp [400] do
-        c.post(PATH_USERS, :name => uname, :password => 'changeme', :roles => 'user')
-      end
-
-      #Connect as a newly created user
-      user_ctx = Splunk::Context.new($config.merge(:username => uname, :password => 'changeme'))
-      user_ctx.login
-
-      #Ensure that this user actually works
-      assert(user_ctx.get("/services").code == 200)
-
-      #This user cannot create new users
-      assertHttp [403, 404] do
-        user_ctx.post(PATH_USERS, :name => "barfo", :password => "killjoy", :roles => "user")
-      end
-    ensure
-      #Test delete - clean up the random user
-      response = c.delete(PATH_USERS + '/' + uname)
-      assert(response.code == 200)
-    end
-
+    assert_nothing_raised() {context.login()}
+    assert_logged_in(context)
   end
 
-  def test_get_user
-    c = Splunk::Context.new($config)
-    c.login
-    assert(c.get(PATH_USERS + '/admin').code == 200)
+  def test_logout
+    context = Context.new(@splunkrc).login()
+    assert_logged_in(context)
+
+    context.logout()
+    assert_not_logged_in(context)
+
+    context.login()
+    assert_logged_in(context)
   end
-
-  def test_get_users
-    c = Splunk::Context.new($config)
-    c.login
-    assert(c.get(PATH_USERS).code == 200)
-  end
-
-  def test_edit_user
-    uname = random_uname
-    user_path = PATH_USERS + '/' + uname
-
-    begin
-      #login as admin
-      c = Splunk::Context.new($config)
-      c.login
-
-      #create a random user
-      response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
-      assert(response.code == 201)
-
-      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
-      userctx.login
-
-      #set the random user's default app to 'search'
-      assert(userctx.post(user_path, :defaultApp => "search").code == 200)
-
-      #set the random users default app to something random and watch it error out
-      assertHttp [400] do
-        userctx.post(user_path, :defaultApp => random_uname())
-      end
-
-      #set the random user's default app to ''
-      assert(userctx.post(user_path, :defaultApp => "").code == 200)
-
-      #set the random user's real name and email
-      assert(userctx.post(user_path, :realname => "Bozo", :email => "email.me@now.com").code == 200)
-
-      #set the random user's real name and email
-      assert(userctx.post(user_path, :realname => "", :email => "").code == 200)
-
-    ensure
-      #Test delete - clean up the random user
-      assert(c.delete(PATH_USERS + '/' + uname).code == 200)
-    end
-  end
-
-def test_password
-    uname = random_uname
-    user_path = PATH_USERS + '/' + uname
-
-    begin
-      #login as admin
-      c = Splunk::Context.new($config)
-      c.login
-
-      #create a random user
-      response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
-      assert(response.code == 201)
-
-      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
-      userctx.login
-
-      #user changes their own password
-      assert(userctx.post(user_path, :password => 'changed').code == 200)
-
-      #user changes it again
-      assert(userctx.post(user_path, :password => 'again').code == 200)
-
-      #try to connect with the original password should error out
-      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
-      assert_raise Splunk::SplunkHTTPError do
-        userctx.login
-      end
-
-      #admin changes it back and login should work
-      assert(c.post(user_path, :password => 'changeme').code == 200)
-      userctx = Splunk::Context.new($config.merge(:username => uname, :password => "changeme"))
-      userctx.login
-
-    ensure
-      #Test delete - clean up the random user
-      assert(c.delete(PATH_USERS + '/' + uname).code == 200)
-    end
-  end
-
-  def test_roles
-    uname = random_uname
-    user_path = PATH_USERS + '/' + uname
-
-    begin
-      #login as admin
-      c = Splunk::Context.new($config)
-      c.login
-
-      #create a random user
-      response = c.post(PATH_USERS, :name => uname, :password => "changeme", :roles => 'user')
-      assert(response.code == 201)
-
-      #admin updates to mutlipe roles
-      assert(c.post(user_path, :roles => ["power","user"]).code == 200)
-
-      #set back to a single role
-      assert(c.post(user_path, :roles => 'user').code == 200)
-
-      #fail adding unknown role
-      assertHttp [400] do
-        c.post(PATH_USERS, :roles => '_unknown__')
-      end
-    ensure
-      #Test delete - clean up the random user
-      assert(c.delete(PATH_USERS + '/' + uname).code == 200)
-    end
-  end
-
 end
