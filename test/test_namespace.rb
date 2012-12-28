@@ -4,6 +4,13 @@ require 'splunk-sdk-ruby/namespace'
 include Splunk
 
 class TestNamespaces < Test::Unit::TestCase
+  def test_incorrect_constructors
+    assert_raises(ArgumentError) {namespace(sharing="boris")}
+    assert_raises(ArgumentError) {namespace(sharing="app")}
+    assert_raises(ArgumentError) {namespace(sharing="user")}
+    assert_raises(ArgumentError) {namespace(sharing="user", app="search")}
+  end
+
   def test_equality
     assert_equal(namespace("global"), namespace("global"))
     assert_equal(namespace("system"), namespace("system"))
@@ -32,8 +39,11 @@ class TestNamespaces < Test::Unit::TestCase
     assert_true(namespace("system").is_a?(SystemNamespace))
     assert_true(namespace("system").is_a?(Namespace))
 
-    assert_true(namespace("app", "search").is_a?(ApplicationNamespace))
+    assert_true(namespace("app", "search").is_a?(AppNamespace))
     assert_true(namespace("app", "search").is_a?(Namespace))
+
+    assert_true(namespace("app", "").is_a?(AppReferenceNamespace))
+    assert_true(namespace("app", "").is_a?(Namespace))
 
     assert_true(namespace("user", "search", "boris").is_a?(UserNamespace))
     assert_true(namespace("user", "search", "boris").is_a?(Namespace))
@@ -66,6 +76,7 @@ class TestNamespaces < Test::Unit::TestCase
     assert_false(namespace().is_proper?)
     assert_true(namespace("app", "search").is_proper?)
     assert_false(namespace("app", "-").is_proper?)
+    assert_true(namespace("app", "").is_proper?)
     assert_true(namespace("user", "search", "boris").is_proper?)
     assert_false(namespace("user", "-", "boris").is_proper?)
     assert_false(namespace("user", "search", "-").is_proper?)
@@ -80,14 +91,12 @@ class TestNamespaces < Test::Unit::TestCase
     assert_equal(["servicesNS", "nobody", "system"],
                  namespace("system").to_path_fragment)
     assert_equal(["servicesNS", "nobody", "search"],
-                 namespace("app",
-                           application="search").to_path_fragment)
+                 namespace("app", app="search").to_path_fragment)
     assert_equal(["servicesNS", "nobody", "-"],
-                 namespace("app",
-                           application="-").to_path_fragment)
+                 namespace("app", app="-").to_path_fragment)
+    assert_equal(["services"], namespace("app", "").to_path_fragment)
     assert_equal(["servicesNS", "boris", "search"],
-                 namespace("user", application="search",
-                           user="boris").to_path_fragment)
+                 namespace("user", app="search", user="boris").to_path_fragment)
   end
 
   def test_eai_acl_to_namespace
@@ -120,7 +129,7 @@ class TestNamespaces < Test::Unit::TestCase
             "app" => "search",
             "can_write" => "1"
         },
-        namespace("default") => {
+        namespace("app", app="") => {
             "app" => "",
             "can_change_perms" => "1",
             "can_list" => "1",
