@@ -3,6 +3,24 @@ require "splunk-sdk-ruby"
 
 include Splunk
 
+# Test the helper functions in test_helper.rb
+class TestHelpers < SplunkTestCase
+  def test_temporary_name
+    assert_true(temporary_name().start_with?("delete-me"))
+  end
+
+  def test_set_and_clear_restart_messages()
+    context = Context.new(@splunkrc).login()
+    assert_false(context.server_requires_restart?)
+
+    set_restart_message(context)
+    assert_true(context.server_requires_restart?)
+
+    clear_restart_message(context)
+    assert_false(context.server_requires_restart?)
+  end
+end
+
 class TestContext < SplunkTestCase
   def test_login()
     context = Context.new(@splunkrc)
