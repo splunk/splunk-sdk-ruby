@@ -4,25 +4,6 @@ require "splunk-sdk-ruby"
 include Splunk
 
 class TestContext < SplunkTestCase
-  def assert_logged_in(context)
-    assert_nothing_raised do
-      # A request to data/indexes requires you to be logged in.
-      context.request(:method=>:GET,
-                      :resource=>["data", "indexes"])
-    end
-  end
-
-  def assert_not_logged_in(context)
-    begin
-      context.request(:method=>:GET,
-                      :resource=>["data", "indexes"])
-    rescue SplunkHTTPError => err
-      assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
-    else
-      fail("Context is logged in.")
-    end
-  end
-
   def test_login()
     context = Context.new(@splunkrc)
     context.login()
@@ -90,5 +71,15 @@ class TestContext < SplunkTestCase
     socket.write("\r\n")
     response = socket.readlines()
     assert_equal("HTTP/1.1 200 OK", response[0].strip)
+  end
+
+  def test_server_accepting_connections?
+    values = @splunkrc.clone()
+    values[:port] = 10253
+    context = Context.new(values)
+    assert_false(context.server_accepting_connections?)
+
+    context = Context.new(@splunkrc)
+    assert_true(context.server_accepting_connections?)
   end
 end

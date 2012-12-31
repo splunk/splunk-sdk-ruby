@@ -244,6 +244,110 @@ module Splunk
         return socket
       end
     end
-  end
 
+    # Is the Splunk server accepting connections?
+    #
+    # Returns true if the Splunk server is up and accepting REST API
+    # connections; false otherwise.
+    #
+    def server_accepting_connections?()
+      begin
+        # Can't use login, since it has short circuits
+        # when @token != nil on the Context. Instead, make
+        # a request directly.
+        request(:resource=>["data","indexes"])
+      rescue Errno::ECONNREFUSED, EOFError
+        return false
+      rescue SplunkHTTPError
+        # Splunk is up, because it responded with a proper HTTP error
+        # that our SplunkHTTPError parser understood.
+        return true
+      else
+        # Or the request worked, so we know that Splunk is up.
+        return true
+      end
+    end
+
+    # Is the Splunk server in a state requiring a restart?
+    #
+    # Returns true if the Splunk server is down (equivalent to
+    # server_accepting_connections?), or if there is a `restart_required`
+    # message on the server; false otherwise.
+    #
+    def server_requires_restart?()
+      begin
+        request(:resource => ["messages", "restart_required"])
+        return true
+      rescue Errno::ECONNREFUSED, EOFError
+        return true
+      rescue SplunkHTTPError => err
+        if err.code == 401
+          # The messages endpoint requires authentication.
+          logout()
+          login()
+          return server_requires_restart?()
+        elsif err.code == 404
+          return false
+        else
+          raise err
+        end
+      end
+    end
+
+    # Restart this Splunk instance.
+    #
+    # `restart` may be called with an optional timeout. If you pass a timeout,
+    # `restart` will wait up to that number of seconds for the server to come
+    # back up before returning. If `restart` did not time out, it leaves the
+    # Context logged in when it returns.
+    #
+    # If the timeout is, omitted, `restart` returns immediately, and you will
+    # have to ascertain if Splunk has come back up yourself, for example with
+    # code like:
+    #
+    #     context = Context.new(...).login()
+    #     context.restart()
+    #     Timeout::timeout(timeout) do
+    #         while !context.server_accepting_connections? ||
+    #                 context.server_requires_restart?
+    #             sleep(0.3)
+    #         end
+    #     end
+    #
+    # Returns this Context.
+    #
+    def restart(timeout=nil)
+      if !timeout.nil?
+        # If we're waiting for a timeout, set a message saying that restart is
+        # required. It will be cleared when Splunk comes back up, but we
+        # otherwise have no way to determine if Splunk has actually gone down.
+        request(:method => :POST,
+                :namespace => namespace(),
+                :resource => ["messages"],
+                :body => {"name" => "restart_required",
+                          "value" => "Message set by restart method" +
+                              " of the Splunk Ruby SDK"})
+      end
+
+      # Make the actual restart request.
+      request(:resource => ["server", "control", "restart"])
+
+      # Clear our old token, which will no longer work after the restart.
+      logout()
+
+      # If timeout is nil, return immediately. If timeout is a positive
+      # integer, wait for `timeout` seconds for the server to come back
+      # up.
+      if !timeout.nil?
+        Timeout::timeout(timeout) do
+          while !server_accepting_connections? || server_requires_restart?
+            sleep(0.3)
+          end
+        end
+      end
+
+      # Return the Context.
+      self
+    end
+  end
 end
