@@ -7,17 +7,15 @@ class TestContext < SplunkTestCase
   def assert_logged_in(context)
     assert_nothing_raised do
       # A request to data/indexes requires you to be logged in.
-      context.request(method=:GET, scheme=nil, host=nil, port=nil,
-                      namespace=Splunk::namespace(),
-                      resource=["data", "indexes"])
+      context.request(:method=>:GET,
+                      :resource=>["data", "indexes"])
     end
   end
 
   def assert_not_logged_in(context)
     begin
-      context.request(method=:GET, scheme=nil, host=nil, port=nil,
-                      namespace=Splunk::namespace(),
-                      resource=["data", "indexes"])
+      context.request(:method=>:GET,
+                      :resource=>["data", "indexes"])
     rescue SplunkHTTPError => err
       assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
     else
@@ -29,6 +27,17 @@ class TestContext < SplunkTestCase
     context = Context.new(@splunkrc)
     context.login()
     assert_logged_in(context)
+  end
+
+  def test_login_with_encodings()
+    ["ASCII", "UTF-8"].each() do |encoding|
+      values = {}
+      @splunkrc.each() do |key, value|
+        values[key] = value.clone().force_encoding(encoding)
+      end
+      context = Context.new(values).login()
+      assert_logged_in(context)
+    end
   end
 
   def test_authenticate_with_token
@@ -70,5 +79,16 @@ class TestContext < SplunkTestCase
 
     context.login()
     assert_logged_in(context)
+  end
+
+  def test_connect()
+    context = Context.new(@splunkrc).login()
+    socket = context.connect()
+    # Send a manual HTTP request
+    socket.write("GET /services/data/indexes HTTP/1.1\r\n")
+    socket.write("Authorization: Splunk #{context.token}\r\n")
+    socket.write("\r\n")
+    response = socket.readlines()
+    assert_equal("HTTP/1.1 200 OK", response[0].strip)
   end
 end
