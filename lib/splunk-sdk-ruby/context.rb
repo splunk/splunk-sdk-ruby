@@ -39,7 +39,7 @@ module Splunk
     # * `password`: The password used to log in.
     #
     attr_reader :scheme, :host, :port, :token,
-                :username, :password
+                :username, :password, :namespace
 
     def initialize(args)
       @token = args.fetch(:token, nil)
@@ -48,7 +48,9 @@ module Splunk
       @port = Integer(args.fetch(:port, DEFAULT_PORT))
       @username = args.fetch(:username, nil)
       @password = args.fetch(:password, nil)
-      @namespace = args.fetch(:namespace, namespace())
+      # Have to use Splunk::namespace() or we will call the
+      # local accessor.
+      @namespace = args.fetch(:namespace, Splunk::namespace())
     end
 
     # Login to Splunk. The _token_ attribute will be filled with the
