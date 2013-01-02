@@ -5,10 +5,12 @@ module Splunk
     # The name of this Entity
     attr_reader :name
 
-    def initialize(service, path, name=nil) # :nodoc:
+    def initialize(service, namespace, resource, name, state=nil) # :nodoc:
       @service = service
-      @path = path
+      @namespace = namespace
+      @resource = resource
       @name = name
+      @state = state
     end
 
     # Access an individual attribute named <b>+key+</b>.

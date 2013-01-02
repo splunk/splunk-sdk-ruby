@@ -1,37 +1,31 @@
 module Splunk
-#TODO: Implement Inputs
-
-  ##
   # Collections are groups of items, which can be Entity objects, subclasses of
   # Entity objects or Job objects.
   # They are created by calling one of many methods on the Service object.
   class Collection
-    def initialize(service, path, name=nil, procs={})
+    def initialize(service, path, entity_class=Entity)
       @service = service
       @path = path
-      @name = name if !name.nil?
-      @procs = procs
-      @item = init_default(:item, nil)
-      @ctor = init_default(:ctor, nil)
-      @dtor = init_default(:dtor, nil)
+      @entity_class = entity_class
+
+      # @infinite_count declares the value used for listing all the entities
+      # in a collection. It is usually -1, but some collections use 0.
+      @infinite_count = -1
     end
 
-    def init_default(key, deflt) # :nodoc:
-      if @procs.has_key?(key)
-        return @procs[key]
-      end
-      deflt
-    end
+    attr_reader :service, :path, :entity_class
 
-    # Calls block once for each item in the collection
+    # Create an Entity from a hash of an Atom entry in this collection.
     #
-    # ==== Example - display the name and level of each logger
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
-    def each(&block)  # :yields: item
-      self.list().each do |name|
-        yield @item.call(@service, name)
-      end
+    def atom_entry_to_entity(entry)
+      name = entry["title"]
+      namespace = eai_acl_to_namespace(entry["content"]["eai:acl"])
+
+      @entity_class.new(service=@service,
+                        namespace=namespace,
+                        path=@path,
+                        name=name,
+                        state=entry)
     end
 
     # Deletes an item named <b>+name+</b>
@@ -45,6 +39,63 @@ module Splunk
       @dtor.call(@service, name)
       return self
     end
+
+    # Calls block once for each item in the collection.
+    #
+    # `each` takes three optional arguments as well:
+    #
+    # * `count` sets the maximum number of entities to fetch (integer >= 0)
+    # * `offset` sets how many items to skip before returning items in the
+    #   collection (integer >= 0)
+    # * `page_size` sets how many items at a time should be fetched from the
+    #   server and processed before fetching another set.
+    #
+    # ==== Example - display the name and level of each logger
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
+    #   svc.loggers.each {|logger| puts logger.name + ":" + logger['level']}
+    def each(args, &block)
+      count = args.fetch(:count, @infinite_count)
+      offset = args.fetch(:offset, 0)
+      page_size = args.fetch(:page_size, nil)
+
+      if !page_size.nil?
+        # Do pagination. Fetch page_size at a time
+        current_offset = offset
+        remaining_count = count
+        while remaining_count > 0
+          n_entities = 0
+          each(:offset => current_offset,
+               :count => [remaining_count, page_size].min) do |entity|
+            n_entities += 1
+            block.call(entity)
+          end
+
+          if n_entities < page_size
+            break # We've reached the end of the collection.
+          else
+            remaining_count -= n_entities
+            current_offset += n_entities
+          end
+        end
+      else
+        # Fetch the specified range in one pass.
+        response = @service.request(:resource => @path,
+                                    :query => {"count" => count.to_s,
+                                               "offset" => offset.to_s})
+        feed = AtomFeed.new(response.body)
+        feed.entries.each() do |entry|
+          entity = atom_entry_to_entity(entry)
+          block.call(entity)
+        end
+      end
+    end
+
+    def each_pair(args, &block)
+      # Synonym for each
+      each(args, &block)
+    end
+
+
 
     # Creates an item in this collection named <b>+name+</b> with optional args
     #
