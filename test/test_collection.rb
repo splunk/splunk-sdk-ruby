@@ -5,29 +5,29 @@ include Splunk
 
 class TestCollection < SplunkTestCase
   def teardown
-    c = Collection.new(@context, ["saved", "searches"])
+    c = Collection.new(@service, ["saved", "searches"])
     c.delete_if() {|e| e.name.start_with?("delete-me")}
     super
   end
 
   def test_constructor
     resource = [temporary_name(), temporary_name()]
-    c = Collection.new(@context, resource)
-    assert_equal(@context, c.service)
+    c = Collection.new(@service, resource)
+    assert_equal(@service, c.service)
     assert_equal(resource, c.resource)
     assert_equal(Entity, c.entity_class)
   end
 
   def test_constructor_with_entity_class
     resource = [temporary_name(), temporary_name()]
-    c = Collection.new(@context, resource, TestCollection)
-    assert_equal(@context, c.service)
+    c = Collection.new(@service, resource, TestCollection)
+    assert_equal(@service, c.service)
     assert_equal(resource, c.resource)
     assert_equal(TestCollection, c.entity_class)
   end
 
   def test_each_without_pagination
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     n_entities = 0
     c.each(:count=>5) do |entity|
       assert_true(entity.is_a?(Entity))
@@ -37,7 +37,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_with_offset_and_count
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     entities = []
     c.each(:count => 5) do |entity|
@@ -53,7 +53,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_with_pagination
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     total = 5 + rand(15)
     page_size = 1 + rand(3)
@@ -72,7 +72,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_has_key
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     c.each(:count => 3) do |entity|
       assert_true(c.has_key?(entity.name))
       assert_true(c.contains?(entity.name))
@@ -93,7 +93,7 @@ class TestCollection < SplunkTestCase
     search_name = temporary_name()
     search = "search index=_internal | head 10"
 
-    c = Collection.new(@context, ["saved", "searches"])
+    c = Collection.new(@service, ["saved", "searches"])
 
     c.create(search_name, :search => search)
     assert_true(c.has_key?(search_name))
@@ -111,7 +111,7 @@ class TestCollection < SplunkTestCase
     search_name = temporary_name()
     search = "search index=_internal | head 10"
 
-    c = Collection.new(@context, ["saved", "searches"])
+    c = Collection.new(@service, ["saved", "searches"])
 
     c.create(search_name, :search => search)
     assert_true(c.has_key?(search_name))
@@ -126,18 +126,18 @@ class TestCollection < SplunkTestCase
     search_name = temporary_name()
     search = "search * | head 5"
 
-    saved_searches = Collection.new(@context, ["saved", "searches"])
+    saved_searches = Collection.new(@service, ["saved", "searches"])
     ss1 = saved_searches.create(search_name, :search => search,
                                 :namespace => namespace("app", "search"))
     ss2 = saved_searches.create(search_name, :search => search,
                                 :namespace => namespace("user", "search", "admin"))
 
-    wildcard_context_args = @splunkrc.clone()
-    wildcard_context_args[:namespace] = namespace("user", "-", "-")
-    wildcard_context = Context.new(wildcard_context_args).login()
+    wildcard_service_args = @splunkrc.clone()
+    wildcard_service_args[:namespace] = namespace("user", "-", "-")
+    wildcard_service = Context.new(wildcard_service_args).login()
 
     wildcard_saved_searches =
-        Collection.new(wildcard_context, ["saved", "searches"])
+        Collection.new(wildcard_service, ["saved", "searches"])
     assert_true(wildcard_saved_searches.has_key?(search_name))
 
     assert_raises(Splunk::AmbiguousEntityReference) do
@@ -174,7 +174,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_values
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     es = c.values(:count => 3)
     assert_true(es.length <= 3)
@@ -184,7 +184,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_equivales_values
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     assert_equal(
         c.each().to_a().map() {|e| e.name},
@@ -193,7 +193,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_length
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     assert_equal(c.values().length(), c.length())
     assert_equal(c.values().length(), c.size())
@@ -201,7 +201,7 @@ class TestCollection < SplunkTestCase
 
 
   def test_select
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     a = c.select() {|e| e.name == "search"}.to_a
     assert_equal(1, a.length)
@@ -209,19 +209,19 @@ class TestCollection < SplunkTestCase
   end
 
   def test_reject
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     a = c.reject() {|e| e.name != "search"}.to_a
     assert_equal(1, a.length)
     assert_equal("search", a[0].name)
   end
 
   def test_fetch_nonexistant
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     assert_nil(c.fetch("this does not exist"))
   end
 
   def test_assoc
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     name, entity = c.assoc("search")
     assert_equal("search", name)
     assert_equal("search", entity.name)
@@ -230,14 +230,14 @@ class TestCollection < SplunkTestCase
   end
 
   def test_keys
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
     keys = c.keys()
     assert_equal(c.values().map(){|e| e.name},
                  keys)
   end
 
   def test_each_key
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     keys = []
     c.each_key do |key|
@@ -247,7 +247,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_pair
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     keys = []
     c.each_pair do |key, value|
@@ -258,7 +258,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_value
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     keys = []
     c.each_value do |value|
@@ -268,13 +268,13 @@ class TestCollection < SplunkTestCase
   end
 
   def test_empty
-    c = Collection.new(@context, ["apps", "local"])
+    c = Collection.new(@service, ["apps", "local"])
 
     assert_false(c.empty?)
   end
 
   def test_delete_if
-    c = Collection.new(@context, ["saved", "searches"])
+    c = Collection.new(@service, ["saved", "searches"])
 
     c.create(temporary_name(), :search => "search *")
     c.create(temporary_name(), :search => "search *")

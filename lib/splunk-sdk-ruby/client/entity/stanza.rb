@@ -1,8 +1,5 @@
 module Splunk
-  class Conf < Entity
-    def initialize(service, path, name)
-      super(service, path, name)
-    end
+  class Stanza < Entity
     # ==== Example 2 - Display a Hash of configuration lines on a particular stanza
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   confs = svc.confs             #Return a Collection of ConfCollection objects (config files)

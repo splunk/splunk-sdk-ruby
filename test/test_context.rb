@@ -10,22 +10,22 @@ class TestHelpers < SplunkTestCase
   end
 
   def test_set_and_clear_restart_messages()
-    context = Context.new(@splunkrc).login()
-    assert_false(context.server_requires_restart?)
+    service = Context.new(@splunkrc).login()
+    assert_false(service.server_requires_restart?)
 
-    set_restart_message(context)
-    assert_true(context.server_requires_restart?)
+    set_restart_message(service)
+    assert_true(service.server_requires_restart?)
 
-    clear_restart_message(context)
-    assert_false(context.server_requires_restart?)
+    clear_restart_message(service)
+    assert_false(service.server_requires_restart?)
   end
 end
 
 class TestContext < SplunkTestCase
   def test_login()
-    context = Context.new(@splunkrc)
-    context.login()
-    assert_logged_in(context)
+    service = Context.new(@splunkrc)
+    service.login()
+    assert_logged_in(service)
   end
 
   def test_login_with_encodings()
@@ -34,58 +34,58 @@ class TestContext < SplunkTestCase
       @splunkrc.each() do |key, value|
         values[key] = value.clone().force_encoding(encoding)
       end
-      context = Context.new(values).login()
-      assert_logged_in(context)
+      service = Context.new(values).login()
+      assert_logged_in(service)
     end
   end
 
   def test_authenticate_with_token
-    context = Context.new(@splunkrc).login()
-    token = context.token
+    service = Context.new(@splunkrc).login()
+    token = service.token
 
     new_arguments = @splunkrc.clone
     new_arguments.delete(:username)
     new_arguments.delete(:password)
     new_arguments[:token] = token
 
-    new_context = Context.new(new_arguments)
-    assert_not_nil(new_context.token)
-    assert_logged_in(new_context)
+    new_service = Context.new(new_arguments)
+    assert_not_nil(new_service.token)
+    assert_logged_in(new_service)
   end
 
   def test_failed_login()
     args = @splunkrc.clone()
     args[:username] = args[:username] + "-boris"
-    context = Context.new(args)
+    service = Context.new(args)
 
-    assert_raises(SplunkHTTPError) {context.login()}
+    assert_raises(SplunkHTTPError) {service.login()}
   end
 
   def test_multiple_logins_are_nops()
-    context = Context.new(@splunkrc).login()
-    assert_logged_in(context)
+    service = Context.new(@splunkrc).login()
+    assert_logged_in(service)
 
-    assert_nothing_raised() {context.login()}
-    assert_logged_in(context)
+    assert_nothing_raised() {service.login()}
+    assert_logged_in(service)
   end
 
   def test_logout
-    context = Context.new(@splunkrc).login()
-    assert_logged_in(context)
+    service = Context.new(@splunkrc).login()
+    assert_logged_in(service)
 
-    context.logout()
-    assert_not_logged_in(context)
+    service.logout()
+    assert_not_logged_in(service)
 
-    context.login()
-    assert_logged_in(context)
+    service.login()
+    assert_logged_in(service)
   end
 
   def test_connect()
-    context = Context.new(@splunkrc).login()
-    socket = context.connect()
+    service = Context.new(@splunkrc).login()
+    socket = service.connect()
     # Send a manual HTTP request
     socket.write("GET /services/data/indexes HTTP/1.1\r\n")
-    socket.write("Authorization: Splunk #{context.token}\r\n")
+    socket.write("Authorization: Splunk #{service.token}\r\n")
     socket.write("\r\n")
     response = socket.readlines()
     assert_equal("HTTP/1.1 200 OK", response[0].strip)
@@ -94,10 +94,10 @@ class TestContext < SplunkTestCase
   def test_server_accepting_connections?
     values = @splunkrc.clone()
     values[:port] = 10253
-    context = Context.new(values)
-    assert_false(context.server_accepting_connections?)
+    service = Context.new(values)
+    assert_false(service.server_accepting_connections?)
 
-    context = Context.new(@splunkrc)
-    assert_true(context.server_accepting_connections?)
+    service = Context.new(@splunkrc)
+    assert_true(service.server_accepting_connections?)
   end
 end

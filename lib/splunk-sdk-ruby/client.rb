@@ -4,10 +4,10 @@ require 'json/pure'
 require 'rubygems'
 
 require_relative 'client/collection'
-require_relative 'client/collection/conf_collection'
+require_relative 'client/collection/configuration_file'
 require_relative 'client/collection/jobs'
 require_relative 'client/entity'
-require_relative 'client/entity/conf'
+require_relative 'client/entity/stanza'
 require_relative 'client/entity/index'
 require_relative 'client/entity/message'
 require_relative 'client/job'
@@ -35,7 +35,7 @@ end
 
 
 module Splunk
-  PATH_APPS_LOCAL = 'apps/local'
+  PATH_APPS_LOCAL = ["apps", "local"]
   PATH_CAPABILITIES = 'authorization/capabilities'
   PATH_LOGGER = 'server/logger'
   PATH_ROLES = 'authentication/roles'
@@ -44,9 +44,9 @@ module Splunk
   PATH_INFO = 'server/info'
   PATH_SETTINGS = 'server/settings'
   PATH_INDEXES = 'data/indexes'
-  PATH_CONFS = 'properties'
-  PATH_CONF = 'configs/conf-%s'
-  PATH_STANZA = 'configs/conf-%s/%s'
+  PATH_CONFS = ["properties"]
+  PATH_CONF = ["configs"]
+  PATH_STANZA = ["configs","conf-%s","%s"]
   PATH_JOBS = 'search/jobs'
   PATH_EXPORT = 'search/jobs/export'
   PATH_RESTART = 'server/control/restart'

@@ -65,33 +65,33 @@ class SplunkTestCase < Test::Unit::TestCase
   def setup
     super
     @splunkrc = read_splunkrc()
-    @context = Context.new(@splunkrc).login()
+    @service = Context.new(@splunkrc).login()
 
-    if @context.server_requires_restart?
+    if @service.server_requires_restart?
       fail("Previous test left server in a state requiring a restart.")
     end
   end
 
   def teardown
-    if @context.server_requires_restart?()
+    if @service.server_requires_restart?()
       puts "Test left server in a state requiring restart."
-      checked_restart(@context)
+      checked_restart(@service)
     end
 
     super
   end
 
-  def assert_logged_in(context)
+  def assert_logged_in(service)
     assert_nothing_raised do
       # A request to data/indexes requires you to be logged in.
-      context.request(:method=>:GET,
+      service.request(:method=>:GET,
                       :resource=>["data", "indexes"])
     end
   end
 
-  def assert_not_logged_in(context)
+  def assert_not_logged_in(service)
     begin
-      context.request(:method=>:GET,
+      service.request(:method=>:GET,
                       :resource=>["data", "indexes"])
     rescue SplunkHTTPError => err
       assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
@@ -100,18 +100,18 @@ class SplunkTestCase < Test::Unit::TestCase
     end
   end
 
-  # Clear any restart messages on _context_.
+  # Clear any restart messages on _service_.
   #
   # If there was no restart message, raises an error. (We want all the restarts
   # and restart messages carefully controlled in the test suite.)
   #
-  def clear_restart_message(context)
-    if !context.server_requires_restart?
+  def clear_restart_message(service)
+    if !service.server_requires_restart?
         raise StandardError.new("Tried to clear restart message " +
                                     "when there was none.")
     end
     begin
-      context.request(:method => :DELETE,
+      service.request(:method => :DELETE,
                       :resource => ["messages", "restart_required"])
     rescue SplunkHTTPError => err
       if err.code != 404
@@ -120,14 +120,14 @@ class SplunkTestCase < Test::Unit::TestCase
     end
   end
 
-  # Create a new restart message on _context_.
+  # Create a new restart message on _service_.
   #
   # Optionally you can specify a value for the restart message, or it will
   # default to "Ruby SDK test suite asked for a restart."
   #
-  def set_restart_message(context,
+  def set_restart_message(service,
                           message="Ruby SDK test suite asked for a restart.")
-    context.request(:method => :POST,
+    service.request(:method => :POST,
             :namespace => namespace(),
             :resource => ["messages"],
             :body => {"name" => "restart_required",
@@ -140,18 +140,18 @@ class SplunkTestCase < Test::Unit::TestCase
   # Throws an error if this is called on a Splunk instance that does not
   # need to be restarted.
   #
-  def checked_restart(context)
-    if !context.server_requires_restart?
+  def checked_restart(service)
+    if !service.server_requires_restart?
       raise StandardError("Tried to restart a Splunk instance that" +
                               " does not need it.")
     else
-      context.restart(DEFAULT_RESTART_TIMEOUT)
+      service.restart(DEFAULT_RESTART_TIMEOUT)
     end
   end
 
   # Restarts a Splunk instance whether it needs it or not.
   #
-  def unchecked_restart(context)
-    context.restart(DEFAULT_RESTART_TIMEOUT)
+  def unchecked_restart(service)
+    service.restart(DEFAULT_RESTART_TIMEOUT)
   end
 end

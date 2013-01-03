@@ -53,6 +53,26 @@ module Splunk
       @namespace = args.fetch(:namespace, Splunk::namespace())
     end
 
+    # Open a TCP socket to the Splunk HTTP server.
+    #
+    # If the Context protocol is `https`, then an SSL wrapped socket is
+    # returned.  If the Context protocol is `http`, then a regular socket
+    # is returned.
+    #
+    def connect()
+      socket = TCPSocket.new @host, @port
+      if scheme == :https
+        ssl_context = OpenSSL::SSL::SSLContext.new
+        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        ssl_socket = OpenSSL::SSL::SSLSocket.new(socket, ssl_context)
+        ssl_socket.sync_close = true
+        ssl_socket.connect
+        return ssl_socket
+      else
+        return socket
+      end
+    end
+
     # Login to Splunk. The _token_ attribute will be filled with the
     # Splunk authentication token upon successful login. If `@token` is not
     # `nil`, the context is taken to be already logged in, and this method
@@ -85,7 +105,7 @@ module Splunk
     #
     # This sets the @token attribute to `nil`.
     #
-    def logout
+    def logout()
       @token = nil
     end
 
@@ -227,75 +247,6 @@ module Splunk
       end
     end
 
-    # Open a TCP socket to the Splunk HTTP server.
-    #
-    # If the Context protocol is `https`, then an SSL wrapped socket is
-    # returned.  If the Context protocol is `http`, then a regular socket
-    # is returned.
-    #
-    def connect()
-      socket = TCPSocket.new @host, @port
-      if scheme == :https
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        ssl_socket = OpenSSL::SSL::SSLSocket.new(socket, ssl_context)
-        ssl_socket.sync_close = true
-        ssl_socket.connect
-        return ssl_socket
-      else
-        return socket
-      end
-    end
-
-    # Is the Splunk server accepting connections?
-    #
-    # Returns true if the Splunk server is up and accepting REST API
-    # connections; false otherwise.
-    #
-    def server_accepting_connections?()
-      begin
-        # Can't use login, since it has short circuits
-        # when @token != nil on the Context. Instead, make
-        # a request directly.
-        request(:resource=>["data","indexes"])
-      rescue Errno::ECONNREFUSED, EOFError
-        return false
-      rescue SplunkHTTPError
-        # Splunk is up, because it responded with a proper HTTP error
-        # that our SplunkHTTPError parser understood.
-        return true
-      else
-        # Or the request worked, so we know that Splunk is up.
-        return true
-      end
-    end
-
-    # Is the Splunk server in a state requiring a restart?
-    #
-    # Returns true if the Splunk server is down (equivalent to
-    # server_accepting_connections?), or if there is a `restart_required`
-    # message on the server; false otherwise.
-    #
-    def server_requires_restart?()
-      begin
-        request(:resource => ["messages", "restart_required"])
-        return true
-      rescue Errno::ECONNREFUSED, EOFError
-        return true
-      rescue SplunkHTTPError => err
-        if err.code == 401
-          # The messages endpoint requires authentication.
-          logout()
-          login()
-          return server_requires_restart?()
-        elsif err.code == 404
-          return false
-        else
-          raise err
-        end
-      end
-    end
-
     # Restart this Splunk instance.
     #
     # `restart` may be called with an optional timeout. If you pass a timeout,
@@ -350,6 +301,55 @@ module Splunk
 
       # Return the Context.
       self
+    end
+
+    # Is the Splunk server accepting connections?
+    #
+    # Returns true if the Splunk server is up and accepting REST API
+    # connections; false otherwise.
+    #
+    def server_accepting_connections?()
+      begin
+        # Can't use login, since it has short circuits
+        # when @token != nil on the Context. Instead, make
+        # a request directly.
+        request(:resource=>["data","indexes"])
+      rescue Errno::ECONNREFUSED, EOFError
+        return false
+      rescue SplunkHTTPError
+        # Splunk is up, because it responded with a proper HTTP error
+        # that our SplunkHTTPError parser understood.
+        return true
+      else
+        # Or the request worked, so we know that Splunk is up.
+        return true
+      end
+    end
+
+    # Is the Splunk server in a state requiring a restart?
+    #
+    # Returns true if the Splunk server is down (equivalent to
+    # server_accepting_connections?), or if there is a `restart_required`
+    # message on the server; false otherwise.
+    #
+    def server_requires_restart?()
+      begin
+        request(:resource => ["messages", "restart_required"])
+        return true
+      rescue Errno::ECONNREFUSED, EOFError
+        return true
+      rescue SplunkHTTPError => err
+        if err.code == 401
+          # The messages endpoint requires authentication.
+          logout()
+          login()
+          return server_requires_restart?()
+        elsif err.code == 404
+          return false
+        else
+          raise err
+        end
+      end
     end
   end
 end

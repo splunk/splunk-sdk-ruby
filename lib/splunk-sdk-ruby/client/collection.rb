@@ -74,7 +74,9 @@ module Splunk
 
       response = @service.request(request_args)
       feed = AtomFeed.new(response.body)
-      atom_entry_to_entity(feed.entries[0])
+      entity = atom_entry_to_entity(feed.entries[0])
+      raise StandardError.new("Found nil entity.") if entity.nil?
+      return entity
     end
 
     # Deletes an item named _name_ from the collection.
@@ -112,6 +114,8 @@ module Splunk
       return self
     end
 
+    # Delete all entities on this collection for which the block returns true.
+    #
     def delete_if(&block)
       # Without a block, just return an enumerator
       return each() if !block_given?
@@ -139,6 +143,7 @@ module Splunk
     # ==== Example - display the name and level of each logger
     #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
     #   svc.loggers.each {|key, logger| puts logger.name + ":" + logger['level']}
+    #
     def each(args={})
       enum = Enumerator.new() do |yielder|
         count = args.fetch(:count, @infinite_count)
@@ -194,6 +199,8 @@ module Splunk
       each(args).map() {|e| [e.name, e]}.each(&block)
     end
 
+    # Return whether there are any entities in this collection.
+    #
     def empty?()
       return length() == 0
     end

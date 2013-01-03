@@ -1,4 +1,44 @@
+require_relative "collection/configurations"
+
 module Splunk
+
+  class Context
+    # Return a collection of all apps.  To operate on apps, call methods on the returned Collection
+    # and Entities from the Collection.
+    #
+    # ==== Returns
+    # Collection of all apps
+    #
+    # ==== Example 1 - list all apps
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
+    #   svc.apps.each {|app| puts app['name']}
+    #     gettingstarted
+    #     launcher
+    #     learned
+    #     legacy
+    #     sample_app
+    #     search
+    #     splunk_datapreview
+    #     ...
+    #
+    # ==== Example 2 - delete the sample app
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
+    #   svc.apps.delete('sample_app')
+    #
+    # ==== Example 3 - display permissions for the sample app
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
+    #   sapp = svc.apps['sample_app']
+    #   puts sapp['eai:acl']['perms']
+    #     {"read"=>["*"], "write"=>["*"]}
+    def apps
+      Collection.new(self, PATH_APPS_LOCAL)
+    end
+
+    def confs
+      Configurations.new(self)
+    end
+  end
+
 ##
   # The <b>Client Layer</b><br>.
   # This class is the main place for clients to access and control Splunk.
@@ -314,7 +354,7 @@ module Splunk
     #   puts stanza.read
     #     {"ANNOTATE_PUNCT"=>"1", "BREAK_ONLY_BEFORE"=>"gooblygook", "BREAK_ONLY_BEFORE_DATE"=>"1",...}
     def confs
-      item = Proc.new{ |service, conf| ConfCollection.new(self, conf) }
+      item = Proc.new{ |service, conf| ConfigurationFile.new(self, conf) }
       Collection.new(self, PATH_CONFS, 'confs', :item => item)
     end
 
