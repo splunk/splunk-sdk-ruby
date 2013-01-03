@@ -11,7 +11,6 @@ require_relative 'client/entity/stanza'
 require_relative 'client/entity/index'
 require_relative 'client/entity/message'
 require_relative 'client/job'
-require_relative 'client/search_results'
 require_relative 'client/service'
 
 # :stopdoc:
