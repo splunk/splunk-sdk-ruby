@@ -37,6 +37,10 @@ module Splunk
     def confs
       Configurations.new(self)
     end
+
+    def users
+      Collection.new(self, PATH_USERS)
+    end
   end
 
 ##

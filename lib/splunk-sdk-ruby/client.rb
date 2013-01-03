@@ -38,7 +38,7 @@ module Splunk
   PATH_CAPABILITIES = 'authorization/capabilities'
   PATH_LOGGER = 'server/logger'
   PATH_ROLES = 'authentication/roles'
-  PATH_USERS = 'authentication/users'
+  PATH_USERS = ['authentication','users']
   PATH_MESSAGES = 'messages'
   PATH_INFO = 'server/info'
   PATH_SETTINGS = 'server/settings'

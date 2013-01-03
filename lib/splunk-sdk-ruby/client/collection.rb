@@ -1,4 +1,5 @@
 require_relative 'ambiguous_entity_reference'
+require_relative '../synonyms'
 
 module Splunk
   # Collections are groups of items, which can be Entity objects, subclasses of
@@ -6,17 +7,7 @@ module Splunk
   # They are created by calling one of many methods on the Service object.
   class Collection
     include Enumerable
-
-    # Make method _new_name_ a synonym for method _old_name_ on this class.
-    #
-    # _new_name_ and _old_name_ should be strings.
-    #
-    def self.synonym(new_name, old_name)
-      define_method(new_name) do |*args, &block|
-        old_method = old_name.intern
-        send(old_method, *args, &block)
-      end
-    end
+    extend Synonyms
 
     def initialize(service, resource, entity_class=Entity)
       @service = service
@@ -74,6 +65,7 @@ module Splunk
 
       response = @service.request(request_args)
       feed = AtomFeed.new(response.body)
+      raise StandardError.new("No entities returned") if feed.entries.empty?
       entity = atom_entry_to_entity(feed.entries[0])
       raise StandardError.new("Found nil entity.") if entity.nil?
       return entity
