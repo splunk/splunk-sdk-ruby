@@ -4,8 +4,10 @@ require 'json/pure'
 require 'rubygems'
 
 require_relative 'client/collection'
+require_relative 'client/collection/configurations'
 require_relative 'client/collection/configuration_file'
 require_relative 'client/collection/jobs'
+require_relative 'client/collection/messages'
 require_relative 'client/entity'
 require_relative 'client/entity/stanza'
 require_relative 'client/entity/index'
@@ -39,7 +41,7 @@ module Splunk
   PATH_LOGGER = 'server/logger'
   PATH_ROLES = 'authentication/roles'
   PATH_USERS = ['authentication','users']
-  PATH_MESSAGES = 'messages'
+  PATH_MESSAGES = ['messages']
   PATH_INFO = 'server/info'
   PATH_SETTINGS = ["server", "settings"]
   PATH_INDEXES = 'data/indexes'

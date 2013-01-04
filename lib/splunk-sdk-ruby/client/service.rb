@@ -42,6 +42,10 @@ module Splunk
       Jobs.new(self)
     end
 
+    def messages
+      Messages.new(self, PATH_MESSAGES, entity_class=Message)
+    end
+
     # Returns Splunk server settings
     #
     # ==== Returns

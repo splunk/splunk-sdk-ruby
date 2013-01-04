@@ -99,4 +99,19 @@ class ConfigurationFileTestCase < SplunkTestCase
       assert_true(configuration_file.is_a?(ConfigurationFile))
     end
   end
+
+  def test_submit_to_stanza
+    file_name = temporary_name()
+    conf = @confs.create(file_name)
+
+    stanza_name = temporary_name()
+    stanza = conf.create(stanza_name)
+
+    assert_equal(0, stanza.length())
+    stanza.submit(:boris => "natasha", :hilda => "moose on the roof")
+    stanza.refresh()
+    assert_equal(2, stanza.length())
+    assert_equal("natasha", stanza["boris"])
+    assert_equal("moose on the roof", stanza["hilda"])
+  end
 end
