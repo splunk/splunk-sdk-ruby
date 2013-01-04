@@ -38,6 +38,23 @@ module Splunk
       Configurations.new(self)
     end
 
+    def jobs
+      Jobs.new(self)
+    end
+
+    # Returns Splunk server settings
+    #
+    # ==== Returns
+    # An Entity with all server settings
+    #
+    # ==== Example - get a Hash of all server settings
+    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
+    #   puts svc.settings.read
+    #     {"SPLUNK_DB"=>"/opt/4.3/splunkbeta/var/lib/splunk", "SPLUNK_HOME"=>"/opt/4.3/splunkbeta",...}
+    def settings
+      Entity.new(self, namespace(), PATH_SETTINGS, "settings").refresh()
+    end
+
     def users
       Collection.new(self, PATH_USERS)
     end

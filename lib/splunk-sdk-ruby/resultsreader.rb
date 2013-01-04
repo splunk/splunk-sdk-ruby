@@ -15,7 +15,7 @@
 # resultsreader.rb provides ResultsReader, an object to incrementally parse
 # XML streams of results from Splunk into Ruby objects.
 
-require 'splunk-sdk-ruby'
+require 'stringio'
 
 module Splunk
   # ResultsReader parses Splunk's XML format for results into Ruby objects.
@@ -60,7 +60,7 @@ module Splunk
 
     def initialize(text_or_stream)
       if !text_or_stream.respond_to?(:read)
-        stream = StringIO(text_or_stream.strip)
+        stream = StringIO.new(text_or_stream.strip)
       else
         stream = text_or_stream
       end

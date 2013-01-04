@@ -93,4 +93,10 @@ class ConfigurationFileTestCase < SplunkTestCase
       assert_equal(n, conf.length())
     end
   end
+
+  def test_each
+    @confs.each() do |configuration_file|
+      assert_true(configuration_file.is_a?(ConfigurationFile))
+    end
+  end
 end

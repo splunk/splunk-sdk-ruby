@@ -41,13 +41,13 @@ module Splunk
   PATH_USERS = ['authentication','users']
   PATH_MESSAGES = 'messages'
   PATH_INFO = 'server/info'
-  PATH_SETTINGS = 'server/settings'
+  PATH_SETTINGS = ["server", "settings"]
   PATH_INDEXES = 'data/indexes'
   PATH_CONFS = ["properties"]
   PATH_CONF = ["configs"]
   PATH_STANZA = ["configs","conf-%s","%s"]
-  PATH_JOBS = 'search/jobs'
-  PATH_EXPORT = 'search/jobs/export'
+  PATH_JOBS = ["search", "jobs"]
+  PATH_EXPORT = ["search", "jobs", "export"]
   PATH_RESTART = 'server/control/restart'
   PATH_PARSE = 'search/parser'
 

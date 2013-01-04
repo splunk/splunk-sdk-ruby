@@ -66,6 +66,7 @@ class SplunkTestCase < Test::Unit::TestCase
     super
     @splunkrc = read_splunkrc()
     @service = Context.new(@splunkrc).login()
+    @installed_apps = []
 
     if @service.server_requires_restart?
       fail("Previous test left server in a state requiring a restart.")
@@ -74,11 +75,30 @@ class SplunkTestCase < Test::Unit::TestCase
 
   def teardown
     if @service.server_requires_restart?()
-      puts "Test left server in a state requiring restart."
-      checked_restart(@service)
+      fail("Test left server in a state requiring restart.")
     end
 
+    @installed_apps.each() do |app_name|
+      @service.apps.delete(app_name)
+      assert_eventually_true() do
+        !@service.apps.has_key?(app_name)
+      end
+      if @service.server_requires_restart?
+        clear_restart_message(@service)
+      end
+    end
+
+    @installed_apps.clear()
+
     super
+  end
+
+  def assert_eventually_true(timeout=30, &block)
+    Timeout::timeout(timeout) do
+      while !block.call()
+        sleep(0.2)
+      end
+    end
   end
 
   def assert_logged_in(service)
@@ -119,6 +139,71 @@ class SplunkTestCase < Test::Unit::TestCase
       end
     end
   end
+
+  def install_app_from_collection(name)
+    collection_name = 'sdk-app-collection'
+    if !@service.apps.has_key?(collection_name)
+      raise StandardError("#{collection_name} not installed in Splunk.")
+    end
+
+    app_path = path_in_app(collection_name, ["build", name+".tar"])
+    args = {"update" => 1, "name" => app_path}
+    begin
+      @service.request(:method => :POST,
+                       :resource => ["apps", "appinstall"],
+                       :body => args)
+      @installed_apps << name
+    rescue SplunkHTTPError => err
+      if err.code == 40
+        raise StandardError("App #{name} not found in app collection")
+      else
+        raise err
+      end
+    end
+  end
+
+  # Return a path to *path_components* in *app_name*.
+  #
+  # `path_in_app` is used to refer to files in applications installed with
+  # `install_app_from_collection`. For example, the app `file_to_upload` in
+  # the collection contains `log.txt`. To get the path to it, call::
+  #
+  # path_in_app('file_to_upload', ['log.txt'])
+  #
+  # The path to `setup.xml` in `has_setup_xml` would be fetched with::
+  #
+  # path_in_app('has_setup_xml', ['default', 'setup.xml'])
+  #
+  # path_in_app` figures out the correct separator to use (based on whether
+  # splunkd is running on Windows or Unix) and joins the elements in
+  # *path_components* into a path relative to the application specified by
+  # *app_name*.
+  #
+  # *path_components* should be a list of strings giving the components.
+  # This function will try to figure out the correct separator (/ or \)
+  # for the platform that splunkd is running on and construct the path
+  # as needed.
+  #
+  # :return: A string giving the path.
+  #
+  def path_in_app(app_name, path_components)
+    splunk_home = @service.settings["SPLUNK_HOME"]
+    if splunk_home.include?("\\")
+      # This clause must come first, since Windows machines may
+      # have mixed \ and / in their paths.
+      separator = "\\"
+    elsif splunk_home.include?("/")
+      separator = "/"
+    else
+      raise StandardError("No separators in $SPLUNK_HOME. Can't determine " +
+                              "what file separator to use.")
+    end
+
+    app_path = ([splunk_home, "etc", "apps", app_name] + path_components).
+        join(separator)
+    return app_path
+  end
+
 
   # Create a new restart message on _service_.
   #
