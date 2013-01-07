@@ -2,8 +2,6 @@ require_relative '../collection'
 require_relative 'configuration_file'
 
 module Splunk
-  PATH_CONFS = ["properties"]
-
   class Configurations < Collection
     def initialize(service)
       super(service, PATH_CONFS, entity_class=ConfigurationFile)

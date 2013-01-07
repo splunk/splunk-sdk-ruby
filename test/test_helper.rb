@@ -65,7 +65,7 @@ class SplunkTestCase < Test::Unit::TestCase
   def setup
     super
     @splunkrc = read_splunkrc()
-    @service = Context.new(@splunkrc).login()
+    @service = Service.new(@splunkrc).login()
     @installed_apps = []
 
     if @service.server_requires_restart?
@@ -138,6 +138,11 @@ class SplunkTestCase < Test::Unit::TestCase
         raise err
       end
     end
+  end
+
+  def has_app_collection?(service)
+    collection_name = 'sdk-app-collection'
+    return service.apps.has_key?(collection_name)
   end
 
   def install_app_from_collection(name)

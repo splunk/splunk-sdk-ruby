@@ -17,7 +17,7 @@ class ConfigurationFileTestCase < SplunkTestCase
     app_service_args = @splunkrc.clone()
     app_service_args[:namespace] =
         namespace("app", @container_app_name)
-    @app_service = Splunk::Context.new(app_service_args).login()
+    @app_service = Splunk::Service.new(app_service_args).login()
     @confs = @app_service.confs
   end
 

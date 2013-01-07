@@ -1,19 +1,14 @@
-require 'cgi'
-#TODO: Please get me working with json/ext - it SO much faster
-require 'json/pure'
-require 'rubygems'
-
-require_relative 'client/collection'
-require_relative 'client/collection/configurations'
-require_relative 'client/collection/configuration_file'
-require_relative 'client/collection/jobs'
-require_relative 'client/collection/messages'
-require_relative 'client/entity'
-require_relative 'client/entity/stanza'
-require_relative 'client/entity/index'
-require_relative 'client/entity/message'
-require_relative 'client/job'
-require_relative 'client/service'
+require_relative 'collection'
+require_relative 'collection/configurations'
+require_relative 'collection/configuration_file'
+require_relative 'collection/jobs'
+require_relative 'collection/messages'
+require_relative 'entity'
+require_relative 'entity/stanza'
+require_relative 'entity/index'
+require_relative 'entity/message'
+require_relative 'entity/job'
+require_relative 'service'
 
 # :stopdoc:
 def _filter_content(content, key_list=nil, add_attrs=true)
@@ -37,21 +32,21 @@ end
 
 module Splunk
   PATH_APPS_LOCAL = ["apps", "local"]
-  PATH_CAPABILITIES = 'authorization/capabilities'
-  PATH_LOGGER = 'server/logger'
-  PATH_ROLES = 'authentication/roles'
+  PATH_CAPABILITIES = ["authorization", "capabilities"]
+  PATH_LOGGER = ["server","logger"]
+  PATH_ROLES = ["authentication", "roles"]
   PATH_USERS = ['authentication','users']
   PATH_MESSAGES = ['messages']
-  PATH_INFO = 'server/info'
+  PATH_INFO = ["server", "info"]
   PATH_SETTINGS = ["server", "settings"]
-  PATH_INDEXES = 'data/indexes'
+  PATH_INDEXES = ["data","indexes"]
   PATH_CONFS = ["properties"]
   PATH_CONF = ["configs"]
   PATH_STANZA = ["configs","conf-%s","%s"]
   PATH_JOBS = ["search", "jobs"]
   PATH_EXPORT = ["search", "jobs", "export"]
-  PATH_RESTART = 'server/control/restart'
-  PATH_PARSE = 'search/parser'
+  PATH_RESTART = ["server", "control", "restart"]
+  PATH_PARSE = ["search", "parser"]
 
   NAMESPACES = { 'ns0' => 'http://www.w3.org/2005/Atom',
                  'ns1' => 'http://dev.splunk.com/ns/rest' }

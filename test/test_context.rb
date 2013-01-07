@@ -100,4 +100,16 @@ class TestContext < SplunkTestCase
     service = Context.new(@splunkrc)
     assert_true(service.server_accepting_connections?)
   end
+
+  def test_info
+    assert_true(@service.info.has_key?("version"))
+  end
+
+  def test_splunk_version
+    version = @service.splunk_version
+    assert_true(version.is_a?(Array))
+    version.each() do |v|
+      assert_true(v.is_a?(Integer))
+    end
+  end
 end

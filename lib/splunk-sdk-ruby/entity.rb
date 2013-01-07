@@ -1,4 +1,4 @@
-require_relative '../synonyms'
+require_relative 'synonyms'
 
 module Splunk
   # Entity objects represent individual items such as indexes, users, roles, etc.

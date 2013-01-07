@@ -1,5 +1,5 @@
 require_relative 'ambiguous_entity_reference'
-require_relative '../synonyms'
+require_relative 'synonyms'
 
 module Splunk
   # Collections are groups of items, which can be Entity objects, subclasses of

@@ -60,13 +60,13 @@ module Splunk
     # is returned.
     #
     def connect()
-      socket = TCPSocket.new @host, @port
+      socket = TCPSocket.new(@host, @port)
       if scheme == :https
-        ssl_context = OpenSSL::SSL::SSLContext.new
+        ssl_context = OpenSSL::SSL::SSLContext.new()
         ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
         ssl_socket = OpenSSL::SSL::SSLSocket.new(socket, ssl_context)
         ssl_socket.sync_close = true
-        ssl_socket.connect
+        ssl_socket.connect()
         return ssl_socket
       else
         return socket
@@ -351,5 +351,8 @@ module Splunk
         end
       end
     end
+
+
+
   end
 end
