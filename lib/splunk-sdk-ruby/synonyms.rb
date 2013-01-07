@@ -1,4 +1,4 @@
-module Synonyms
+module Synonyms # :nodoc:
   # Make method _new_name_ a synonym for method _old_name_ on this class.
   #
   # _new_name_ and _old_name_ should be strings.

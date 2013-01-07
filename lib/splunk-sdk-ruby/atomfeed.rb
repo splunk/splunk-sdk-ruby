@@ -29,7 +29,7 @@ end
 # Nokogiri returns attribute values as an object on which we have to call
 # `#text`. REXML returns Strings. To make them both work, add a `text` method to
 # String which returns itself.
-class String
+class String # :nodoc:
   def text
     self
   end

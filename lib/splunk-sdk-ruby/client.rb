@@ -1,3 +1,4 @@
+# :stopdoc:
 require_relative 'collection'
 require_relative 'collection/configurations'
 require_relative 'collection/configuration_file'
@@ -10,7 +11,6 @@ require_relative 'entity/message'
 require_relative 'entity/job'
 require_relative 'service'
 
-# :stopdoc:
 def _filter_content(content, key_list=nil, add_attrs=true)
   if key_list.nil?
     return content.add_attrs if add_attrs
@@ -23,12 +23,9 @@ def _filter_content(content, key_list=nil, add_attrs=true)
   result
 end
 
-
 def _path_stanza(conf, stanza)
   Splunk::PATH_STANZA % [conf, CGI::escape(stanza)]
 end
-# :startdoc:
-
 
 module Splunk
   PATH_APPS_LOCAL = ["apps", "local"]
