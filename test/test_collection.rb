@@ -27,9 +27,8 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_without_pagination
-    c = Collection.new(@service, ["apps", "local"])
     n_entities = 0
-    c.each(:count=>5) do |entity|
+    @service.apps.each(:count=>5) do |entity|
       assert_true(entity.is_a?(Entity))
       n_entities += 1
     end
@@ -37,15 +36,13 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_with_offset_and_count
-    c = Collection.new(@service, ["apps", "local"])
-
     entities = []
-    c.each(:count => 5) do |entity|
+    @service.apps.each(:count => 5) do |entity|
       entities << entity.name
     end
 
     entities_with_offset = []
-    c.each(:count => entities.length-1, :offset => 1) do |entity|
+    @service.apps.each(:count => entities.length-1, :offset => 1) do |entity|
       entities_with_offset << entity.name
     end
 
@@ -53,18 +50,16 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_with_pagination
-    c = Collection.new(@service, ["apps", "local"])
-
     total = 5 + rand(15)
     page_size = 1 + rand(3)
 
     entities = []
-    c.each(:count => total) do |entity|
+    @service.apps.each(:count => total) do |entity|
       entities << entity.name
     end
 
     entities_with_pagination = []
-    c.each(:count => total, :page_size => page_size) do |entity|
+    @service.apps.each(:count => total, :page_size => page_size) do |entity|
       entities_with_pagination << entity.name
     end
 
@@ -72,8 +67,8 @@ class TestCollection < SplunkTestCase
   end
 
   def test_has_key
-    c = Collection.new(@service, ["apps", "local"])
-    c.each(:count => 3) do |entity|
+    c = @service.apps
+    @service.apps.each(:count => 3) do |entity|
       assert_true(c.has_key?(entity.name))
       assert_true(c.contains?(entity.name))
       assert_true(c.include?(entity.name))
@@ -174,9 +169,7 @@ class TestCollection < SplunkTestCase
   end
 
   def test_values
-    c = Collection.new(@service, ["apps", "local"])
-
-    es = c.values(:count => 3)
+    es = @service.apps.values(:count => 3)
     assert_true(es.length <= 3)
     es.each do |entity|
       assert_true(entity.is_a?(Entity))
@@ -184,93 +177,72 @@ class TestCollection < SplunkTestCase
   end
 
   def test_each_equivales_values
-    c = Collection.new(@service, ["apps", "local"])
-
     assert_equal(
-        c.each().to_a().map() {|e| e.name},
-        c.values.map() {|e| e.name}
+        @service.apps.each().to_a().map() {|e| e.name},
+        @service.apps.values.map() {|e| e.name}
     )
   end
 
   def test_length
-    c = Collection.new(@service, ["apps", "local"])
-
+    c = @service.apps
     assert_equal(c.values().length(), c.length())
     assert_equal(c.values().length(), c.size())
   end
 
 
   def test_select
-    c = Collection.new(@service, ["apps", "local"])
-
-    a = c.select() {|e| e.name == "search"}.to_a
+    a = @service.apps.select() {|e| e.name == "search"}.to_a
     assert_equal(1, a.length)
     assert_equal("search", a[0].name)
   end
 
   def test_reject
-    c = Collection.new(@service, ["apps", "local"])
-    a = c.reject() {|e| e.name != "search"}.to_a
+    a = @service.apps.reject() {|e| e.name != "search"}.to_a
     assert_equal(1, a.length)
     assert_equal("search", a[0].name)
   end
 
   def test_fetch_nonexistant
-    c = Collection.new(@service, ["apps", "local"])
-    assert_nil(c.fetch("this does not exist"))
+    assert_nil(@service.apps.fetch("this does not exist"))
   end
 
   def test_assoc
-    c = Collection.new(@service, ["apps", "local"])
-    name, entity = c.assoc("search")
+    name, entity = @service.apps.assoc("search")
     assert_equal("search", name)
     assert_equal("search", entity.name)
 
-    assert_nil(c.assoc("this does not exist"))
+    assert_nil(@service.apps.assoc("this does not exist"))
   end
 
   def test_keys
-    c = Collection.new(@service, ["apps", "local"])
-    keys = c.keys()
-    assert_equal(c.values().map(){|e| e.name},
+    keys = @service.apps.keys()
+    assert_equal(@service.apps.values().map(){|e| e.name},
                  keys)
   end
 
   def test_each_key
-    c = Collection.new(@service, ["apps", "local"])
-
-    keys = []
-    c.each_key do |key|
-      keys << key
-    end
-    assert_equal(c.keys(), keys)
+    assert_equal(@service.apps.keys(), @service.apps.each_key.to_a)
   end
 
   def test_each_pair
-    c = Collection.new(@service, ["apps", "local"])
-
     keys = []
-    c.each_pair do |key, value|
+    @service.apps.each_pair do |key, value|
       assert_equal(key, value.name)
       keys << key
     end
-    assert_equal(c.keys(), keys)
+    assert_equal(@service.apps.keys(), keys)
   end
 
   def test_each_value
-    c = Collection.new(@service, ["apps", "local"])
-
     keys = []
-    c.each_value do |value|
+    @service.apps.each_value do |value|
       keys << value.name
     end
-    assert_equal(c.keys(), keys)
+    assert_equal(@service.apps.keys(), keys)
   end
 
   def test_empty
-    c = Collection.new(@service, ["apps", "local"])
-
-    assert_false(c.empty?)
+    assert_false(@service.apps.empty?)
   end
 
   def test_delete_if
