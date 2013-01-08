@@ -25,6 +25,7 @@
 require 'rexml/document'
 require 'net/http'
 
+require_relative 'splunk_http_error'
 require_relative 'version'
 
 module Splunk

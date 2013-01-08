@@ -1,10 +1,40 @@
+#--
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#++
+
+##
+# Provides +Collection+, representing collections in Splunk.
+#
+
 require_relative 'ambiguous_entity_reference'
+require_relative 'atomfeed'
+require_relative 'entity'
+require_relative 'splunk_http_error'
 require_relative 'synonyms'
 
 module Splunk
-  # Collections are groups of items, which can be Entity objects, subclasses of
-  # Entity objects or Job objects.
-  # They are created by calling one of many methods on the Service object.
+  # Class representing a collection on Splunk.
+  #
+  # +Collection+s are groups of items, usually of class +Entity+ or one of its
+  # subclasses, but occasionally another +Collection+. Usually you will obtain
+  # a +Collection+ by calling one of the convenience methods on +Service+.
+  #
+  # +Collection+s are enumerable, and implement many of the methods found on
+  # +Hash+, so methods like +each+, +select+, and +delete_if+ all work, as does
+  # fetching a member of the +Collection+ with +[]+.
+  #
   class Collection
     include Enumerable
     extend Synonyms
@@ -19,8 +49,44 @@ module Splunk
       @infinite_count = -1
     end
 
-    attr_reader :service, :resource, :entity_class
+    ##
+    # The service via which this +Collection+ refers to Splunk.
+    #
+    # Returns: a +Service+.
+    #
+    attr_reader :service
 
+    ##
+    # The path after the namespace to reach this collection.
+    #
+    # For example, for apps +resource+ will be +["apps", "local"]+.
+    #
+    # Returns: an +Array+ of +String+s.
+    #
+    attr_reader :resource
+
+    ##
+    # The class used to represent members of this +Collection+.
+    #
+    # By default this will be +Entity+, but many collections such as jobs
+    # will use a subclass of it (in the case of jobs, the +Job+ class), or
+    # even another collection (+ConfigurationFile+ in the case of
+    # configurations).
+    #
+    # Returns: a class.
+    #
+    attr_reader :entity_class
+
+    ##
+    # Find the first entity in the collection with the given name.
+    #
+    # Optionally, you may provide a _namespace_. If there are multiple entities
+    # visible in this collection named _name_, you _must_ provide a namespace
+    # or +assoc+ will raise an +AmbiguousEntityReference+ error.
+    #
+    # Returns: an +Array+ of +[+_name_+, +_entity_+]+ or +nil+ if there is
+    # no matching element.
+    #
     def assoc(name, namespace=nil)
       entity = fetch(name, namespace)
       if entity.nil?
@@ -30,7 +96,12 @@ module Splunk
       end
     end
 
-    # Create an Entity from a hash of an Atom entry in this collection.
+    ##
+    # Convert an Atom entry into an entity in this collection.
+    #
+    # The Atom entry should be in the form of an entry from +AtomFeed+.
+    #
+    # Returns: An object of class +@entity_class+.
     #
     def atom_entry_to_entity(entry)
       name = entry["title"]
@@ -43,13 +114,21 @@ module Splunk
                         state=entry)
     end
 
-    # Creates an item in this collection named _name_ with optional args.
+    ##
+    # Creates an item in this collection.
     #
-    # Returns the created entity.
+    # The _name_ argument is required. All other arguments are passed as a hash,
+    # though they vary from collection to collection.
     #
-    # ==== Example - create a user named _jack_ and assign a password, a real name and a role
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.users.create('jack', :password => 'mypassword', :realname => 'Jack_be_nimble', :roles => ['user'])
+    # Returns: the created entity.
+    #
+    # *Example:*
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     service.users.create('jack',
+    #       :password => 'mypassword',
+    #       :realname => 'Jack_be_nimble',
+    #       :roles => ['user'])
+    #
     def create(name, args={})
       body_args = args.clone()
       body_args["name"] = name
@@ -71,18 +150,20 @@ module Splunk
       return entity
     end
 
-    # Deletes an item named _name_ from the collection.
+    ##
+    # Deletes an item from the collection.
     #
     # Entities from different namespaces may have the same name, so if you are
     # connected to Splunk using a namespace with wildcards in it, there may
     # be multiple entities in the collection with the same name. In this case
-    # you must specify a namespace as well, or `delete` will raise an
+    # you must specify a namespace as well, or +delete+ will raise an
     # AmbiguousEntityReference error.
     #
-    # ==== Example - delete stanza _sdk-tests_ from _props.conf_
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   props = svc.confs['props']
-    #   props.delete('sdk-tests')
+    # *Example:*
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     props = service.confs['props']
+    #     props.delete('sdk-tests')
+    #
     def delete(name, namespace=nil)
       if namespace.nil?
         namespace = @service.namespace
@@ -106,7 +187,11 @@ module Splunk
       return self
     end
 
+    ##
     # Delete all entities on this collection for which the block returns true.
+    #
+    # If block is omitted, returns an enumerator over all members of the
+    # collection.
     #
     def delete_if(&block)
       # Without a block, just return an enumerator
@@ -120,21 +205,27 @@ module Splunk
 
     end
 
+    ##
     # Calls block once for each item in the collection.
     #
-    # `each` takes three optional arguments as well:
+    # +each+ takes three optional arguments as well:
     #
-    # * `count` sets the maximum number of entities to fetch (integer >= 0)
-    # * `offset` sets how many items to skip before returning items in the
+    # * +count+ sets the maximum number of entities to fetch (integer >= 0)
+    # * +offset+ sets how many items to skip before returning items in the
     #   collection (integer >= 0)
-    # * `page_size` sets how many items at a time should be fetched from the
+    # * +page_size+ sets how many items at a time should be fetched from the
     #   server and processed before fetching another set.
     #
     # The block is called with the entity as its argument.
     #
-    # ==== Example - display the name and level of each logger
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.loggers.each {|key, logger| puts logger.name + ":" + logger['level']}
+    # If the block is omitted, returns an enumerator over all members of the
+    # entity.
+    #
+    # *Example:*
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     service.loggers.each do |key, logger|
+    #       puts logger.name + ":" + logger['level']
+    #     end
     #
     def each(args={})
       enum = Enumerator.new() do |yielder|
@@ -181,25 +272,39 @@ module Splunk
       end
     end
 
+    ##
+    # Identical to +each+.
+    #
     synonym "each_value", "each"
 
+    ##
+    # Identical to +each+, but the block is passed the entity's name.
+    #
     def each_key(args={}, &block)
       each(args).map() {|e| e.name}.each(&block)
     end
 
+    ##
+    # Identical to +each+, but the block is passed both the entity's name,
+    # and the entity.
+    #
     def each_pair(args={}, &block)
       each(args).map() {|e| [e.name, e]}.each(&block)
     end
 
+    ##
     # Return whether there are any entities in this collection.
+    #
+    # Returns: +true+ or +false+.
     #
     def empty?()
       return length() == 0
     end
 
+    ##
     # Fetch _name_ from this collection.
     #
-    # If _name_ does not exist, return nil. Otherwise return an Entity.
+    # If _name_ does not exist, returns +nil+. Otherwise returns the element.
     # If, due to wildcards in your namespace, there are two entities visible
     # in the collection with the same name, fetch will raise an
     # AmbiguousEntityReference error. You must specify a namespace in this
@@ -233,10 +338,12 @@ module Splunk
 
     synonym "[]", "fetch"
 
+    ##
     # Return whether there is an entity named _name_ in this collection.
     #
-    # Returns a boolean.
+    # Returns: a boolean.
     # Synonyms: contains?, include?, key?, member?
+    #
     def has_key?(name)
       begin
         response = @service.request(:resource=>@resource + [name])
@@ -255,11 +362,20 @@ module Splunk
     synonym "key?", "has_key?"
     synonym "member?", "has_key?"
 
+    ##
+    # Return an +Array+ of all entity names in the +Collection+.
+    #
+    # Returns: an +Array+ of +String+s.
+    #
     def keys()
       return values().map() {|e| e.name}
     end
 
+    ##
     # Return the number of entities in this collection.
+    #
+    # Returns: a nonnegative +Integer+.
+    # Synonyms: +size+.
     #
     def length()
       return values().length()
@@ -267,15 +383,19 @@ module Splunk
 
     synonym "size", "length"
 
-    # Return an array of the entities in this collection.
+    ##
+    # Return an Array of the entities in this collection.
     #
-    # `values` takes three optional arguments:
+    # +values+ takes three optional arguments:
     #
-    # * `count` sets the maximum number of entities to fetch (integer >= 0)
-    # * `offset` sets how many items to skip before returning items in the
+    # * +count+ sets the maximum number of entities to fetch (integer >= 0)
+    # * +offset+ sets how many items to skip before returning items in the
     #   collection (integer >= 0)
-    # * `page_size` sets how many items at a time should be fetched from the
+    # * +page_size+ sets how many items at a time should be fetched from the
     #   server and processed before fetching another set.
+    #
+    # Returns: an +Array+ of +@entity_class+.
+    # Synonyms: +list+, +to_a+.
     #
     def values(args={})
       each(args).to_a()
