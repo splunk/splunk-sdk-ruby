@@ -1,3 +1,4 @@
+#--
 # Copyright 2011-2012 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
@@ -11,22 +12,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+#++
 
-# resultsreader.rb provides ResultsReader, an object to incrementally parse
-# XML streams of results from Splunk into Ruby objects.
+##
+# +resultsreader.rb+ provides +ResultsReader+, an object to incrementally parse
+# XML streams of results from Splunk search jobs into Ruby objects.
+#
+# By default, +ResultsReader+ will try to use Nokogiri for XML parsing. If
+# Nokogiri isn't available, it will fall back to REXML, which ships with Ruby
+# 1.9. See +xml_shim.rb+ for how to alter this behavior.
+#
 
 require 'stringio'
+
+require_relative 'xml_shim'
 
 module Splunk
   # ResultsReader parses Splunk's XML format for results into Ruby objects.
   #
-  # You can use both Nokogiri and REXML. By default, the library will try
-  # to use Nokogiri, and if it is not available will fall back to REXML,
-  # but you can specify which to use by passing `:nokogiri` or `:rexml` to
-  # the `xml_library` argument when you create the ResultsReader.
+  # You can use both Nokogiri and REXML. By default, the +ResultsReader+ will
+  # try to use Nokogiri, and if it is not available will fall back to REXML. If
+  # you want other behavior, see +xml_shim.rb+ for how to set the XML library.
   #
-  # ResultsReader is an Enumerable, so it has methods such as each and
-  # each_with_index. However, since it's a stream parser, once you iterate
+  # +ResultsReader is an Enumerable, so it has methods such as +each+ and
+  # +each_with_index+. However, since it's a stream parser, once you iterate
   # through it once, it will thereafter be empty.
   #
   # The ResultsReader object has two additional methods:
@@ -37,24 +46,39 @@ module Splunk
   #   in this set, in the order they should be displayed (if you're going
   #   to make a table or the like).
   #
-  # *Examples*:
+  # *Example*:
   #
-  #     [TODO: Add connection stuff]
+  #     require 'splunk-sdk-ruby'
+  #
+  #     service = Splunk::connect(:username => "admin", :password => "changeme")
+  #
+  #     stream = service.jobs.create_oneshot("search index=_internal | head 10")
   #     reader = ResultsReader.new(stream)
-  #     # or: reader = ResultsReader.new(stream, xml_library=:rexml)
-  #     reader.is_preview? == false
-  #     reader.each {|result| puts result}
+  #     puts reader.is_preview?
+  #     # Prints: false
+  #     reader.each do |result|
+  #       puts result
+  #     end
+  #     # Prints a sequence of Hashes containing events.
   #
   class ResultsReader
     include Enumerable
 
+    ##
     # Are the results in this reader a preview from an unfinished search?
+    #
+    # Returns: +true+ or +false+, or +nil+ if the stream is empty.
     #
     def is_preview?
       return @is_preview
     end
 
-    # An array of all the fields that may appear in each result.
+    ##
+    # An +Array+ of all the fields that may appear in each result.
+    #
+    # Note that any given result will contain a subset of these fields.
+    #
+    # Returns: an +Array+ of +String+s.
     #
     attr_reader :fields
 
@@ -100,6 +124,7 @@ module Splunk
     end
   end
 
+  ##
   # ResultsListener is the SAX event handler for ResultsReader.
   #
   # The authors of Nokogiri decided to make their SAX interface
@@ -120,7 +145,7 @@ module Splunk
   # continue and thereafter call `Fiber.yield` with every result as it
   # finishes parsing it.
   #
-  class ResultsListener
+  class ResultsListener # :nodoc:
     def initialize()
       @fields = []
       @header_sent = false
@@ -280,7 +305,7 @@ module Splunk
     end
 
     # REXML methods - all dispatch is done here
-    def tag_start(name, attributes) # REXML version
+    def tag_start(name, attributes)
       # attributes is a hash.
       if @states[@state].has_key?(:start_element)
         @states[@state][:start_element].call(name, attributes)
