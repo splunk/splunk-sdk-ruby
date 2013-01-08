@@ -99,11 +99,11 @@ class JobsTestCase < SplunkTestCase
   def test_timeline
     job = @service.jobs.create(QUERY, JOB_ARGS)
     assert_eventually_true() { job.is_done() }
-    require_xml_library(:rexml)
+    Splunk::require_xml_library(:rexml)
     timeline = job.timeline()
     assert_true(timeline.is_a?(Array))
 
-    require_xml_library(:nokogiri)
+    Splunk::require_xml_library(:nokogiri)
     timeline = job.timeline()
     assert_true(timeline.is_a?(Array))
   end

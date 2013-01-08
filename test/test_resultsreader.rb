@@ -21,7 +21,7 @@ class TestResultsReader < Test::Unit::TestCase
     end
 
     xml_libraries.each do |xml_library|
-      require_xml_library(xml_library)
+      Splunk::require_xml_library(xml_library)
       $results_reader_tests.each_entry do |filename, expected|
         puts "#{xml_library}: #{filename}"
         file = File.open(filename)

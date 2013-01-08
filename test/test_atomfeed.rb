@@ -1,6 +1,8 @@
 require_relative "test_helper"
 require "splunk-sdk-ruby"
 
+include Splunk
+
 # URI's classes compare by object identity, which is exactly what we
 # *don't* want to do. Instead we use simple textual identity.
 module URI
@@ -37,7 +39,7 @@ class TestAtomFeed < Test::Unit::TestCase
     end
 
     xml_libraries.each do |xml_library|
-      require_xml_library(xml_library)
+      Splunk::require_xml_library(xml_library)
       $atom_tests.each_entry do |filename, expected|
         puts "#{xml_library}: #{filename}"
         file = File.open(filename)

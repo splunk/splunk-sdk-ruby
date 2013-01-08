@@ -15,7 +15,7 @@ class TestXMLShim < SplunkTestCase
   end
 
   def test_matches_with_nokogiri
-    require_xml_library(:nokogiri)
+    Splunk::require_xml_library(:nokogiri)
     m = text_at_xpath("//msg", "<response><msg>Boris &amp; Natasha</msg></response>")
     assert_equal("Boris & Natasha", m)
   end

@@ -4,10 +4,6 @@ require 'splunk-sdk-ruby'
 include Splunk
 
 class ServiceTestCase < SplunkTestCase
-  def test_capabilities
-    assert_true(@service.capabilities.member?("change_own_password"))
-  end
-
   def test_loggers
     assert_false(@service.loggers.empty?)
     assert_equal(@service.loggers.length, @service.loggers.values.length)
