@@ -24,8 +24,6 @@ module Splunk
   # * `:protocol` - either 'https' or 'http' (defaults to 'https')
   # * `:namespace` - application namespace option.  'username:appname'
   #     (defaults to nil)
-  # * `:key_file` - the full path to a SSL key file (defaults to nil)
-  # * `:cert_file` - the full path to a SSL certificate file (defaults to nil)
   # * `:token` - a preauthenticated Splunk token (default to nil)
   #
   class Context

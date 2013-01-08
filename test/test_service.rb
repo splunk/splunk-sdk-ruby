@@ -4,6 +4,11 @@ require 'splunk-sdk-ruby'
 include Splunk
 
 class ServiceTestCase < SplunkTestCase
+  def test_connect
+    service = Splunk::connect(@splunkrc)
+    assert_true(service.apps.length() > 0)
+  end
+
   def test_loggers
     assert_false(@service.loggers.empty?)
     assert_equal(@service.loggers.length, @service.loggers.values.length)
