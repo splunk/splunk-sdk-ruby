@@ -22,7 +22,9 @@ require_relative 'collection/messages'
 require_relative 'context'
 require_relative 'entity'
 require_relative 'entity/index'
+require_relative 'entity/job'
 require_relative 'entity/message'
+require_relative 'entity/stanza'
 
 ##
 # This module provides the +Service+ class, which encapsulated the interaction
@@ -30,6 +32,22 @@ require_relative 'entity/message'
 #
 
 module Splunk
+  # The paths used by service.
+  PATH_APPS_LOCAL = ["apps", "local"]
+  PATH_CAPABILITIES = ["authorization", "capabilities"]
+  PATH_LOGGER = ["server","logger"]
+  PATH_ROLES = ["authentication", "roles"]
+  PATH_USERS = ['authentication','users']
+  PATH_MESSAGES = ['messages']
+  PATH_INFO = ["server", "info"]
+  PATH_SETTINGS = ["server", "settings"]
+  PATH_INDEXES = ["data","indexes"]
+  PATH_CONFS = ["properties"]
+  PATH_CONF = ["configs"]
+  PATH_STANZA = ["configs","conf-%s","%s"]
+  PATH_JOBS = ["search", "jobs"]
+  PATH_EXPORT = ["search", "jobs", "export"]
+
   ##
   # Create a logged in reference to a Splunk instance.
   #

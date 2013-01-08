@@ -37,5 +37,5 @@ require_relative 'splunk-sdk-ruby/illegal_operation'
 require_relative 'splunk-sdk-ruby/atomfeed'
 require_relative 'splunk-sdk-ruby/resultsreader'
 require_relative 'splunk-sdk-ruby/context'
-require_relative 'splunk-sdk-ruby/client'
+require_relative 'splunk-sdk-ruby/service'
 
