@@ -1,20 +1,72 @@
+#--
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#++
+
+require_relative 'ambiguous_entity_reference'
+require_relative 'atomfeed'
 require_relative 'synonyms'
 
 module Splunk
-  # Entity objects represent individual items such as indexes, users, roles, etc.
-  # They are usually contained within Collection objects
+  ##
+  # Class representing individual entities in Splunk.
+  #
+  # +Entity+ objects represent individual items such as indexes, users, roles,
+  # etc. They are usually contained within Collection objects.
+  #
+  # The basic, identifying information for an +Entity+ (name, namespace, path
+  # of the collection containing entity, and the service it's on) is all
+  # accessible via getters (+name+, +namespace+, +resource+, +service+). All
+  # the fields containing the +Entity+'s state, such as the capabilities of
+  # a role or whether an app should check for updates, are accessible with the
+  # +[]+ operator (e.g., +role["capabilities"]+ or +app["check_for_updates"]+).
+  #
+  # +Entity+ objects cache their state, so each lookup of a field does not
+  # make a roundtrip to the server. The state may be refreshed by calling
+  # the +refresh+ method on the +Entity+.
+  #
   class Entity
     extend Synonyms
-    # The name of this Entity
+
+    ##
+    # The name of this Entity.
+    #
+    # Returns: a +String+.
+    #
     attr_reader :name
 
+    ##
     # The namespace of this Entity
+    #
+    # Returns: a +Namespace+.
+    #
     attr_reader :namespace
 
-    # The path of the collection this entity lives in
+    ##
+    # The path of the collection this entity lives in.
+    #
+    # For example, on an app this will be +["apps", "local"]+.
+    #
+    # Returns: an +Array+ of +String+s.
+    #
     attr_reader :resource
 
-    # The service this entity refers to
+    ##
+    # The service this entity refers to.
+    #
+    # Returns: a +Service+ object.
+    #
     attr_reader :service
 
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:
@@ -25,7 +77,10 @@ module Splunk
       @state = state
     end
 
-    # Delete this entity.
+    ##
+    # Delete this entity from the server.
+    #
+    # Returns: +nil+.
     #
     def delete()
       @service.request({:method => :DELETE,
@@ -33,39 +88,47 @@ module Splunk
                         :resource => @resource + [name]})
     end
 
-
+    ##
     # Fetch the field _key_ on this entity.
     #
     # You may provide a default value. All values are returned
     # as strings.
     #
+    # Returns: a +String+.
+    #
     def fetch(key, default=nil)
       @state["content"].fetch(key, default)
     end
 
+    ##
+    # Fetch a field on this entity.
+    #
+    # Returns: a +String+.
+    #
     synonym "[]", "fetch"
 
-    # Return a hash of the links associated with this entity.
+    ##
+    # Return a Hash of the links associated with this entity.
+    #
+    # The links typically include keys such as +"list"+, +"edit"+, or
+    # +"disable"+.
+    #
+    # Returns: a Hash of Strings to Strings.
     #
     def links()
       return @state["links"]
     end
 
-    # Return all or a specified subset of attribute/value pairs for this Entity
+    ##
+    # Return all or a specified subset of key/value pairs on this +Entity+
     #
-    # ==== Returns
-    # A Hash of all attributes and values for this Entity.  If Array <b>+field_list+</b> is specified,
-    # only those fields are returned.  If a field does not exist, nil is returned for it's value.
+    # In the absence of arguments, returns a Hash of all the fields on this
+    # +Entity+. If you specify one or more +String+s or +Array+s of +String+s,
+    # all the keys specified in the arguments will be returned in the Hash.
     #
-    # ==== Example 1 - Return a Hash of all attribute/values for index 'main'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   puts svc.indexes['main'].read
-    #     {"assureUTF8"=>"0", "blockSignSize"=>"0", "blockSignatureDatabase"=>"_blocksignature",....}
+    # Returns: a Hash with Strings as keys, and Strings or Hashes or Arrays
+    #          as values.
     #
-    # ==== Example 2 - Return a Hash of only the specified attribute/values for index 'main'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   puts svc.indexes['main'],read(['coldPath', 'blockSignSize'])
-    #     {"coldPath"=>"$SPLUNK_DB/defaultdb/colddb", "blockSignSize"=>"0"}
     def read(*field_list)
       if field_list.empty?
         return @state["content"].clone()
@@ -79,23 +142,23 @@ module Splunk
       end
     end
 
-    # Return metadata information for this Entity. This is the same as:
-    # <tt>entity.read(['eai:acl', 'eai:attributes')</tt>
+    ##
+    # Return the metadata for this Entity.
     #
-    # ==== Returns
-    # A Hash of this entities attributes/values for 'eai:acl' and 'eai:attributes'
+    # This method is identical to
     #
-    # ==== Example: Get metadata information for the index 'main'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   puts svc.indexes['main'].readmeta
-    #     {"eai:acl"=>{"app"=>"search", "can_list"=>"1",...},"eai:attributes"=>{"optionalFields"=>["assureUTF8"...]}}
+    #     entity.read(['eai:acl', 'eai:attributes')
+    #
+    # Returns: a Hash with the keys +"eai:acl"+ and +"eai:attributes"+.
+    #
     def readmeta
       read('eai:acl', 'eai:attributes')
     end
 
-    # Refresh the cached state of this Entity.
+    ##
+    # Refresh the cached state of this +Entity+.
     #
-    # Returns the Entity.
+    # Returns: the +Entity+.
     #
     def refresh()
       response = @service.request(:resource => @resource + [name],
@@ -108,15 +171,24 @@ module Splunk
       self
     end
 
-    # Updates an Entity with a Hash of attribute/value pairs specified as <b>+args+</b>
+    ##
+    # Updates the values on the Entity specified in the arguments.
     #
-    # ==== Returns
-    # The Entity object after it's been updated
+    # The arguments can be either a Hash or a sequence of +key => value+ pairs.
+    # This method does not refresh the +Entity+, so if you want to see the new
+    # values, you must call +refresh+ yourself.
     #
-    # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   index =  svc.indexes['main']
-    #   index.update('rotatePeriodInSecs' => '61')  #Note that you cannot use the number 61.  It must be a String.
+    # Whatever values you pass will be coerced to +String+s, so updating a
+    # numeric field with an Integer, for example, will work perfectly well.
+    #
+    # Returns: the +Entity+.
+    #
+    # *Example*:
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     index =  service.indexes['main']
+    #     # You could use the string "61" as well here.
+    #     index.update('rotatePeriodInSecs' => 61)
+    #
     def update(args)
       @service.request({:method => :POST,
                         :namespace => @namespace,
@@ -125,38 +197,47 @@ module Splunk
       self
     end
 
-    # Updates an individual attribute named <b>+key+</b> with String <b>+value+</b>
+    ##
+    # Updates the attribute _key_ with _value_.
     #
-    # ==== Returns
-    # The new value
+    # As for +update+, _value_ may be anything that may be coerced sensibly
+    # to a +String+.
     #
-    # ==== Example - Set the 'rotateValueInSecs' to 61 on index 'main'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   index =  svc.indexes['main']
-    #   index['rotatePeriodInSecs'] = '61'  #Note that you cannot use the number 61.  It must be a String.
+    # Returns: the new value
+    #
     def []=(key, value)
       update(key => value)
       value
     end
 
+    ##
     # Disable this entity.
     #
     # After a subsequent refresh, the "disabled" field will be set to "1".
+    # Note that on some entities, such as indexes in Splunk 5.x, most other
+    # operations do not work until it is enabled again.
+    #
+    # Returns: the +Entity+.
     #
     def disable
       @service.request(:method => :POST,
                        :namespace => @namespace,
                        :resource => @resource + [name, "disable"])
+      self
     end
 
+    ##
     # Enable this entity.
     #
     # After a subsequent refresh, the "disabled" field will be set to "0".
+    #
+    # Returns: the +Entity+.
     #
     def enable
       @service.request(:method => :POST,
                        :namespace => @namespace,
                        :resource => @resource + [name, "enable"])
+      self
     end
   end
 end

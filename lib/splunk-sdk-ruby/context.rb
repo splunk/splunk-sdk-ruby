@@ -1,3 +1,27 @@
+#--
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#++
+
+##
+# Provides +Context+, the basic class representing a connection to a Splunk
+# server. +Context+ is minimal, and only handles authentication and calls to
+# the REST API. For most use, you will want to use its subclass +Service+, which
+# adds convenient methods to access the various collections and entities
+# on Splunk.
+#
+
 require 'rexml/document'
 require 'net/http'
 
@@ -8,37 +32,41 @@ module Splunk
   DEFAULT_PORT = 8089
   DEFAULT_SCHEME = :https
 
-  # Low level access to the REST API.
+  # Class encapsulating a connection to a Splunk server.
   #
   # This class is used for lower level REST-based control of Splunk.
-  # To get started by logging in, create a Context instance and call
-  # `Context#login` on it.
+  # For most use, you will want to use +Context+'s subclass +Service+, which
+  # provides convenient access to Splunk's various collections and entities.
   #
-  # `Context#new` takes a hash of keyword arguments. The keys it understands
+  # To use +Context+, create a new +Context+ with a hash of arguments giving
+  # the details of the connection, and call +login+ on it:
+  #
+  #     context = Splunk::Context.new(:username => "admin",
+  #                                   :password => "changeme").login()
+  #
+  # +Context#new+ takes a hash of keyword arguments. The keys it understands
   # are:
   #
-  # * `:username` - log in to Splunk as this user (no default)
-  # * `:password` - password to use when logging in (no default)
-  # * `:host` - Splunk host (e.g. "10.1.2.3") (defaults to 'localhost')
-  # * `:port` - the Splunk management port (defaults to '8089')
-  # * `:protocol` - either 'https' or 'http' (defaults to 'https')
-  # * `:namespace` - application namespace option.  'username:appname'
-  #     (defaults to nil)
-  # * `:token` - a preauthenticated Splunk token (default to nil)
+  # * +:username+ - log in to Splunk as this user (no default)
+  # * +:password+ - password to use when logging in (no default)
+  # * +:host+ - Splunk host (e.g. "10.1.2.3") (default: 'localhost')
+  # * +:port+ - the Splunk management port (default: 8089)
+  # * +:protocol+ - either :https or :http (default: :https)
+  # * +:namespace+ - a +Namespace+ object representing the default namespace for
+  #   this context (default: +DefaultNamespace+)
+  # * +:token+ - a preauthenticated Splunk token (default: +nil+)
+  #
+  # If you specify a token, you need not specify a username or password, nor
+  # do you need to call +login+.
+  #
+  # +Context+ provides three other important methods:
+  #
+  # * +connect+ opens a socket to the Splunk server.
+  # * +request+ issues a request to the REST API.
+  # * +restart+ restarts the Splunk server and handles waiting for it to come
+  #   back up.
   #
   class Context
-    # Fields on the context:
-    # * `scheme`: :https or :http - Symbol
-    # * `host`: host where Splunk Server lives - String
-    # * `port`: port number of the Splunk Server's management port - Integer
-    # * `token`: the authentication token for this session (or `nil` if
-    #   not logged in) - String.
-    # * `username`: The username used to log in.
-    # * `password`: The password used to log in.
-    #
-    attr_reader :scheme, :host, :port, :token,
-                :username, :password, :namespace
-
     def initialize(args)
       @token = args.fetch(:token, nil)
       @scheme = args.fetch(:scheme, DEFAULT_SCHEME).intern()
@@ -51,11 +79,82 @@ module Splunk
       @namespace = args.fetch(:namespace, Splunk::namespace())
     end
 
+    ##
+    # The protocol used to connect.
+    #
+    # Defaults to +:https+.
+    #
+    # Returns: +:http+ or +:https+.
+    #
+    attr_reader :scheme
+
+    ##
+    # The host to connect to.
+    #
+    # Defaults to +"localhost"+.
+    #
+    # Returns: a +String+.
+    #
+    attr_reader :host
+
+    ##
+    # The port to connect to.
+    #
+    # Defaults to +8089+.
+    #
+    # Returns: an +Integer+.
+    #
+    attr_reader :port
+
+    ##
+    # The authentication token on Splunk.
+    #
+    # Is this +Context+ is not logged in, this is +nil+. Otherwise it is a
+    # +String+ that is passed with each request.
+    #
+    # Returns: a +String+ or +nil+.
+    #
+    attr_reader :token
+
+    ##
+    # The username used to connect.
+    #
+    # If a token is provided, this field can be +nil+.
+    #
+    # Returns: a +String+ or +nil+.
+    #
+    attr_reader :username
+
+    ##
+    # The password used to connect.
+    #
+    # If a token is provided, this field can be +nil+.
+    #
+    # Returns: a +String+ or +nil+.
+    #
+    attr_reader :password
+
+    ##
+    # The default namespace used for requests on this +Context+.
+    #
+    # The namespace must be a +Namespace+ object. If a call to +request+ is
+    # made without a namespace, this namespace is used for the request.
+    #
+    # Defaults to +DefaultNamespace+.
+    #
+    # Returns: a +Namespace+ object.
+    #
+    attr_reader :namespace
+
+    ##
     # Open a TCP socket to the Splunk HTTP server.
     #
-    # If the Context protocol is `https`, then an SSL wrapped socket is
-    # returned.  If the Context protocol is `http`, then a regular socket
-    # is returned.
+    # If the +scheme+ field of this +Context+ is +:https+, this method returns
+    # an +SSLSocket+. If +scheme+ is +:http+, a +TCPSocket+ is returned. Due to
+    # design errors in Ruby's standard library, these two do not share the same
+    # method names, so code written for HTTPS will not work for HTTP.
+    #
+    # Returns: an +SSLSocket+ or +TCPSocket+.
     #
     def connect()
       socket = TCPSocket.new(@host, @port)
@@ -71,14 +170,20 @@ module Splunk
       end
     end
 
-    # Login to Splunk. The _token_ attribute will be filled with the
-    # Splunk authentication token upon successful login. If `@token` is not
-    # `nil`, the context is taken to be already logged in, and this method
-    # is a nop.
+    ##
+    # Log into Splunk and set the token field on this +Context+.
     #
-    # Raises HTTPError if there is a problem logging in.
+    # +login+ assumes that the +Context+ has a username and password set.
+    # You cannot pass them as arguments to this method. On a successful login,
+    # the token field of the +Context+ is set to the token returned by Splunk,
+    # and all further requests to the server will send this token.
     #
-    # Returns the Context.
+    # If this +Context+ already has a token that is not +nil+, it is already
+    # logged in, and this method is a nop.
+    #
+    # Raises +SplunkHTTPError+ if there is a problem logging in.
+    #
+    # Returns: the +Context+.
     #
     def login()
       if @token # If we're already logged in, this method is a nop.
@@ -99,60 +204,68 @@ module Splunk
       self
     end
 
+    ##
     # Log out of Splunk.
     #
-    # This sets the @token attribute to `nil`.
+    # This sets the @token attribute to +nil+.
+    #
+    # Returns: the +Context+.
     #
     def logout()
       @token = nil
+      self
     end
 
-    # Issue an HTTP request to the Splunk instance.
+    ##
+    # Issue an HTTP(S) request to the Splunk instance.
     #
-    # `request` does not take a URL. Instead, it takes a number of optional
-    # arguments from which it will construct a URL, then call request_by_url.
+    # +request+ does not take a URL. Instead, it takes a hash of optional
+    # arguments specifying an action in the REST API. This avoids the problem
+    # knowing whether a given piece of data is URL encoded or not.
+    #
     # The arguments are:
     #
-    # * `method`: The HTTP method to use (one of `:GET`, `:POST`, or `:DELETE`;
-    #   default: `:GET`)
-    # * `scheme`: `:http` or `:https` (defaults to the value of `@scheme` on
-    #   this `Context`).
-    # * `host`: The hostname to send the request to (defaults to the value of
-    #   `@host` on this `Context`).
-    # * `port`: The port on the host to connect to (default to the value of
-    #   `@port` on this `Context`).
-    # * `namespace`: The namespace to request a resource from Splunk in. Must
-    #   by a `Namespace` object.
-    #   (default: the value of `@namespace` on this `Context`).
-    # * `resource`: An array of strings specifying the components of the path
+    # * +method+: The HTTP method to use (one of +:GET+, +:POST+, or +:DELETE+;
+    #   default: +:GET+)
+    # * +scheme+: +:http+ or +:https+ (default: the value of +@scheme+ on
+    #   this +Context+).
+    # * +host+: The hostname to send the request to (default: the value of
+    #   +@host+ on this +Context+).
+    # * +port+: The port on the host to connect to (default: the value of
+    #   +@port+ on this +Context+).
+    # * +namespace+: The namespace to request a resource from Splunk in. Must
+    #   be a +Namespace+ object. (default: the value of +@namespace+ on
+    #   this +Context+).
+    # * +resource+: An array of strings specifying the components of the path
     #   to the resource after the namespace. The strings should not be URL
-    #   encoded, as that will be handled by `request`. (default: `[]`).
-    # * `query`: A hash containing the values to be encoded as
-    #   the query (the part following `?`) in the URL. Nothing should be URL
-    #   encoded as `request` will do the encoding. If you need to pass multiple
-    #   values for the same key, insert them as a list into the Hash, and they
-    #   will be properly encoded as a sequence of entries with the same key.
-    #   (default: `{}`)
-    # * `headers`: A hash containing the values to be encoded as headers. None
-    #   should be URL encoded, and the `request` method will automatically add
-    #   headers for `User-Agent` and Splunk authentication for you. Keys must
-    #   be unique, so the values must be strings, not arrays. (default: `{}`).
-    # * `body`: Either a hash to be encoded as the body of a POST request, or
+    #   encoded, as that will be handled by +request+. (default: +[]+).
+    # * +query+: A hash containing the values to be encoded as
+    #   the query (the part following +?+) in the URL. Nothing should be URL
+    #   encoded as +request+ will do the encoding. If you need to pass multiple
+    #   values for the same key, insert them as an Array as the value of their
+    #   key into the Hash, and they will be properly encoded as a sequence of
+    #   entries with the same key. (default: +{}+)
+    # * +headers+: A hash containing the values to be encoded as headers. None
+    #   should be URL encoded, and the +request+ method will automatically add
+    #   headers for +User-Agent+ and Splunk authentication for you. Keys must
+    #   be unique, so the values must be strings, not arrays, unlike for
+    #   +query+. (default: +{}+).
+    # * +body+: Either a hash to be encoded as the body of a POST request, or
     #   a string to be used as the raw, already encoded body of a POST request.
     #   If you pass a hash, you can pass multiple values for the same key by
     #   encoding them as an Array, which will be properly set as multiple
     #   instances of the same key in the POST body. Nothing in the hash should
-    #   be URL encoded, as `request` will handle all such encoding.
-    #   (default: `{}`)
+    #   be URL encoded, as +request+ will handle all such encoding.
+    #   (default: +{}+)
     #
-    # If Splunk responds with an HTTP code 2xx, `request` returns an HTTP
-    # response object (the import methods of which are `code`, `message`,
-    # `body`, and `each` to enumerate over the response headers). If the HTTP
-    # code is not 2xx, `request` raises a `SplunkHTTPError`.
+    # If Splunk responds with an HTTP code 2xx, +request+ returns an HTTP
+    # response object (the import methods of which are +code+, +message+,
+    # and +body+, and +each+ to enumerate over the response headers). If the HTTP
+    # code is not 2xx, +request+ raises a +SplunkHTTPError+.
     #
     # *Examples*
     #
-    #     c = Splunk::connect(username=..., password=...)
+    #     c = Splunk::connect(username="admin", password="changeme")
     #     # Get a list of the indexes in this Splunk instance.
     #     c.request(:namespace => Splunk::namespace(),
     #               :resource => ["data", "indexes"])
@@ -245,14 +358,15 @@ module Splunk
       end
     end
 
+    ##
     # Restart this Splunk instance.
     #
-    # `restart` may be called with an optional timeout. If you pass a timeout,
-    # `restart` will wait up to that number of seconds for the server to come
-    # back up before returning. If `restart` did not time out, it leaves the
+    # +restart+ may be called with an optional timeout. If you pass a timeout,
+    # +restart+ will wait up to that number of seconds for the server to come
+    # back up before returning. If +restart+ did not time out, it leaves the
     # Context logged in when it returns.
     #
-    # If the timeout is, omitted, `restart` returns immediately, and you will
+    # If the timeout is, omitted, +restart+ returns immediately, and you will
     # have to ascertain if Splunk has come back up yourself, for example with
     # code like:
     #
@@ -265,7 +379,7 @@ module Splunk
     #         end
     #     end
     #
-    # Returns this Context.
+    # Returns: this +Context+.
     #
     def restart(timeout=nil)
       if !timeout.nil?
@@ -287,7 +401,7 @@ module Splunk
       logout()
 
       # If timeout is nil, return immediately. If timeout is a positive
-      # integer, wait for `timeout` seconds for the server to come back
+      # integer, wait for +timeout+ seconds for the server to come back
       # up.
       if !timeout.nil?
         Timeout::timeout(timeout) do
@@ -301,17 +415,18 @@ module Splunk
       self
     end
 
+    ##
     # Is the Splunk server accepting connections?
     #
-    # Returns true if the Splunk server is up and accepting REST API
-    # connections; false otherwise.
+    # Returns +true+ if the Splunk server is up and accepting REST API
+    # connections; +false+ otherwise.
     #
     def server_accepting_connections?()
       begin
         # Can't use login, since it has short circuits
         # when @token != nil on the Context. Instead, make
         # a request directly.
-        request(:resource=>["data","indexes"])
+        request(:resource => ["data", "indexes"])
       rescue Errno::ECONNREFUSED, EOFError
         return false
       rescue SplunkHTTPError
@@ -324,11 +439,12 @@ module Splunk
       end
     end
 
+    ##
     # Is the Splunk server in a state requiring a restart?
     #
-    # Returns true if the Splunk server is down (equivalent to
-    # server_accepting_connections?), or if there is a `restart_required`
-    # message on the server; false otherwise.
+    # Returns +true+ if the Splunk server is down (equivalent to
+    # +server_accepting_connections?+), or if there is a +restart_required+
+    # message on the server; +false+ otherwise.
     #
     def server_requires_restart?()
       begin
@@ -349,8 +465,5 @@ module Splunk
         end
       end
     end
-
-
-
   end
 end

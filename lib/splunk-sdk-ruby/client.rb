@@ -42,8 +42,6 @@ module Splunk
   PATH_STANZA = ["configs","conf-%s","%s"]
   PATH_JOBS = ["search", "jobs"]
   PATH_EXPORT = ["search", "jobs", "export"]
-  PATH_RESTART = ["server", "control", "restart"]
-  PATH_PARSE = ["search", "parser"]
 
   NAMESPACES = { 'ns0' => 'http://www.w3.org/2005/Atom',
                  'ns1' => 'http://dev.splunk.com/ns/rest' }
