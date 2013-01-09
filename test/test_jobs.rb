@@ -191,4 +191,9 @@ class JobWithDelayedDoneTestCase < JobsTestCase
     end
     assert_true(new_ttl > old_ttl)
   end
+
+  def test_searchlog
+    log_stream = @job.searchlog
+    assert_false(log_stream.empty?)
+  end
 end

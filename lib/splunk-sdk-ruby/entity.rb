@@ -39,6 +39,17 @@ module Splunk
   class Entity
     extend Synonyms
 
+    def initialize(service, namespace, resource, name, state=nil) # :nodoc:
+      @service = service
+      @namespace = namespace
+      @resource = resource
+      @name = name
+      @state = state
+      if !state # If the state was not provided, we need to fetch it.
+        refresh()
+      end
+    end
+
     ##
     # The name of this Entity.
     #
@@ -68,14 +79,6 @@ module Splunk
     # Returns: a +Service+ object.
     #
     attr_reader :service
-
-    def initialize(service, namespace, resource, name, state=nil) # :nodoc:
-      @service = service
-      @namespace = namespace
-      @resource = resource
-      @name = name
-      @state = state
-    end
 
     ##
     # Delete this entity from the server.
