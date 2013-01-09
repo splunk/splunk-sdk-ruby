@@ -1,0 +1,42 @@
+Private preview to public preview:
+
+* The Splunk SDK for Ruby now uses the same .splunkrc format as the other SDKs.
+* Elements of hashes can no longer be accessed with . notation (i.e., hash.key
+  instead of hash["key"]). Hashes also no longer have a urlencode method.
+* AtomResponseLoader in aloader.rb has been replaced by AtomFeed in atomfeed.rb.
+* Lots of code reorganization, leading to the deletion of client.rb.
+* Collection now implements most of the relevant methods of Hash.
+* The whole SDK now handles namespaces properly, and namespaces are first class
+  objects.
+* Constructor of Collection has been simplified. It now takes only the service,
+  resource path, and an optional class for its members.
+* Conf renamed to ConfigurationFile, and conf.rb to configuration_file.rb.
+* ConfCollection renamed to Configurations, and conf_collection.rb to
+  configurations.rb.
+* Constructor of Entity has changed. It now takes the service, namespace,
+  resource path, name, and optional initial state of the entity.
+* Job is now a subclass of Entity.
+* Entities now cache their state. To update the cache, call the entity's refresh
+  method.
+* Service is now a subclass of Context instead of including the Context as
+  an instance variable. This matches the behavior of the Python SDK.
+* The get, post, and delete methods on Context have been replaced by a single
+  request method that takes a much more structured set of arguments than a
+  URL.
+* Removed the parse method from Service, since it didn't actually parse
+  the response in any useful way.
+* Removed the summary method from Job since it wasn't actually parsed in any
+  useful way.
+* Added a ResultsReader class to parse and iterate over sets of XML results from
+  search jobs. This supersedes the SearchResults class, which has been deleted.
+* Context no longer depends on netrc, rest-client, or other external libraries.
+  It only uses the net/http library from the standard library.
+* All XML handling is shimmed to work with either Nokogiri or REXML.
+* Added documentation throughout the SDK.
+* Created a Stanza subclass of Entity.
+* Wrote an extensive unit test suite for the SDK.
+* Index#submit and Index#attach now take hash arguments instead of positional
+  arguments.
+* Index#clean has a timeout instead of waiting forever.
+* Context#restart has a timeout, and properly handles waiting for
+  Splunk to restart.
