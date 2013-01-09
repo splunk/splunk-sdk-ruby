@@ -1,18 +1,55 @@
+#--
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#++
+
+##
+# Provides a class +Index+ to represent indexes on the Splunk server.
+#
+
+require_relative '../entity'
+
 module Splunk
-# Splunk can have many indexes.  Each index is represented by an Index object.
+  ##
+  # Class representing an index on the Splunk server.
+  #
+  # Beyond what its superclass +Entity+ provides, +Index+ also exposes methods
+  # to write data to an index and delete all data from an index.
+  #
   class Index < Entity
-    # Streaming HTTP(S) input for Splunk. Write to the returned stream Socket, and Splunk will index the data.
-    # Optionally, you can assign a <b>+host+</b>, <b>+source+</b> or <b>+sourcetype+</b> that will apply
-    # to every event sent on the socket. Note that the client is responsible for closing the socket when finished.
+    # Open a socket to write events to this index.
     #
-    # ==== Returns
-    # Either an encrypted or non-encrypted stream Socket depending on if Service.connect is http or https
+    # Write events to the returned stream Socket, and Splunk will index the
+    # data. You can optionally pass a hash of _host_, _source_, and
+    # _sourcetype_ arguments to be sent with every event.
     #
-    # ==== Example - Index 5 events written to the stream and assign a sourcetype 'mysourcetype' to each event
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   stream = svc.indexes['main'].attach(nil, nil, 'mysourcetype')
-    #   (1..5).each { stream.write("This is a cheezy event\r\n") }
-    #   stream.close
+    # Splunk may not index submitted events until the socket is closed or
+    # at least 1MB of data has been submitted.
+    #
+    # You are responsible for closing the socket.
+    #
+    # Note that +SSLSocket+ and +TCPSocket+ have incompatible APIs.
+    #
+    # Returns: an +SSLSocket+ or +TCPSocket+.
+    #
+    # *Example*:
+    #
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     stream = service.indexes['main'].attach(:sourcetype => 'mysourcetype')
+    #     (1..5).each { stream.write("This is a cheezy event\r\n") }
+    #     stream.close()
+    #
     def attach(args={})
       args[:index] = @name
       path = "receivers/stream?#{URI.encode_www_form(args)}"
@@ -33,17 +70,18 @@ module Splunk
       cn
     end
 
-    # Nuke all events in this index.  This is done by setting <b>+maxTotalDataSizeMG+</b> and
-    # <b>+frozenTimePeriodInSecs+</b> both to 1. The call will then block until <b>+totalEventCount+</b> == 0.
-    # When the call is completed, the original parameters are restored.
+    ##
+    # Delete all events in this index.
     #
-    # ==== Returns
-    # The original 'maxTotalDataSizeMB' and 'frozenTimePeriodInSecs' parameters in a Hash
+    # +clean+ will wait until the operation completes, or _timeout_
+    # seconds have passed. By default, _timeout_ is 100 seconds.
     #
-    # ==== Example - clean the 'main' index
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.indexes['main'].clean
-    def clean(timeout=nil)
+    # Cleaning an index is done by setting +maxTotalDataSizeMG+ and
+    # +frozenTimePeriodInSecs+ to +"1"+.
+    #
+    # Returns: the +Index+.
+    #
+    def clean(timeout=100)
       refresh()
       original_state = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
       was_disabled_initially = fetch("disabled") == "1"
@@ -72,45 +110,66 @@ module Splunk
       update(original_state)
     end
 
+    ##
+    # Tell Splunk to roll the hot buckets in this index now.
+    #
+    # A Splunk index is a collection of buckets containing events. A bucket
+    # begins life "hot", where events may be written into it. At some point,
+    # when it grows to a certain size, or when +roll_hot_buckets+ is called,
+    # it is rolled to "warm" and a new hot bucket created. Warm buckets are
+    # fully accessible, but not longer receiving new events. Eventually warm
+    # buckets are archived to become cold buckets.
+    #
+    # Returns: the +Index+.
+    #
     def roll_hot_buckets()
       @service.request(:method => :POST,
                        :resource => @resource + [@name, "roll-hot-buckets"])
       return self
     end
 
-    # Batch HTTP(S) input for Splunk. Specify one or more events in a String along with optional
-    # <b>+host+</b>, <b>+source+</b> or <b>+sourcetype+</b> fields which will apply to all events.
+    ##
+    # Write a single event to this index.
     #
-    # Example - Index a single event into the 'main' index with source 'baz' and sourcetype 'foo'
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.indexes['main'].submit("this is an event", nil, "baz", "foo")
+    # _event_ is the text of the event. You can optionally pass a hash
+    # with the optional keys +:host+, +:source+, and +:sourcetype+.
     #
-    # Example 2 - Index multiple events into the 'main' index with default metadata
-    def submit(events, args={})
+    # Returns: the +Index+.
+    #
+    # *Example:*
+    #   service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #   service.indexes['main'].submit("this is an event",
+    #                                  :host => "baz",
+    #                                  :sourcetype => "foo")
+    #
+    def submit(event, args={})
       args[:index] = @name
       @service.request(:method => :POST,
                        :resource => ["receivers", "simple"],
                        :query => args,
-                       :body => events)
+                       :body => event)
       return self
     end
 
-    # Upload a file accessible by the Splunk server.  The full path of the file is specified by
-    # <b>+filename+</b>.
+    ##
+    # Upload a file accessible by the Splunk server.
     #
-    # ==== Optional Arguments
-    # +args+ - Valid optional args are listed below.  Note that they are all Strings:
+    # _filename_ should be the full path to the file on the server where
+    # Splunk is running. Besides _filename_, +upload+ also takes a hash of
+    # optional arguments, all of which take +String+s:
+    #
     # * +:host+ - The host for the events
-    # * +:host_regex+ - A regex to be used to extract a 'host' field from the path.
-    #   If the path matches this regular expression, the captured value is used to populate the 'host' field
-    #   or events from this data input.  The regular expression must have one capture group.
-    # * +:host_segment+ - Use the specified slash-seperated segment of the path as the host field value.
-    # * +:rename-source+ - The value of the 'source' field to be applied to the data from this file
-    # * +:sourcetype+ - The value of the 'sourcetype' field to be applied to data from this file
+    # * +:host_regex+ - A regex to be used to extract a 'host' field from
+    #   the path. If the path matches this regular expression, the captured
+    #   value is used to populate the 'host' field or events from this data
+    #   input.  The regular expression must have one capture group.
+    # * +:host_segment+ - Use the specified slash-seperated segment of the
+    #   path as the host field value.
+    # * +:rename-source+ - The value of the 'source' field to be applied to the
+    #   data from this file
+    # * +:sourcetype+ - The value of the 'sourcetype' field to be applied to
+    #   data from this file
     #
-    # ==== Example - Upload a file using defaults
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   svc.indexes['main'].upload("/Users/rdas/myfile.log")
     def upload(filename, args={})
       args['index'] = @name
       args['name'] = filename

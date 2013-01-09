@@ -1,8 +1,36 @@
+#--
+# Copyright 2011-2012 Splunk, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"): you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#++
+
+##
+# Provides +Configurations+, a collection of configuration files in Splunk.
+# +Configurations+ has an API identical to its superclass, +Collection+,
+# so a user of the SDK should not have to be aware of its existance.
+#
+
 require_relative '../collection'
 require_relative 'configuration_file'
 
 module Splunk
-  class Configurations < Collection
+  ##
+  # Class representing a collection of configuration files.
+  #
+  # The API of +Configurations+ is identical to +Collection+,
+  # so the user should not need to be aware of this class.
+  #
+  class Configurations < Collection # :nodoc:
     def initialize(service)
       super(service, PATH_CONFS, entity_class=ConfigurationFile)
     end
@@ -45,5 +73,4 @@ module Splunk
       end
     end
   end
-
 end

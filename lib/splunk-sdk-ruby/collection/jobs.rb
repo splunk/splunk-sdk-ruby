@@ -1,3 +1,4 @@
+#--
 # Copyright 2011-2012 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
@@ -11,51 +12,44 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+#++
+
+require '../collection'
+
+##
+# Provides a class representing the collection of jobs in Splunk.
+#
 
 module Splunk
-# Jobs objects are used for executing searches and retrieving a list of all jobs
+  ##
+  # Class representing a search job in Splunk.
+  #
+  # +Jobs+ adds two additional methods to +Collection+ to start additional
+  # kinds of search job. The basic +create+ method starts a normal,
+  # asynchronous search job. The two new methods, +create_oneshot+ and
+  # +create_stream+, creating oneshot and streaming searches, respectively,
+  # which block until the search finishes and return the results directly.
+  #
   class Jobs < Collection
-
     def initialize(service)
       super(service, PATH_JOBS, entity_class=Job)
 
+      # Jobs is one of the inconsistent collections where 0 means
+      # list all, not -1.
       @infinite_count = 0
     end
 
-    def atom_entry_to_entity(entry)
+    def atom_entry_to_entity(entry) # :nodoc:
       sid = entry["content"]["sid"]
       return Job.new(@service, sid)
     end
 
-    # Run a search.  This search can be either synchronous (oneshot) or asynchronous.  A synchronous search
-    # will execute the search and the caller will block until the results have been returned.  An asynchronous search
-    # will return immediately, returning a Job object that can be queried for completion, paused, etc.
-    # There are many possible arguments - all are documented in the Splunk REST documentation at
-    # http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST.  The one that controls
-    # either synchronous or asynchronous is called <b>+:exec_mode+</b>.
+    ##
+    # Create an asynchronous search job.
     #
-    # ==== Example 1 - Execute a synchronous search returning XML (XML is the default output mode )
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   puts svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'oneshot')
+    # The search job requires a _query_, and takes a hash of other, optional
+    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST].
     #
-    # ==== Example 2 - Execute a synchronous search returning results in JSON
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   puts svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'oneshot', :output_mode => 'json')
-    #
-    # ==== Example 3 - Execute a synchronous search returning a Job object with the results as a JSON String
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   job = svc.jobs.create("search error", :max_count => 10, :max_results => 10, :exec_mode => 'blocking')
-    #   puts job.results(:output_mode => 'json')
-    #
-    # ==== Example 4 - Execute an asynchronous search and wait for all the results (returned in JSON)
-    #   svc = Splunk::Service.connect(:username => 'admin', :password => 'foo')
-    #   job = svc.jobs.create("search error", :max_count => 10, :max_results => 10)
-    #   while true
-    #     stats = job.read(['isDone'])
-    #     break if stats['isDone'] == '1'
-    #     sleep(1)
-    #   end
-    #   puts job.results(:output_mode => 'json')
     def create(query, args={})
       if args.has_key?(:exec_mode)
         raise ArgumentError.new("Cannot specify exec_mode for create. Use " +
@@ -70,6 +64,17 @@ module Splunk
       Job.new(@service, sid)
     end
 
+    ##
+    # Create a blocking search.
+    #
+    # +create_oneshot+ starts a search _query_, and any optional arguments
+    # specified in a hash (which are identical to those taken by +create+).
+    # It then blocks until the job finished, and returns the results, as
+    # transformed by any transforming search commands in _query_ (equivalent
+    # to calling the +results+ method on a +Job+).
+    #
+    # Returns: a stream readable by +ResultsReader+.
+    #
     def create_oneshot(query, args={})
       args[:search] = query
       args[:exec_mode] = 'oneshot'
@@ -79,6 +84,17 @@ module Splunk
       return response.body
     end
 
+    ##
+    # Create a blocking search without transforming search commands.
+    #
+    # +create+_stream+ starts a search _query_, and any optional arguments
+    # specified in a hash (which are identical to those taken by +create+).
+    # It then blocks until the job is finished, and returns the events
+    # found by the job before any transforming search commands (equivalent
+    # to calling +events+ on a +Job+).
+    #
+    # Returns: a stream readable by +ResultsReader+.
+    #
     def create_stream(query, args={})
       args["search"] = query
       response = @service.request(:method => :GET,
