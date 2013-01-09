@@ -14,7 +14,7 @@
 # under the License.
 #++
 
-require '../collection'
+require_relative '../collection'
 
 ##
 # Provides a class representing the collection of jobs in Splunk.

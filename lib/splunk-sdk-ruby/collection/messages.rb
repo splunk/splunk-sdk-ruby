@@ -14,7 +14,7 @@
 # under the License.
 #++
 
-require '../collection'
+require_relative '../collection'
 
 ##
 # Provides a collection representing system-wide messages on Splunk.

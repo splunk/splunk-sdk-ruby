@@ -154,6 +154,13 @@ class JobWithDelayedDoneTestCase < JobsTestCase
     end
   end
 
+  def test_get_preview
+    @job.enable_preview()
+    response = @job.preview()
+    results = Splunk::ResultsReader.new(response)
+    assert_true(results.is_preview?)
+  end
+
   def test_pause_unpause_finalize
     assert_equal("0", @job["isPaused"])
 
