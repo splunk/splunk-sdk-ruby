@@ -11,7 +11,7 @@ end
 # See http://youtrack.jetbrains.com/issue/RUBY-11922
 $:.unshift($:.select {|i| i.include? '/patch/'}).flatten!
 
-require 'test/unit'
+require 'test-unit'
 
 $:.unshift File.expand_path(File.join([File.dirname(__FILE__), "..", "lib"]))
 
