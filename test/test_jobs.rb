@@ -115,16 +115,31 @@ class JobsTestCase < SplunkTestCase
 
     job.cancel()
   end
+
+  def test_enable_preview
+    install_app_from_collection("sleep_command")
+    job = @service.jobs.create("search index=_internal | sleep 100",
+                               :earliest_time => "-1d",
+                               :latest_time => "now",
+                               :priority => 5)
+    assert_equal("0", job["isPreviewEnabled"])
+    job.enable_preview()
+    assert_eventually_true(10) do
+      job.refresh()
+      fail("Job finished before preview enabled") if job.is_done()
+      job["isPreviewEnabled"] == "1"
+    end
+    job.cancel()
+  end
 end
 
 class JobWithDelayedDoneTestCase < JobsTestCase
   def setup
     super
-    install_app_from_collection("sleep_command")
-    query = "search index=_internal | sleep 1000"
+    query = "search index=_internal"
     @job = @service.jobs.create(query,
-                                :earliest_time => "-1m",
-                                :latest_time => "now",
+                                :earliest_time => "rt-1d",
+                                :latest_time => "rt",
                                 :priority => 5)
 
   end
@@ -140,22 +155,12 @@ class JobWithDelayedDoneTestCase < JobsTestCase
     super
   end
 
-  def test_enable_preview
-    assert_equal("0", @job["isPreviewEnabled"])
-    @job.enable_preview()
-    assert_eventually_true(120) do
-      @job.refresh()
-      fail("Job finished before preview enabled") if @job.is_done()
-      @job["isPreviewEnabled"] == "1"
-    end
-  end
-
   def test_set_priority
     assert_equal("5", @job["priority"])
-
+    sleep(1)
     new_priority = 3
     @job.set_priority(new_priority)
-    assert_eventually_true(120) do
+    assert_eventually_true(10) do
       @job.refresh()
       fail("Job finished before priority was set.") if @job.is_done()
       @job["priority"] == "3"
@@ -163,10 +168,12 @@ class JobWithDelayedDoneTestCase < JobsTestCase
   end
 
   def test_get_preview
-    @job.enable_preview()
-    response = @job.preview()
-    results = Splunk::ResultsReader.new(response)
-    assert_true(results.is_preview?)
+    assert_equal("1", @job["isPreviewEnabled"])
+    assert_eventually_true do
+      response = @job.preview()
+      results = Splunk::ResultsReader.new(response)
+      results.is_preview?
+    end
   end
 
   def test_pause_unpause_finalize
