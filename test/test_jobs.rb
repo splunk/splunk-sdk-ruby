@@ -19,7 +19,7 @@ class JobsTestCase < SplunkTestCase
     job = jobs.create(QUERY)
     assert_true(jobs.has_key?(job.sid))
     job.cancel()
-    assert_eventually_true() {!jobs.has_key?(job.sid)}
+    assert_eventually_true() { !jobs.has_key?(job.sid) }
     job.cancel() # Cancel twice should be a nop
   end
 
@@ -69,7 +69,7 @@ class JobsTestCase < SplunkTestCase
       each_jobs << job.sid
     end
 
-    assert_equal(each_jobs, jobs.values().map() {|j| j.sid})
+    assert_equal(each_jobs, jobs.values().map() { |j| j.sid })
 
     jobs.each do |job|
       job.cancel()
@@ -79,7 +79,7 @@ class JobsTestCase < SplunkTestCase
   def test_preview_and_events
     job = @service.jobs.create(QUERY, JOB_ARGS)
     assert_eventually_true() { job.is_done() }
-    assert_true( Integer(job['eventCount']) <= 3 )
+    assert_true(Integer(job['eventCount']) <= 3)
 
     preview_stream = job.preview()
     preview_results = ResultsReader.new(preview_stream)
@@ -118,10 +118,7 @@ class JobsTestCase < SplunkTestCase
 
   def test_enable_preview
     install_app_from_collection("sleep_command")
-    job = @service.jobs.create("search index=_internal | sleep 100",
-                               :earliest_time => "-1d",
-                               :latest_time => "now",
-                               :priority => 5)
+    job = @service.jobs.create("search index=_internal | sleep 2")
     assert_equal("0", job["isPreviewEnabled"])
     job.enable_preview()
     assert_eventually_true(10) do
@@ -133,7 +130,50 @@ class JobsTestCase < SplunkTestCase
   end
 end
 
-class JobWithDelayedDoneTestCase < JobsTestCase
+class LongJobTestCase < JobsTestCase
+  def setup
+    super
+
+    install_app_from_collection("sleep_command")
+    @job = @service.jobs.create("search index=_internal | sleep 20")
+  end
+
+  def teardown
+    if @job
+      @job.cancel()
+      assert_eventually_true() do
+        !@service.jobs.has_key?(@job.sid)
+      end
+    end
+
+    super
+  end
+
+  def test_setttl
+    old_ttl = Integer(@job["ttl"])
+    new_ttl = old_ttl + 1000
+
+    @job.set_ttl(new_ttl)
+    assert_eventually_true() do
+      @job.refresh()
+      ttl = Integer(@job["ttl"])
+      ttl <= new_ttl && ttl > old_ttl
+    end
+  end
+
+  def test_touch
+    sleep(4)
+    old_ttl = Integer(@job.refresh()["ttl"])
+    @job.touch()
+    new_ttl = Integer(@job.refresh()["ttl"])
+    if new_ttl == old_ttl
+      fail("Didn't wait long enough to make ttl change meaningful.")
+    end
+    assert_true(new_ttl > old_ttl)
+  end
+end
+
+class RealTimeJobTestCase < JobsTestCase
   def setup
     super
     query = "search index=_internal"
@@ -189,29 +229,6 @@ class JobWithDelayedDoneTestCase < JobsTestCase
 
     @job.finalize()
     assert_eventually_true() { @job.refresh()["isFinalized"] == "1" }
-  end
-
-  def test_setttl
-    old_ttl = Integer(@job["ttl"])
-    new_ttl = old_ttl + 1000
-
-    @job.set_ttl(new_ttl)
-    assert_eventually_true() do
-      @job.refresh()
-      ttl = Integer(@job["ttl"])
-      ttl <= new_ttl && ttl > old_ttl
-    end
-  end
-
-  def test_touch
-    sleep(2)
-    old_ttl = Integer(@job.refresh()["ttl"])
-    @job.touch()
-    new_ttl = Integer(@job.refresh()["ttl"])
-    if new_ttl == old_ttl
-      fail("Didn't wait long enough to make ttl change meaningful.")
-    end
-    assert_true(new_ttl > old_ttl)
   end
 
   def test_searchlog
