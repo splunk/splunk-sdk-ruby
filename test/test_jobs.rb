@@ -70,6 +70,10 @@ class JobsTestCase < SplunkTestCase
     end
 
     assert_equal(each_jobs, jobs.values().map() {|j| j.sid})
+
+    jobs.each do |job|
+      job.cancel()
+    end
   end
 
   def test_preview_and_events
@@ -94,6 +98,8 @@ class JobsTestCase < SplunkTestCase
 
     assert_equal(events_array, preview_array)
     assert_equal(results_array, preview_array)
+
+    job.cancel()
   end
 
   def test_timeline
@@ -106,6 +112,8 @@ class JobsTestCase < SplunkTestCase
     Splunk::require_xml_library(:nokogiri)
     timeline = job.timeline()
     assert_true(timeline.is_a?(Array))
+
+    job.cancel()
   end
 end
 
@@ -135,7 +143,7 @@ class JobWithDelayedDoneTestCase < JobsTestCase
   def test_enable_preview
     assert_equal("0", @job["isPreviewEnabled"])
     @job.enable_preview()
-    assert_eventually_true(100) do
+    assert_eventually_true(120) do
       @job.refresh()
       fail("Job finished before preview enabled") if @job.is_done()
       @job["isPreviewEnabled"] == "1"

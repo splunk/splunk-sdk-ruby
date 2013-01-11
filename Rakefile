@@ -41,7 +41,7 @@ task :reek do
 end
 
 Rake::TestTask.new do |t|
-  t.libs << 'lib' << 'test'
-  t.pattern = 'test/test_*.rb'
+  t.libs << 'test'
+  t.pattern = File.join(['test', 'test_*.rb'])
   t.verbose = true
 end

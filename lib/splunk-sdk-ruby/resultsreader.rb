@@ -83,7 +83,9 @@ module Splunk
     attr_reader :fields
 
     def initialize(text_or_stream)
-      if !text_or_stream.respond_to?(:read)
+      if text_or_stream.nil?
+        stream = StringIO.new("")
+      elsif !text_or_stream.respond_to?(:read)
         stream = StringIO.new(text_or_stream.strip)
       else
         stream = text_or_stream
