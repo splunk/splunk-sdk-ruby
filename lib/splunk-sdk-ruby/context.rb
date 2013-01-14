@@ -191,7 +191,8 @@ module Splunk
         return
       end
 
-      response = request(:method => :POST,
+      response = request(:namespace => Splunk::namespace("default"),
+                         :method => :POST,
                          :resource => ["auth", "login"],
                          :query => {},
                          :headers => {},

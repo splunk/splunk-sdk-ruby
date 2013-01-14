@@ -26,6 +26,21 @@ class ServiceTestCase < SplunkTestCase
     @service.info.keys {|key| assert(key.include? keys)}
   end
 
+  def test_info_with_namespace
+    service_args = @splunkrc.clone()
+    custom_namespace = namespace("user",
+                                 "search",
+                                 service_args[:username])
+    service_args[:namespace] = custom_namespace
+    service = Splunk::connect(service_args)
+    assert_equal(custom_namespace, service.namespace)
+    keys = [
+        "build", "cpu_arch", "guid", "isFree", "isTrial", "licenseKeys",
+        "licenseSignature", "licenseState", "master_guid", "mode",
+        "os_build", "os_name", "os_version", "serverName", "version" ]
+    service.info.keys {|key| assert(key.include? keys)}
+  end
+
   def test_capabilities
     expected = [
         "admin_all_objects", "change_authentication",

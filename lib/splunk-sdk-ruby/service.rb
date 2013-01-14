@@ -161,7 +161,8 @@ module Splunk
     # Returns: A +Hash+ which has +String+s as both keys and values.
     #
     def info
-      response = request(:resource => PATH_INFO)
+      response = request(:namespace => Splunk::namespace("default"),
+                         :resource => PATH_INFO)
       feed = AtomFeed.new(response.body)
       feed.entries[0]["content"]
     end
