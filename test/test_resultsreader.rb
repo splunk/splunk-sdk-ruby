@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 require 'splunk-sdk-ruby'
 
+include Splunk
+
 class TestResultsReader < Test::Unit::TestCase
   def test_results_reader
     # This method tests ResultsReader against each of a set of files extracted
@@ -21,11 +23,11 @@ class TestResultsReader < Test::Unit::TestCase
     end
 
     xml_libraries.each do |xml_library|
-      Splunk::require_xml_library(xml_library)
+      require_xml_library(xml_library)
       $results_reader_tests.each_entry do |filename, expected|
         puts "#{xml_library}: #{filename}"
         file = File.open(filename)
-        reader = Splunk::ResultsReader.new(file)
+        reader = ResultsReader.new(file)
         assert_equal(expected[:is_preview], reader.is_preview?)
         assert_equal(expected[:fields], reader.fields)
 

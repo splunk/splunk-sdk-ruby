@@ -54,34 +54,24 @@ module Splunk
   def require_xml_library(library)
     if library == :nokogiri
       require 'nokogiri'
-      $default_xml_library = :nokogiri
+      $splunk_xml_library = :nokogiri
     else
       require 'rexml/document'
       require 'rexml/streamlistener'
-      $xml_library = :rexml
+      $splunk_xml_library = :rexml
     end
   end
 
   # In the absence of any other call to +require_xml_library+, we try to use
   # Nokogiri, and if that doesn't work, we fall back to REXML, which is shipped
   # with Ruby 1.9, and should always be there.
-  if ENV['RUBY_XML_LIBRARY'].nil?
-    begin
-      require 'nokogiri'
-      $default_xml_library = :nokogiri
-    rescue LoadError
-      require 'rexml/document'
-      require 'rexml/streamlistener'
-      $xml_library = :rexml
-    end
-  elsif ENV['RUBY_XML_LIBRARY'].downcase == "rexml"
+  begin
     require 'nokogiri'
-    $default_xml_library = :nokogiri
-  elsif ENV['RUBY_XML_LIBRARY'].downcase == "nokogiri"
-    require 'nokogiri'
-    $default_xml_library = :nokogiri
-  else # Default: try to use Nokogiri, and otherwise fall back on REXML.
-    raise StandardError.new("Unknown XML library: #{ENV['RUBY_XML_LIBRARY']}")
+    $splunk_xml_library = :nokogiri
+  rescue LoadError
+    require 'rexml/document'
+    require 'rexml/streamlistener'
+    $splunk_xml_library = :rexml
   end
 
   ##
@@ -105,9 +95,14 @@ module Splunk
   def text_at_xpath(xpath, text)
     if text.nil? or text.length == 0
       return nil
-    elsif $xml_library == :nokogiri
+    elsif $splunk_xml_library == :nokogiri
       doc = Nokogiri::XML(text)
-      return doc.xpath(xpath).last.content
+      matches = doc.xpath(xpath)
+      if matches.empty?
+        return nil
+      else
+        return matches.last.content
+      end
     else
       doc = REXML::Document.new(text)
       matches = doc.elements[xpath]

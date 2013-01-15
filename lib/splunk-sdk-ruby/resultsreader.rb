@@ -99,9 +99,9 @@ module Splunk
         # parser won't usually transfer control during parsing. In order
         # to incrementally return results as we parse, we have to put
         # the parser into a Fiber from which we can yield.
-        listener = ResultsListener.new
+        listener = ResultsListener.new()
         @iteration_fiber = Fiber.new do
-          if $xml_library == :nokogiri
+          if $splunk_xml_library == :nokogiri
             parser = Nokogiri::XML::SAX::Parser.new(listener)
             parser.parse(stream)
           else # Use REXML
@@ -113,15 +113,21 @@ module Splunk
       end
     end
 
-    def each(&block)
-      if @iteration_fiber.nil? # Handle the case of empty files
-        return
-      else
-        result = @iteration_fiber.resume
-        while result != nil
-          block.call(result)
+    def each()
+      enum = Enumerator.new() do |yielder|
+        if !@iteration_fiber.nil? # Handle the case of empty files
           result = @iteration_fiber.resume
+          while result != nil
+            yielder << result
+            result = @iteration_fiber.resume
+          end
         end
+      end
+
+      if block_given? # Apply the enumerator to a block if we have one
+        enum.each() { |e| yield e }
+      else
+        enum # Otherwise return the enumerator itself
       end
     end
   end
@@ -283,7 +289,8 @@ module Splunk
       # that tag_start can use.
       attribute_dict = {}
       attributes.each do |attribute|
-        key, value = attribute
+        key = attribute.localname
+        value = attribute.value
         attribute_dict[key] = value
       end
 

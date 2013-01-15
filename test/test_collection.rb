@@ -122,13 +122,19 @@ class TestCollection < SplunkTestCase
     search = "search * | head 5"
 
     saved_searches = Collection.new(@service, ["saved", "searches"])
-    ss1 = saved_searches.create(search_name, :search => search,
-                                :namespace => namespace("app", "search"))
+    ss1 = saved_searches.create(search_name,
+                                :search => search,
+                                :namespace => namespace(:sharing => "app",
+                                                        :app => "search"))
     ss2 = saved_searches.create(search_name, :search => search,
-                                :namespace => namespace("user", "search", "admin"))
+                                :namespace => namespace(:sharing => "user",
+                                                        :app => "search",
+                                                        :owner => "admin"))
 
     wildcard_service_args = @splunkrc.clone()
-    wildcard_service_args[:namespace] = namespace("user", "-", "-")
+    wildcard_service_args[:namespace] = namespace(:sharing => "user",
+                                                  :owner => "-",
+                                                  :app => "-")
     wildcard_service = Context.new(wildcard_service_args).login()
 
     wildcard_saved_searches =
@@ -146,11 +152,14 @@ class TestCollection < SplunkTestCase
     assert_equal(search_name,
                  wildcard_saved_searches.fetch(
                      search_name,
-                     namespace("app", "search")).name)
+                     namespace(:sharing => "app",
+                               :app => "search")).name)
     assert_equal(search_name,
                  wildcard_saved_searches.fetch(
                      search_name,
-                     namespace("user", "search", "admin")).name)
+                     namespace(:sharing => "user",
+                               :app => "search",
+                               :owner => "admin")).name)
 
     assert_raises(Splunk::AmbiguousEntityReference) do
       wildcard_saved_searches.delete(search_name)
@@ -160,10 +169,12 @@ class TestCollection < SplunkTestCase
     # will delete both of the saved searches; user/search/admin
     # will only delete that particular one.
     wildcard_saved_searches.delete(search_name,
-      namespace=namespace("user", "search", "admin"))
+      namespace=namespace(:sharing => "user",
+                          :app => "search",
+                          :owner => "admin"))
     assert_true(wildcard_saved_searches.has_key?(search_name))
     wildcard_saved_searches.delete(search_name,
-      namespace=namespace("app", "search"))
+      namespace=namespace(:sharing => "app", :app => "search"))
 
     assert_false(wildcard_saved_searches.has_key?(search_name))
   end

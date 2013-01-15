@@ -38,13 +38,13 @@ end
 # without escaping entities. This is identical to REXML's
 # value method.
 #++
-if $default_xml_library == :rexml
-  class REXML::Text # :nodoc:
-    def text
-      value
-    end
-  end
-end
+#if $splunk_xml_library == :rexml
+#  class REXML::Text # :nodoc:
+#    def text
+#      value
+#    end
+#  end
+#end
 
 module Splunk
   ##
@@ -78,7 +78,7 @@ module Splunk
       text = text.strip
       raise ArgumentError, 'text size is 0' if text.size == 0
 
-      if $default_xml_library == :nokogiri
+      if $splunk_xml_library == :nokogiri
         doc = Nokogiri::XML(text)
       else
         doc = REXML::Document.new(text)
@@ -140,7 +140,11 @@ module Splunk
     def children_to_s(element) # :nodoc:
       result = ""
       element.children.each do |child|
-        result << child.text
+        if $splunk_xml_library == :nokogiri
+          result << child.text
+        else
+          result << child.value
+        end
       end
       result
     end
@@ -173,13 +177,10 @@ module Splunk
           rel, uri = read_link(element)
           metadata["links"][rel] = uri
         elsif element.name == "id"
-          # In REXML, element.children is an Array. In Nokogiri
-          # it's a special object whose to_s method returns literal text,
-          # not an array. To work around the difference, coerce both
-          # to an Array.
           metadata[element.name] = URI(children_to_s(element))
         elsif element.name == "messages"
           # No idea what these look like. Try to get one with messages.
+          # TODO: Find examples, so I can actually handle this.
         else
           metadata[element.name] = children_to_s(element)
         end
