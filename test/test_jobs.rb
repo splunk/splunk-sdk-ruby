@@ -59,8 +59,10 @@ class JobsTestCase < SplunkTestCase
   def test_each_and_values
     jobs = Jobs.new(@service)
 
+    created_jobs = []
+
     (1..3).each() do |i|
-      jobs.create("search index=_internal | head #{i}")
+      created_jobs << jobs.create("search index=_internal | head #{i}")
     end
 
     each_jobs = []
@@ -71,7 +73,7 @@ class JobsTestCase < SplunkTestCase
 
     assert_equal(each_jobs, jobs.values().map() { |j| j.sid })
 
-    jobs.each do |job|
+    created_jobs.each do |job|
       job.cancel()
     end
   end
@@ -165,6 +167,7 @@ class LongJobTestCase < JobsTestCase
     sleep(4)
     old_ttl = Integer(@job.refresh()["ttl"])
     @job.touch()
+    sleep(0.5)
     new_ttl = Integer(@job.refresh()["ttl"])
     if new_ttl == old_ttl
       fail("Didn't wait long enough to make ttl change meaningful.")

@@ -85,6 +85,7 @@ module Splunk
       refresh()
       original_state = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
       was_disabled_initially = fetch("disabled") == "1"
+      needed_restart_initially = @service.server_requires_restart?
       if (!was_disabled_initially && @service.splunk_version[0] < 5)
         disable()
       end
@@ -106,6 +107,10 @@ module Splunk
       # Restore the original state
       if !was_disabled_initially
         enable()
+        if !needed_restart_initially and @service.server_requires_restart?
+          service.request(:method => :DELETE,
+                          :resource => ["messages", "restart_required"])
+        end
       end
       update(original_state)
     end

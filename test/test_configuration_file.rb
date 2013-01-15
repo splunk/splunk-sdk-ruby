@@ -22,8 +22,15 @@ class ConfigurationFileTestCase < SplunkTestCase
   end
 
   def teardown
+    if @service.server_requires_restart?
+      fail("Test left Splunk in a state requiring restart.")
+    end
+
     @service.apps.delete(@container_app_name)
-    clear_restart_message(@service)
+    if @service.server_requires_restart?
+      clear_restart_message(@service)
+    end
+
     super
   end
 

@@ -16,7 +16,11 @@ class EntityTestCase < SplunkTestCase
 
   def teardown
     @entity.delete()
-    clear_restart_message(@service)
+
+    if @service.splunk_version[0..1] != [4,2]
+      clear_restart_message(@service)
+    end
+
     super
   end
 

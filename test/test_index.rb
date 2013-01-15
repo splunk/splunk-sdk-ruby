@@ -30,6 +30,9 @@ class IndexTestCase < SplunkTestCase
   end
 
   def test_delete
+    if @service.splunk_version[0] < 5
+      return
+    end
     assert_true(@service.indexes.has_key?(@index_name))
     @service.indexes.delete(@index_name)
     assert_eventually_true() do

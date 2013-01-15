@@ -143,6 +143,14 @@ module Splunk
       end
 
       response = @service.request(request_args)
+      if @service.splunk_version[0..1] == [4,2]
+        # For some endpoints, like apps/local, Splunk 4.2 doesn't return
+        # the new entity, but rather a feed entitled "Created" with no useful
+        # information in it. We have to make a second request to get the
+        # entity in that case.
+        response = @service.request(:method => :GET,
+                                    :resource => @resource + [name])
+      end
       feed = AtomFeed.new(response.body)
       raise StandardError.new("No entities returned") if feed.entries.empty?
       entity = atom_entry_to_entity(feed.entries[0])

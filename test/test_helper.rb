@@ -69,7 +69,8 @@ class SplunkTestCase < Test::Unit::TestCase
     @installed_apps = []
 
     if @service.server_requires_restart?
-      fail("Previous test left server in a state requiring a restart.")
+      puts "Previous test left server in a state requiring a restart."
+      checked_restart(@service)
     end
   end
 
