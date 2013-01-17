@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class TestResultsReader < Test::Unit::TestCase
+class TestResultsReader < SplunkTestCase
   if nokogiri_available?
     xml_libraries = [:nokogiri, :rexml]
   else
