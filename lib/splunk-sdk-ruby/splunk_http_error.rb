@@ -38,7 +38,7 @@ module Splunk
 
     def initialize(response)
       @body = response.body
-      @detail = text_at_xpath("//msg", response.body)
+      @detail = Splunk::text_at_xpath("//msg", response.body)
       @reason = response.message
       @code = Integer(response.code)
       @headers = response.each().to_a()

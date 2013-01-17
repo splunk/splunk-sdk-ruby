@@ -6,7 +6,7 @@ include Splunk
 class TestCollection < SplunkTestCase
   def teardown
     c = Collection.new(@service, ["saved", "searches"])
-    c.delete_if() {|e| e.name.start_with?("delete-me")}
+    c.delete_if() { |e| e.name.start_with?("delete-me") }
     super
   end
 
@@ -28,7 +28,7 @@ class TestCollection < SplunkTestCase
 
   def test_each_without_pagination
     n_entities = 0
-    @service.apps.each(:count=>5) do |entity|
+    @service.apps.each(:count => 5) do |entity|
       assert_true(entity.is_a?(Entity))
       n_entities += 1
     end
@@ -111,7 +111,7 @@ class TestCollection < SplunkTestCase
     c.create(search_name, :search => search)
     assert_true(c.has_key?(search_name))
 
-    assert_raises(SplunkHTTPError) {c.create(search_name, :search => search)}
+    assert_raises(SplunkHTTPError) { c.create(search_name, :search => search) }
 
     c.delete(search_name)
     assert_false(c.has_key?(search_name))
@@ -124,17 +124,17 @@ class TestCollection < SplunkTestCase
     saved_searches = Collection.new(@service, ["saved", "searches"])
     ss1 = saved_searches.create(search_name,
                                 :search => search,
-                                :namespace => namespace(:sharing => "app",
-                                                        :app => "search"))
+                                :namespace => Splunk::namespace(:sharing => "app",
+                                                                :app => "search"))
     ss2 = saved_searches.create(search_name, :search => search,
-                                :namespace => namespace(:sharing => "user",
-                                                        :app => "search",
-                                                        :owner => "admin"))
+                                :namespace => Splunk::namespace(:sharing => "user",
+                                                                :app => "search",
+                                                                :owner => "admin"))
 
     wildcard_service_args = @splunkrc.clone()
-    wildcard_service_args[:namespace] = namespace(:sharing => "user",
-                                                  :owner => "-",
-                                                  :app => "-")
+    wildcard_service_args[:namespace] = Splunk::namespace(:sharing => "user",
+                                                          :owner => "-",
+                                                          :app => "-")
     wildcard_service = Context.new(wildcard_service_args).login()
 
     wildcard_saved_searches =
@@ -152,14 +152,14 @@ class TestCollection < SplunkTestCase
     assert_equal(search_name,
                  wildcard_saved_searches.fetch(
                      search_name,
-                     namespace(:sharing => "app",
-                               :app => "search")).name)
+                     Splunk::namespace(:sharing => "app",
+                                       :app => "search")).name)
     assert_equal(search_name,
                  wildcard_saved_searches.fetch(
                      search_name,
-                     namespace(:sharing => "user",
-                               :app => "search",
-                               :owner => "admin")).name)
+                     Splunk::namespace(:sharing => "user",
+                                       :app => "search",
+                                       :owner => "admin")).name)
 
     assert_raises(Splunk::AmbiguousEntityReference) do
       wildcard_saved_searches.delete(search_name)
@@ -169,12 +169,12 @@ class TestCollection < SplunkTestCase
     # will delete both of the saved searches; user/search/admin
     # will only delete that particular one.
     wildcard_saved_searches.delete(search_name,
-      namespace=namespace(:sharing => "user",
-                          :app => "search",
-                          :owner => "admin"))
+                                   namespace=Splunk::namespace(:sharing => "user",
+                                                               :app => "search",
+                                                               :owner => "admin"))
     assert_true(wildcard_saved_searches.has_key?(search_name))
     wildcard_saved_searches.delete(search_name,
-      namespace=namespace(:sharing => "app", :app => "search"))
+                                   namespace=Splunk::namespace(:sharing => "app", :app => "search"))
 
     assert_false(wildcard_saved_searches.has_key?(search_name))
   end
@@ -189,8 +189,8 @@ class TestCollection < SplunkTestCase
 
   def test_each_equivales_values
     assert_equal(
-        @service.apps.each().to_a().map() {|e| e.name},
-        @service.apps.values.map() {|e| e.name}
+        @service.apps.each().to_a().map() { |e| e.name },
+        @service.apps.values.map() { |e| e.name }
     )
   end
 
@@ -202,13 +202,13 @@ class TestCollection < SplunkTestCase
 
 
   def test_select
-    a = @service.apps.select() {|e| e.name == "search"}.to_a
+    a = @service.apps.select() { |e| e.name == "search" }.to_a
     assert_equal(1, a.length)
     assert_equal("search", a[0].name)
   end
 
   def test_reject
-    a = @service.apps.reject() {|e| e.name != "search"}.to_a
+    a = @service.apps.reject() { |e| e.name != "search" }.to_a
     assert_equal(1, a.length)
     assert_equal("search", a[0].name)
   end
@@ -227,7 +227,7 @@ class TestCollection < SplunkTestCase
 
   def test_keys
     keys = @service.apps.keys()
-    assert_equal(@service.apps.values().map(){|e| e.name},
+    assert_equal(@service.apps.values().map() { |e| e.name },
                  keys)
   end
 
@@ -264,14 +264,14 @@ class TestCollection < SplunkTestCase
     c.create(temporary_name(), :search => "search *")
     assert_equal(
         3,
-        c.select() {|e| e.name.start_with?("delete-me")}.to_a.length()
+        c.select() { |e| e.name.start_with?("delete-me") }.to_a.length()
     )
 
-    c.delete_if() {|e| e.name.start_with?("delete-me")}
+    c.delete_if() { |e| e.name.start_with?("delete-me") }
 
     assert_equal(
         0,
-        c.select() {|e| e.name.start_with?("delete-me")}.to_a.length()
+        c.select() { |e| e.name.start_with?("delete-me") }.to_a.length()
     )
   end
 

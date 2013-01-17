@@ -65,7 +65,7 @@ class SplunkTestCase < Test::Unit::TestCase
   def setup
     super
     @splunkrc = read_splunkrc()
-    @service = Service.new(@splunkrc).login()
+    @service = Splunk::Service.new(@splunkrc).login()
     @installed_apps = []
 
     if @service.server_requires_restart?
@@ -219,7 +219,7 @@ class SplunkTestCase < Test::Unit::TestCase
   def set_restart_message(service,
                           message="Ruby SDK test suite asked for a restart.")
     service.request(:method => :POST,
-            :namespace => namespace(:sharing => "default"),
+            :namespace => Splunk::namespace(:sharing => "default"),
             :resource => ["messages"],
             :body => {"name" => "restart_required",
                       "value" => "Message set by restart method" +

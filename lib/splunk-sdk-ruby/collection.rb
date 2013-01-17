@@ -47,6 +47,12 @@ module Splunk
       # @infinite_count declares the value used for listing all the entities
       # in a collection. It is usually -1, but some collections use 0.
       @infinite_count = -1
+
+      # @always_fetch tells whether, when creating an entity in this collection
+      # never to bother trying to parse the response, and to always fetch
+      # the new state after the fact. This is necessary for some collections,
+      # such as users, which don't return the newly created object.
+      @always_fetch = false
     end
 
     ##
@@ -105,7 +111,7 @@ module Splunk
     #
     def atom_entry_to_entity(entry)
       name = entry["title"]
-      namespace = eai_acl_to_namespace(entry["content"]["eai:acl"])
+      namespace = Splunk::eai_acl_to_namespace(entry["content"]["eai:acl"])
 
       @entity_class.new(service=@service,
                         namespace=namespace,
@@ -143,11 +149,16 @@ module Splunk
       end
 
       response = @service.request(request_args)
-      if @service.splunk_version[0..1] == [4,2]
+      if @service.splunk_version[0..1] == [4, 2]
         # For some endpoints, like apps/local, Splunk 4.2 doesn't return
         # the new entity, but rather a feed entitled "Created" with no useful
         # information in it. We have to make a second request to get the
         # entity in that case.
+        response = @service.request(:method => :GET,
+                                    :resource => @resource + [name])
+      end
+
+      if @always_fetch
         response = @service.request(:method => :GET,
                                     :resource => @resource + [name])
       end
@@ -289,7 +300,7 @@ module Splunk
     # Identical to +each+, but the block is passed the entity's name.
     #
     def each_key(args={}, &block)
-      each(args).map() {|e| e.name}.each(&block)
+      each(args).map() { |e| e.name }.each(&block)
     end
 
     ##
@@ -297,7 +308,7 @@ module Splunk
     # and the entity.
     #
     def each_pair(args={}, &block)
-      each(args).map() {|e| [e.name, e]}.each(&block)
+      each(args).map() { |e| [e.name, e] }.each(&block)
     end
 
     ##
@@ -338,7 +349,7 @@ module Splunk
 
       if feed.entries.length > 1
         raise AmbiguousEntityReference.new("Found multiple entities with " +
-              "name #{name}. Please specify a disambiguating namespace.")
+                                               "name #{name}. Please specify a disambiguating namespace.")
       else
         atom_entry_to_entity(feed.entries[0])
       end
@@ -354,7 +365,7 @@ module Splunk
     #
     def has_key?(name)
       begin
-        response = @service.request(:resource=>@resource + [name])
+        response = @service.request(:resource => @resource + [name])
         return true
       rescue SplunkHTTPError => err
         if err.code == 404
@@ -376,7 +387,7 @@ module Splunk
     # Returns: an +Array+ of +String+s.
     #
     def keys()
-      return values().map() {|e| e.name}
+      return values().map() { |e| e.name }
     end
 
     ##

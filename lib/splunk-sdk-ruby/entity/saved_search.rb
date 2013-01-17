@@ -29,7 +29,7 @@ module Splunk
                                   :namespace => @namespace,
                                   :resource => @resource + [name, "dispatch"],
                                   :body => args)
-      sid = text_at_xpath("//response/sid", response.body)
+      sid = Splunk::text_at_xpath("//response/sid", response.body)
       return Job.new(@service, sid)
     end
 

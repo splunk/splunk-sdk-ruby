@@ -27,6 +27,7 @@ require 'net/http'
 require_relative 'splunk_http_error'
 require_relative 'version'
 require_relative 'xml_shim'
+require_relative 'namespace'
 
 module Splunk
   DEFAULT_HOST = 'localhost'
@@ -202,7 +203,7 @@ module Splunk
       # <response>
       # <sessionKey>da950729652f8255c230afe37bdf8b97</sessionKey>
       # </response>
-      @token = text_at_xpath("//sessionKey", response.body)
+      @token = Splunk::text_at_xpath("//sessionKey", response.body)
 
       self
     end

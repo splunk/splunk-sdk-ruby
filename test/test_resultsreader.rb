@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class TestResultsReader < SplunkTestCase
+class TestResultsReader < Test::Unit::TestCase
   if nokogiri_available?
     xml_libraries = [:nokogiri, :rexml]
   else
@@ -14,11 +14,11 @@ class TestResultsReader < SplunkTestCase
   test_data = eval(open("test/resultsreader_test_data.rb").read())
 
   xml_libraries.each do |xml_library|
-    require_xml_library(xml_library)
+    Splunk::require_xml_library(xml_library)
     test_data.each_entry do |test, expected|
       version = test[0]
       name = test[1]
-      test_name = "test_#{xml_library}_#{version.gsub( /\./, "_" )}_#{name}"
+      test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_#{name}"
       define_method(test_name.intern()) do
         file = File.open("test/data/results/#{version}/#{name}.xml")
         reader = ResultsReader.new(file)

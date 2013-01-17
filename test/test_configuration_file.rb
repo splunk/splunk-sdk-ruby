@@ -16,7 +16,7 @@ class ConfigurationFileTestCase < SplunkTestCase
     # Now reconnect in the test app context.
     app_service_args = @splunkrc.clone()
     app_service_args[:namespace] =
-        namespace(:sharing => "app", :app => @container_app_name)
+        Splunk::namespace(:sharing => "app", :app => @container_app_name)
     @app_service = Splunk::Service.new(app_service_args).login()
     @confs = @app_service.confs
   end
@@ -52,7 +52,7 @@ class ConfigurationFileTestCase < SplunkTestCase
     assert_true(@confs.key?(file_name))
     assert_true(@confs.include?(file_name))
 
-    assert_raises(Splunk::IllegalOperation) {@confs.delete(file_name)}
+    assert_raises(Splunk::IllegalOperation) { @confs.delete(file_name) }
   end
 
   def test_fetch
@@ -72,7 +72,7 @@ class ConfigurationFileTestCase < SplunkTestCase
     each_names = []
     @confs.each() { |entity| each_names << entity.name }
 
-    values_names = @confs.values().map() {|e| e.name}
+    values_names = @confs.values().map() { |e| e.name }
 
     assert_false(each_names.empty?)
     assert_equal(each_names, values_names)

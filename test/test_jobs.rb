@@ -199,10 +199,12 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
-    sleep(4)
+    original_ttl = Integer(@job.refresh()["ttl"])
+    assert_eventually_true do
+      Integer(@job.refresh()["ttl"]) != original_ttl
+    end
     old_ttl = Integer(@job.refresh()["ttl"])
     @job.touch()
-    sleep(0.5)
     new_ttl = Integer(@job.refresh()["ttl"])
     if new_ttl == old_ttl
       fail("Didn't wait long enough to make ttl change meaningful.")

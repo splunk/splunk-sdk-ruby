@@ -61,7 +61,7 @@ module Splunk
       response = @service.request(:method => :POST,
                                   :resource => @resource,
                                   :body => args)
-      sid = text_at_xpath("/response/sid", response.body)
+      sid = Splunk::text_at_xpath("/response/sid", response.body)
       Job.new(@service, sid)
     end
 

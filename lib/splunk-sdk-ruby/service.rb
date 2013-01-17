@@ -19,6 +19,7 @@ require_relative 'collection'
 require_relative 'collection/configurations'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
+require_relative 'collection/users'
 require_relative 'context'
 require_relative 'entity'
 require_relative 'entity/index'
@@ -72,7 +73,7 @@ module Splunk
   #     require 'splunk-sdk-ruby'
   #     service = Splunk::Connect(:username => "admin", :password => "changeme")
   #
-  def connect(args)
+  def self.connect(args)
     Service.new(args).login()
   end
 
@@ -319,7 +320,7 @@ module Splunk
     # Return a +Collection+ of the users defined on Splunk.
     #
     def users
-      Collection.new(self, PATH_USERS)
+      Users.new(self)
     end
   end
 end

@@ -77,7 +77,7 @@ module Splunk
   #
   # Returns: a +Namespace+.
   #
-  def eai_acl_to_namespace(eai_acl)
+  def self.eai_acl_to_namespace(eai_acl)
     namespace(:sharing => eai_acl["sharing"],
               :app => eai_acl["app"],
               :owner => eai_acl["owner"])
@@ -104,7 +104,7 @@ module Splunk
   #
   # Returns: a +Namespace+.
   #
-  def namespace(args)
+  def self.namespace(args)
     sharing = args.fetch(:sharing, "default")
     owner = args.fetch(:owner, nil)
     app = args.fetch(:app, nil)

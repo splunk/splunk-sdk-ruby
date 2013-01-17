@@ -25,7 +25,7 @@ module URI
   end
 end
 
-class TestAtomFeed < SplunkTestCase
+class TestAtomFeed < Test::Unit::TestCase
   # If Nokogiri is available, we'll test AtomFeed against both it
   # and REXML. Otherwise, we'll print a warning and test only against
   # REXML. REXML is part of the standard library in Ruby 1.9, so it will
