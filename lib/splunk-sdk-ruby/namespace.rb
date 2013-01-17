@@ -78,45 +78,56 @@ module Splunk
   # Returns: a +Namespace+.
   #
   def eai_acl_to_namespace(eai_acl)
-    namespace(eai_acl["sharing"], eai_acl["app"], eai_acl["owner"])
+    namespace(:sharing => eai_acl["sharing"],
+              :app => eai_acl["app"],
+              :owner => eai_acl["owner"])
   end
 
   ##
   # Create a +Namespace+.
   #
-  # All the arguments are optional. The first argument, _sharing_, determines
-  # what kind of namespace is produced. If it is omitted, a +DefaultNamespace+
-  # is returned. It can have the values +"default"+, +"global"+, +"system"+,
-  # +"user"+, or +"app"+.
   #
-  # If _sharing_ is +"default"+, +"global"+, or +"system"+, the other two
-  # arguments are ignored. If _sharing_ is +"app"+, only the first argument is
-  # used to specify the application of the namespace. If _sharing_ is +"user"+,
-  # then both arguments are used.
+  # +namespace+ takes a hash of arguments, recognizing the keys +:sharing+,
+  # +:owner+, and +:app+. Among them, +:sharing+ is
+  # required, and depending on its value, the others may be required or not.
   #
-  # If _sharing_ is +"app"+ but _app_ is +""+, it returns an
+  # +:sharing+ determines what kind of namespace is produced. It can have the
+  # values +"default"+, +"global"+, +"system"+, +"user"+, or +"app"+.
+  #
+  # If +:sharing+ is +"default"+, +"global"+, or +"system"+, the other two
+  # arguments are ignored. If +:sharing+ is +"app"+, only +:app+ is used,
+  # specifying the application of the namespace. If +:sharing+ is +"user"+,
+  # then both the +:app+ and +:owner+ arguments are used.
+  #
+  # If +:sharing+ is +"app"+ but +:app+ is +""+, it returns an
   # +AppReferenceNamespace+.
   #
   # Returns: a +Namespace+.
   #
-  def namespace(sharing="default", app=nil, user=nil)
+  def namespace(args)
+    sharing = args.fetch(:sharing, "default")
+    owner = args.fetch(:owner, nil)
+    app = args.fetch(:app, nil)
+
     if sharing == "system"
       return SystemNamespace.instance
     elsif sharing == "global"
       return GlobalNamespace.instance
     elsif sharing == "user"
-      if user.nil? or app.nil? or (user == "") or (app == "")
-        raise ArgumentError.new("Must specify a user and application for user sharing.")
+      if owner.nil? or owner == ""
+        raise ArgumentError.new("Must provide an owner for user namespaces.")
+      elsif app.nil? or app == ""
+        raise ArgumentError.new("Must provide an app for user namespaces.")
       else
-        return UserNamespace.new(user, app)
+        return UserNamespace.new(owner, app)
       end
     elsif sharing == "app"
       if app.nil?
         raise ArgumentError.new("Must specify an application for application sharing")
-      elsif app == ""
+      elsif args[:app] == ""
         return AppReferenceNamespace.instance
       else
-        return AppNamespace.new(app)
+        return AppNamespace.new(args[:app])
       end
     elsif sharing == "default"
       return DefaultNamespace.instance

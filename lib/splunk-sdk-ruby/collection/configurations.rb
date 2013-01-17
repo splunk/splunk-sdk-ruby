@@ -60,7 +60,6 @@ module Splunk
         # We don't actually use any information returned from the server
         # besides the status code.
         request_args = {:resource => PATH_CONFS + [name]}
-        request_args[:namespace] = namespace if !namespace.nil?
         @service.request(request_args)
 
         return ConfigurationFile.new(@service, name)

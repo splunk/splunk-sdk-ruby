@@ -28,9 +28,9 @@ class ServiceTestCase < SplunkTestCase
 
   def test_info_with_namespace
     service_args = @splunkrc.clone()
-    custom_namespace = namespace("user",
-                                 "search",
-                                 service_args[:username])
+    custom_namespace = namespace(:sharing => "user",
+                                 :app => "search",
+                                 :owner => service_args[:username])
     service_args[:namespace] = custom_namespace
     service = Splunk::connect(service_args)
     assert_equal(custom_namespace, service.namespace)

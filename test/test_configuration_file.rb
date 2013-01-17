@@ -16,7 +16,7 @@ class ConfigurationFileTestCase < SplunkTestCase
     # Now reconnect in the test app context.
     app_service_args = @splunkrc.clone()
     app_service_args[:namespace] =
-        namespace("app", @container_app_name)
+        namespace(:sharing => "app", :app => @container_app_name)
     @app_service = Splunk::Service.new(app_service_args).login()
     @confs = @app_service.confs
   end
