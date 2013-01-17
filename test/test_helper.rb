@@ -219,7 +219,7 @@ class SplunkTestCase < Test::Unit::TestCase
   def set_restart_message(service,
                           message="Ruby SDK test suite asked for a restart.")
     service.request(:method => :POST,
-            :namespace => namespace(),
+            :namespace => namespace(:sharing => "default"),
             :resource => ["messages"],
             :body => {"name" => "restart_required",
                       "value" => "Message set by restart method" +

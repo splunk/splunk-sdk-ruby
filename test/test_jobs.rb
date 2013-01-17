@@ -23,6 +23,19 @@ class JobsTestCase < SplunkTestCase
     job.cancel() # Cancel twice should be a nop
   end
 
+  ##
+  # There is a convenience method on service to create an asynchronous
+  # search job. Test it the same way.
+  #
+  def service_create_and_idempotent_cancel
+    jobs = @service.jobs
+    job = @service.create(QUERY)
+    assert_true(jobs.has_key?(job.sid))
+    job.cancel()
+    assert_eventually_true() { !jobs.has_key?(job.sid) }
+    job.cancel() # Cancel twice should be a nop
+  end
+
   def test_create_with_exec_mode_fails
     assert_raises(ArgumentError) do
       @service.jobs.create(QUERY, :exec_mode => "oneshot")
@@ -32,6 +45,18 @@ class JobsTestCase < SplunkTestCase
   def test_oneshot
     jobs = @service.jobs
     stream = jobs.create_oneshot(QUERY)
+    results = ResultsReader.new(stream)
+    assert_false(results.is_preview?)
+    events = results.to_a()
+    assert_equal(3, events.length())
+  end
+
+  ##
+  # Test that Service#create_oneshot properly creates a oneshot search.
+  #
+  def test_oneshot_on_service
+    jobs = @service.jobs
+    stream = @service.create_oneshot(QUERY)
     results = ResultsReader.new(stream)
     assert_false(results.is_preview?)
     events = results.to_a()
@@ -52,6 +77,16 @@ class JobsTestCase < SplunkTestCase
 
   def test_stream
     stream = @service.jobs.create_stream(QUERY)
+    results = ResultsReader.new(stream).to_a()
+    assert_equal(3, results.length())
+  end
+
+  ##
+  # Test that the convenience method Service#create_stream behaves the same
+  # way as Jobs#create_stream.
+  #
+  def test_stream_on_service
+    stream = @service.create_stream(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end

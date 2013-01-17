@@ -35,7 +35,7 @@ module Splunk
   #
   class Job < Entity
     def initialize(service, sid)
-      super(service, Splunk::namespace("global"), PATH_JOBS, sid)
+      super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid)
       refresh() # Jobs don't return their state on creation
     end
 
@@ -230,7 +230,7 @@ module Splunk
     def timeline(args={})
       response = @service.request(:resource => @resource + [sid, "timeline"],
                                   :body => args)
-      if $default_xml_library == :nokogiri
+      if $splunk_xml_library == :nokogiri
         doc = Nokogiri::XML(response.body)
         matches = doc.xpath("/timeline/bucket").map() do |bucket|
           {:a => Integer(bucket.attributes["a"].to_s),
@@ -246,7 +246,7 @@ module Splunk
       else
         doc = REXML::Document.new(response.body)
         matches = []
-        matches = doc.elements.map("/timeline/bucket") do |bucket|
+        matches = doc.elements.each("/timeline/bucket") do |bucket|
           {:a => Integer(bucket.attributes["a"]),
            :c => Integer(bucket.attributes["c"]),
            :t => Float(bucket.attributes["t"]),

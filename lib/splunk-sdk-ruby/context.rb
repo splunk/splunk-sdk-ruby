@@ -22,11 +22,11 @@
 # on Splunk.
 #
 
-require 'rexml/document'
 require 'net/http'
 
 require_relative 'splunk_http_error'
 require_relative 'version'
+require_relative 'xml_shim'
 
 module Splunk
   DEFAULT_HOST = 'localhost'
@@ -77,7 +77,8 @@ module Splunk
       @password = args.fetch(:password, nil)
       # Have to use Splunk::namespace() or we will call the
       # local accessor.
-      @namespace = args.fetch(:namespace, Splunk::namespace())
+      @namespace = args.fetch(:namespace,
+                              Splunk::namespace(:sharing => "default"))
     end
 
     ##
@@ -191,7 +192,7 @@ module Splunk
         return
       end
 
-      response = request(:namespace => Splunk::namespace("default"),
+      response = request(:namespace => Splunk::namespace(:sharing => "default"),
                          :method => :POST,
                          :resource => ["auth", "login"],
                          :query => {},
@@ -229,12 +230,6 @@ module Splunk
     #
     # * +method+: The HTTP method to use (one of +:GET+, +:POST+, or +:DELETE+;
     #   default: +:GET+)
-    # * +scheme+: +:http+ or +:https+ (default: the value of +@scheme+ on
-    #   this +Context+).
-    # * +host+: The hostname to send the request to (default: the value of
-    #   +@host+ on this +Context+).
-    # * +port+: The port on the host to connect to (default: the value of
-    #   +@port+ on this +Context+).
     # * +namespace+: The namespace to request a resource from Splunk in. Must
     #   be a +Namespace+ object. (default: the value of +@namespace+ on
     #   this +Context+).
@@ -278,9 +273,9 @@ module Splunk
     #
     def request(args)
       method = args.fetch(:method, :GET)
-      scheme = args.fetch(:scheme, @scheme)
-      host = args.fetch(:host, @host)
-      port = args.fetch(:port, @port)
+      scheme = @scheme
+      host = @host
+      port = @port
       namespace = args.fetch(:namespace, @namespace)
       resource = args.fetch(:resource, [])
       query = args.fetch(:query, {})
@@ -313,11 +308,63 @@ module Splunk
       url << (namespace.to_path_fragment() + resource).
           map {|fragment| URI::encode(fragment)}.
           join("/")
-      url = URI(url)
+
+      return request_by_url(:url => url,
+                            :method => method,
+                            :query => query,
+                            :headers => headers,
+                            :body => body)
+    end
+
+    ##
+    # Make a request to the Splunk server given a prebuilt URL.
+    #
+    # Unless you are using a URL that was returned by the Splunk server
+    # as part of an Atom feed, you should prefer the +request+ method, which
+    # has much clearer semantics.
+    #
+    # +request_by_url+ takes a hash of arguments. The recognized arguments are:
+    #
+    # * +:url+: (a +URI+ object or a +String+) The URL, including authority, to
+    #   make a request to.
+    # * +:method+: (+:GET+, +:POST+, or +:DELETE+) the HTTP method to use.
+    # * +query+: A hash containing the values to be encoded as
+    #   the query (the part following +?+) in the URL. Nothing should be URL
+    #   encoded as +request+ will do the encoding. If you need to pass multiple
+    #   values for the same key, insert them as an Array as the value of their
+    #   key into the Hash, and they will be properly encoded as a sequence of
+    #   entries with the same key. (default: +{}+)
+    # * +headers+: A hash containing the values to be encoded as headers. None
+    #   should be URL encoded, and the +request+ method will automatically add
+    #   headers for +User-Agent+ and Splunk authentication for you. Keys must
+    #   be unique, so the values must be strings, not arrays, unlike for
+    #   +query+. (default: +{}+).
+    # * +body+: Either a hash to be encoded as the body of a POST request, or
+    #   a string to be used as the raw, already encoded body of a POST request.
+    #   If you pass a hash, you can pass multiple values for the same key by
+    #   encoding them as an Array, which will be properly set as multiple
+    #   instances of the same key in the POST body. Nothing in the hash should
+    #   be URL encoded, as +request+ will handle all such encoding.
+    #   (default: +{}+)
+    #
+    # If Splunk responds with an HTTP code 2xx, +request+ returns an HTTP
+    # response object (the import methods of which are +code+, +message+,
+    # and +body+, and +each+ to enumerate over the response headers). If the HTTP
+    # code is not 2xx, +request+ raises a +SplunkHTTPError+.
+    #
+    def request_by_url(args)
+      url = args.fetch(:url)
+      if url.is_a?(String)
+        url = URI(url)
+      end
+      method = args.fetch(:method, :GET)
+      query = args.fetch(:query, {})
+      headers = args.fetch(:headers, {})
+      body = args.fetch(:body, {})
+
       if !query.empty?
         url.query = URI.encode_www_form(query)
       end
-
 
       if method == :GET
         request = Net::HTTP::Get.new(url.request_uri)
@@ -389,7 +436,7 @@ module Splunk
         # required. It will be cleared when Splunk comes back up, but we
         # otherwise have no way to determine if Splunk has actually gone down.
         request(:method => :POST,
-                :namespace => namespace(),
+                :namespace => Splunk::namespace(:sharing => "default"),
                 :resource => ["messages"],
                 :body => {"name" => "restart_required",
                           "value" => "Message set by restart method" +
