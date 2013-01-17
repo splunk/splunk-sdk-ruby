@@ -199,10 +199,7 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
-    original_ttl = Integer(@job.refresh()["ttl"])
-    assert_eventually_true do
-      Integer(@job.refresh()["ttl"]) != original_ttl
-    end
+    sleep(2)
     old_ttl = Integer(@job.refresh()["ttl"])
     @job.touch()
     new_ttl = Integer(@job.refresh()["ttl"])
