@@ -24,6 +24,7 @@ require_relative 'entity'
 require_relative 'entity/index'
 require_relative 'entity/job'
 require_relative 'entity/message'
+require_relative 'entity/saved_search'
 require_relative 'entity/stanza'
 
 ##
@@ -44,6 +45,7 @@ module Splunk
   PATH_INDEXES = ["data","indexes"]
   PATH_CONFS = ["properties"]
   PATH_CONF = ["configs"]
+  PATH_SAVED_SEARCHES = ["saved", "searches"]
   PATH_STANZA = ["configs","conf-%s","%s"]
   PATH_JOBS = ["search", "jobs"]
   PATH_EXPORT = ["search", "jobs", "export"]
@@ -271,6 +273,14 @@ module Splunk
     end
 
     ##
+    #
+    #
+    #
+    def saved_searches
+      Collection.new(self, PATH_SAVED_SEARCHES, entity_class=SavedSearch)
+    end
+
+    ##
     # Returns an +Entity+ of Splunk's mutable runtime information.
     #
     # +settings+ includes values such as +"SPLUNK_DB"+ and +"SPLUNK_HOME"+.
@@ -287,7 +297,8 @@ module Splunk
     #     #     ...}
     #
     def settings
-      Entity.new(self, namespace(), PATH_SETTINGS, "settings").refresh()
+      Entity.new(self, Splunk::namespace(:sharing => "default"),
+                 PATH_SETTINGS, "settings").refresh()
     end
 
     ##

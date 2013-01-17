@@ -25,6 +25,15 @@ module Splunk
   ##
   # A class to represent a Splunk asynchronous search job.
   #
+  # When you create a job, you need to wait for it to be ready before you can
+  # interrogate it in an useful way. Typically, you will write something like
+  #
+  #     job = @service.jobs.create("search *")
+  #     while !job.is_ready?
+  #       sleep(0.2)
+  #     end
+  #     # Now the job is ready to use.
+  #
   # The most important methods on +Job+ beyond those provided by +Entity+
   # are those that fetch results (+results+, +preview+), and those that control
   # the job's execution (+cancel+, +pause+, +unpause+, +finalize+).
@@ -36,7 +45,6 @@ module Splunk
   class Job < Entity
     def initialize(service, sid)
       super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid)
-      refresh() # Jobs don't return their state on creation
     end
 
     ##
@@ -128,9 +136,30 @@ module Splunk
     #
     # Returns: +true+ or +false+.
     #
-    def is_done()
-      refresh()
-      return fetch("isDone") == "1"
+    def is_done?()
+      begin
+        refresh()
+        return fetch("isDone") == "1"
+      rescue EntityNotReady
+        return false
+      end
+    end
+
+    ##
+    # Returns whether the search job is ready.
+    #
+    # +is_ready+ refreshes the +Job+, so once the job is ready, you need
+    # not call +refresh+ an additional time.
+    #
+    # Returns: +true+ or +false+.
+    #
+    def is_ready?()
+      begin
+        refresh()
+        return true
+      rescue EntityNotReady
+        return false
+      end
     end
 
     ##

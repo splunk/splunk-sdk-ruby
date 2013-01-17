@@ -65,7 +65,7 @@ class IndexTestCase < SplunkTestCase
     original_count = Integer(@index.refresh()["totalEventCount"])
     @index.submit("Boris 1", :sourcetype => "Boris", :host => "Meep")
     @index.submit("Boris 2", :sourcetype => "Boris", :host => "Meep")
-    assert_eventually_true() do
+    assert_eventually_true(100) do
       Integer(@index.refresh()["totalEventCount"]) == original_count + 2
     end
 

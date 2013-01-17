@@ -16,6 +16,7 @@
 
 require_relative 'ambiguous_entity_reference'
 require_relative 'atomfeed'
+require_relative 'entity_not_ready'
 require_relative 'synonyms'
 
 module Splunk
@@ -46,7 +47,10 @@ module Splunk
       @name = name
       @state = state
       if !state # If the state was not provided, we need to fetch it.
-        refresh()
+        begin
+          refresh()
+        rescue EntityNotReady
+        end
       end
     end
 
@@ -166,6 +170,11 @@ module Splunk
     def refresh()
       response = @service.request(:resource => @resource + [name],
                                   :namespace => @namespace)
+      if response.code == 204 or response.body.nil?
+        # This code is here primarily to handle the case of a job not yet being
+        # ready, in which case you get back empty bodies.
+        raise EntityNotReady.new((@resource + [name]).join("/"))
+      end
       feed = AtomFeed.new(response.body)
 
       raise AmbiguousEntityReference.new("Found multiple entities matching" +

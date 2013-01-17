@@ -115,7 +115,7 @@ class JobsTestCase < SplunkTestCase
 
   def test_preview_and_events
     job = @service.jobs.create(QUERY, JOB_ARGS)
-    assert_eventually_true() { job.is_done() }
+    assert_eventually_true() { job.is_done?() }
     assert_true(Integer(job['eventCount']) <= 3)
 
     preview_stream = job.preview()
@@ -141,7 +141,7 @@ class JobsTestCase < SplunkTestCase
 
   def test_timeline
     job = @service.jobs.create(QUERY, JOB_ARGS)
-    assert_eventually_true() { job.is_done() }
+    assert_eventually_true() { job.is_done?() }
     Splunk::require_xml_library(:rexml)
     timeline = job.timeline()
     assert_true(timeline.is_a?(Array))
@@ -160,7 +160,7 @@ class JobsTestCase < SplunkTestCase
     job.enable_preview()
     assert_eventually_true(10) do
       job.refresh()
-      fail("Job finished before preview enabled") if job.is_done()
+      fail("Job finished before preview enabled") if job.is_done?()
       job["isPreviewEnabled"] == "1"
     end
     job.cancel()
@@ -240,7 +240,7 @@ class RealTimeJobTestCase < JobsTestCase
     @job.set_priority(new_priority)
     assert_eventually_true(10) do
       @job.refresh()
-      fail("Job finished before priority was set.") if @job.is_done()
+      fail("Job finished before priority was set.") if @job.is_done?()
       @job["priority"] == "3"
     end
   end

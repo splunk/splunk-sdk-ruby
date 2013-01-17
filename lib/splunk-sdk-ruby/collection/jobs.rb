@@ -15,6 +15,7 @@
 #++
 
 require_relative '../collection'
+require_relative '../entity/job'
 
 ##
 # Provides a class representing the collection of jobs in Splunk.
