@@ -142,6 +142,46 @@ module Splunk
     end
 
     ##
+    # Create a blocking search.
+    #
+    # +create_oneshot+ starts a search _query_, and any optional arguments
+    # specified in a hash (which are identical to those taken by +create+).
+    # It then blocks until the job finished, and returns the results, as
+    # transformed by any transforming search commands in _query_ (equivalent
+    # to calling the +results+ method on a +Job+).
+    #
+    # Returns: a stream readable by +ResultsReader+.
+    #
+    def create_oneshot(query, args={})
+      jobs.create_oneshot(query, args)
+    end
+
+    ##
+    # Create an asynchronous search job.
+    #
+    # The search job requires a _query_, and takes a hash of other, optional
+    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST].
+    #
+    def create_search(query, args={})
+      jobs.create(query, args)
+    end
+
+    ##
+    # Create a blocking search without transforming search commands.
+    #
+    # +create+_stream+ starts a search _query_, and any optional arguments
+    # specified in a hash (which are identical to those taken by +create+).
+    # It then blocks until the job is finished, and returns the events
+    # found by the job before any transforming search commands (equivalent
+    # to calling +events+ on a +Job+).
+    #
+    # Returns: a stream readable by +ResultsReader+.
+    #
+    def create_stream(query, args={})
+      jobs.create_stream(query, args)
+    end
+
+    ##
     # Return a +Collection+ of all +Index+ objects.
     #
     # +Index+ is a subclass of +Entity+, with additional methods for
