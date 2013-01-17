@@ -7,7 +7,7 @@ QUERY = "search index=_internal | head 3"
 JOB_ARGS = {:earliest_time => "-1m", :latest_time => "now",
             :status_buckets => 10}
 
-class JobsTestCase < SplunkTestCase
+class JobsTestCase < TestCaseWithSplunkConnection
   def test_create_with_garbage_fails
     assert_raises(SplunkHTTPError) do
       @service.jobs.create("aweaj;awfaw faf'adf")

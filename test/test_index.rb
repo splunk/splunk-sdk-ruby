@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class IndexTestCase < SplunkTestCase
+class IndexTestCase < TestCaseWithSplunkConnection
   def setup
     super
 

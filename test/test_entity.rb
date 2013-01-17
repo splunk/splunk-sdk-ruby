@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class EntityTestCase < SplunkTestCase
+class EntityTestCase < TestCaseWithSplunkConnection
   def setup
     super
     @app_args = {

@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class ConfigurationFileTestCase < SplunkTestCase
+class ConfigurationFileTestCase < TestCaseWithSplunkConnection
   def setup
     super
     # We cannot delete configuration files from the REST API

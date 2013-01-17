@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class SavedSearchesTestCase < SplunkTestCase
+class SavedSearchesTestCase < TestCaseWithSplunkConnection
   def teardown
     @service.saved_searches.each do |ss|
       if ss.name.start_with?("delete-me")

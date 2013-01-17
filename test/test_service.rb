@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class ServiceTestCase < SplunkTestCase
+class ServiceTestCase < TestCaseWithSplunkConnection
   def test_connect
     service = Splunk::connect(@splunkrc)
     assert_true(service.apps.length() > 0)

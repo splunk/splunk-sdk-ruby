@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class IndexTestCase < SplunkTestCase
+class IndexTestCase < TestCaseWithSplunkConnection
   def teardown
     @service.users.each do |user|
       if user.name.start_with?("delete-me")

@@ -3,7 +3,7 @@ require "splunk-sdk-ruby"
 
 include Splunk
 
-class TestRestarts < SplunkTestCase
+class TestRestarts < TestCaseWithSplunkConnection
   def test_restart_with_long_timeout
     service = Context.new(@splunkrc).login()
     service.restart(1000)

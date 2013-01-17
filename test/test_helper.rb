@@ -61,7 +61,7 @@ end
 
 DEFAULT_RESTART_TIMEOUT = 500 # seconds
 
-class SplunkTestCase < Test::Unit::TestCase
+class TestCaseWithSplunkConnection < Test::Unit::TestCase
   def setup
     super
     @splunkrc = read_splunkrc()
