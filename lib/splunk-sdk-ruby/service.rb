@@ -19,7 +19,7 @@ require_relative 'collection'
 require_relative 'collection/configurations'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
-require_relative 'collection/users'
+require_relative 'collection/case_insensitive_collection'
 require_relative 'context'
 require_relative 'entity'
 require_relative 'entity/index'
@@ -270,7 +270,7 @@ module Splunk
     #          this Splunk instance.
     #
     def roles
-      Collection.new(self, PATH_ROLES)
+      CaseInsensitiveCollection.new(self, PATH_ROLES)
     end
 
     ##
@@ -320,7 +320,7 @@ module Splunk
     # Return a +Collection+ of the users defined on Splunk.
     #
     def users
-      Users.new(self)
+      CaseInsensitiveCollection.new(self, PATH_USERS)
     end
   end
 end

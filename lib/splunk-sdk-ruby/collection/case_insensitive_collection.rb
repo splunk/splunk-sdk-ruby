@@ -18,14 +18,17 @@ require_relative '../collection'
 require_relative '../entity'
 
 ##
-# Provides a class representing the collection of users in Splunk.
-# This should look identical to the end user of the SDK.
+# Provides a class representing the collection of users and roles in Splunk.
+# This should look identical to Collection to the end user of the SDK.
+#
+# Users and roles are both case insensitive to the entity name, and neither
+# returns the newly created entity.
 #
 
 module Splunk
-  class Users < Collection
-    def initialize(service)
-      super(service, PATH_USERS, Entity)
+  class CaseInsensitiveCollection < Collection
+    def initialize(service, resource, entity_class=Entity)
+      super(service, resource, entity_class)
 
       @always_fetch = true
     end
