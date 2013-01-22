@@ -179,8 +179,14 @@ module Splunk
         elsif element.name == "id"
           metadata[element.name] = URI(children_to_s(element))
         elsif element.name == "messages"
-          # No idea what these look like. Try to get one with messages.
-          # TODO: Find examples, so I can actually handle this.
+          element.elements.each do |element|
+            if element.name == "msg"
+              metadata["messages"] << {
+                  "type" => element.attributes["type"].text.intern,
+                  "message" => children_to_s(element)
+              }
+            end
+          end
         else
           metadata[element.name] = children_to_s(element)
         end

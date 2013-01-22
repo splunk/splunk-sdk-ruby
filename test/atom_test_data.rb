@@ -446,5 +446,27 @@
                 }
             }
         ]
+    },
+    "atom_feed_with_message" => {
+        :metadata => {
+            "title" => "roles",
+            "id" => URI("https://localhost:8089/services/authorization/roles"),
+            "updated" => "2013-01-22T08:52:24-08:00",
+            "generator" => {"build" => "146385", "version" => "5.0.2"},
+            "author" => "Splunk",
+            "links" => {
+                "create" => URI("/services/authorization/roles/_new")
+            },
+            "startIndex" => "0",
+            "totalResults" => "0",
+            "itemsPerPage" => "30",
+            "messages" => [
+                {
+                    "type" => :WARN,
+                    "message" => "This role will be disabled after the Enterprise Trial License expires"
+                }
+            ]
+        },
+        :entries => []
     }
 }
