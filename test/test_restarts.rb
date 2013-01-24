@@ -6,7 +6,15 @@ include Splunk
 class TestRestarts < TestCaseWithSplunkConnection
   def test_restart_with_long_timeout
     service = Context.new(@splunkrc).login()
-    service.restart(1000)
+    begin
+      service.restart(2000)
+    rescue TimeoutError
+      while !service.server_accepting_connections? ||
+          service.server_requires_restart?
+        sleep(0.3)
+      end
+    end
+
     assert_logged_in(service)
   end
 

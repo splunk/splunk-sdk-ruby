@@ -15,4 +15,6 @@ Gem::Specification.new do |gem|
   gem.version       = '0.1.0'
   gem.required_ruby_version = '>=1.9.2'
   gem.add_dependency 'jruby-openssl', '~>0.7.7' if RUBY_PLATFORM == "java"
+  gem.add_dependency 'rake', '~>10'
+  gem.add_dependency 'test-unit'
 end

@@ -79,13 +79,15 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
       fail("Test left server in a state requiring restart.")
     end
 
-    @installed_apps.each() do |app_name|
-      @service.apps.delete(app_name)
-      assert_eventually_true() do
-        !@service.apps.has_key?(app_name)
-      end
-      if @service.server_requires_restart?
-        clear_restart_message(@service)
+    if @service.splunk_version[0..1] != [4,2]
+      @installed_apps.each() do |app_name|
+        @service.apps.delete(app_name)
+        assert_eventually_true() do
+          !@service.apps.has_key?(app_name)
+        end
+        if @service.server_requires_restart?
+          clear_restart_message(@service)
+        end
       end
     end
 

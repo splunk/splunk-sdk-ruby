@@ -32,7 +32,11 @@ class TestContext < TestCaseWithSplunkConnection
     ["ASCII", "UTF-8"].each() do |encoding|
       values = {}
       @splunkrc.each() do |key, value|
-        values[key] = value.clone().force_encoding(encoding)
+        if value.is_a?(String)
+          values[key] = value.clone().force_encoding(encoding)
+        else
+          values[key] = value
+        end
       end
       service = Context.new(values).login()
       assert_logged_in(service)

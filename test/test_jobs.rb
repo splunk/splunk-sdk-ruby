@@ -155,10 +155,10 @@ class JobsTestCase < TestCaseWithSplunkConnection
 
   def test_enable_preview
     install_app_from_collection("sleep_command")
-    job = @service.jobs.create("search index=_internal | sleep 2")
+    job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
     assert_equal("0", job["isPreviewEnabled"])
     job.enable_preview()
-    assert_eventually_true(10) do
+    assert_eventually_true(1000) do
       job.refresh()
       fail("Job finished before preview enabled") if job.is_done?()
       job["isPreviewEnabled"] == "1"
@@ -199,7 +199,11 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
-    sleep(2)
+    if @service.splunk_version[0..1] == [4,2]
+      sleep(20)
+    else
+      sleep(2)
+    end
     old_ttl = Integer(@job.refresh()["ttl"])
     @job.touch()
     new_ttl = Integer(@job.refresh()["ttl"])

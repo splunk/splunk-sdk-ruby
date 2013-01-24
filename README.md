@@ -85,6 +85,13 @@ The Splunk Ruby SDK requires Ruby 1.9.2 or greater.
 First, do not run the test suite against your production Splunk server! Install
 another copy and run it against that.
 
+Second, the versions of Rake and Test::Unit that ship with various Ruby versions
+are broken. They work enough to install the SDK, but you cannot run the unit
+tests or do any real development. You need to install the latest versions:
+
+    gem install rake
+    gem install test-unit
+
 The test suite reads the host to connect to and credentials to use from a
 **.splunkrc** file. Create a text file with the following format:
 
