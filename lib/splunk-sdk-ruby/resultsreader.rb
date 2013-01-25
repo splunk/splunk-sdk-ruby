@@ -163,10 +163,10 @@ module Splunk
           # Toplevel state.
           :base => {
               :start_element => lambda do |name, attributes|
-                if name == "results"
+                if name == "results" and !@header_sent
                   @is_preview = attributes["preview"] == "1"
                 elsif name == "fieldOrder"
-                  @state = :field_order
+                  @state = :field_order if !@header_sent
                 elsif name == "result"
                   @state = :result
                   @current_offset = Integer(attributes["offset"])
@@ -176,6 +176,7 @@ module Splunk
               :end_element => lambda do |name|
                 if name == "results" and !@header_sent
                   @header_sent = true
+                  puts "Yielding header."
                   Fiber.yield @is_preview, @fields
                 end
               end
@@ -190,7 +191,7 @@ module Splunk
                 end
               end,
               :end_element => lambda do |name|
-                if name == "fieldOrder"
+                if name == "fieldOrder" and !@header_sent
                   @state = :base
                   @header_sent = true
                   Fiber.yield @is_preview, @fields

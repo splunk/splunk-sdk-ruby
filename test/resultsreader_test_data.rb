@@ -1,4 +1,13 @@
 {
+    ["5.0.2", "streaming_results"] => {
+        :is_preview => true,
+        :fields => ["count"],
+        :results => [
+            {"count" => "1"},
+            {"count" => "3"},
+            {"count" => "54"}
+        ]
+    },
     ["5.0.2", "results"] => {
         :is_preview => false,
         :fields => ["_bkt", "_cd", "_indextime", "_kv", "_raw", "_serial",
