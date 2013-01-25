@@ -97,7 +97,11 @@ class JobsTestCase < TestCaseWithSplunkConnection
     created_jobs = []
 
     (1..3).each() do |i|
-      created_jobs << jobs.create("search index=_internal | head #{i}")
+      job = jobs.create("search index=_internal | head #{i}")
+      while !job.is_ready?
+        sleep(0.1)
+      end
+      created_jobs << job
     end
 
     each_jobs = []
@@ -154,16 +158,25 @@ class JobsTestCase < TestCaseWithSplunkConnection
   end
 
   def test_enable_preview
-    install_app_from_collection("sleep_command")
-    job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
-    assert_equal("0", job["isPreviewEnabled"])
-    job.enable_preview()
-    assert_eventually_true(1000) do
-      job.refresh()
-      fail("Job finished before preview enabled") if job.is_done?()
-      job["isPreviewEnabled"] == "1"
+    begin
+      install_app_from_collection("sleep_command")
+      job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
+      assert_equal("0", job["isPreviewEnabled"])
+      job.enable_preview()
+      assert_eventually_true(1000) do
+        job.refresh()
+        fail("Job finished before preview enabled") if job.is_done?()
+        job["isPreviewEnabled"] == "1"
+      end
+    ensure
+      job.cancel()
+      assert_eventually_true do
+        !@service.jobs.contains?(job.sid)
+      end
+      # We have to wait for jobs to be properly killed or we can't delete
+      # the sleep_command app in teardown on some platforms.
+      sleep(4)
     end
-    job.cancel()
   end
 end
 
@@ -199,16 +212,17 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
-    if @service.splunk_version[0..1] == [4,2]
-      sleep(20)
-    else
-      sleep(2)
-    end
-    old_ttl = Integer(@job.refresh()["ttl"])
-    @job.touch()
-    new_ttl = Integer(@job.refresh()["ttl"])
-    if new_ttl == old_ttl
-      fail("Didn't wait long enough to make ttl change meaningful.")
+    i = 2
+    while i < 20
+      sleep(i)
+      old_ttl = Integer(@job.refresh()["ttl"])
+      @job.touch()
+      new_ttl = Integer(@job.refresh()["ttl"])
+      if new_ttl > old_ttl
+        break
+      else
+        i += 1
+      end
     end
     assert_true(new_ttl > old_ttl)
   end
@@ -222,7 +236,9 @@ class RealTimeJobTestCase < JobsTestCase
                                 :earliest_time => "rt-1d",
                                 :latest_time => "rt",
                                 :priority => 5)
-
+    while !@job.is_ready?
+      sleep(0.2)
+    end
   end
 
   def teardown
