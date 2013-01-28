@@ -103,7 +103,12 @@ module Splunk
         @iteration_fiber = Fiber.new do
           if $splunk_xml_library == :nokogiri
             parser = Nokogiri::XML::SAX::Parser.new(listener)
-            parser.parse(stream)
+            edited_stream = ConcatenatedStream.new(
+                StringIO.new("<fake-root-element>"),
+                XMLDTDFilter.new(stream),
+                StringIO.new("</fake-root-element>")
+            )
+            parser.parse(edited_stream)
           else # Use REXML
             REXML::Document.parse_stream(stream, listener)
           end
@@ -176,7 +181,6 @@ module Splunk
               :end_element => lambda do |name|
                 if name == "results" and !@header_sent
                   @header_sent = true
-                  puts "Yielding header."
                   Fiber.yield @is_preview, @fields
                 end
               end
@@ -356,4 +360,105 @@ module Splunk
     def notationdecl(content) end
     def xmldecl(version, encoding, standalone) end
   end
+
+  ##
+  # Stream transformer that filters out XML DTD definitions.
+  #
+  # XMLDTDFilter takes anything between <? and > to be a DTD. It does no
+  # escaping of quoted text.
+  #
+  class XMLDTDFilter < IO
+    def initialize(stream)
+      @stream = stream
+      @peeked_char = nil
+    end
+
+    def close()
+      @stream.close()
+    end
+
+    def read(n=nil)
+      response = ""
+
+      while n.nil? or n > 0
+        # First use any element we already peeked at.
+        if !@peeked_char.nil?
+          response << @peeked_char
+          @peeked_char = nil
+          if !n.nil?
+            n -= 1
+          end
+          next
+        end
+
+        c = @stream.read(1)
+        if c.nil? # We've reached the end of the stream
+          break
+        elsif c == "<" # We might have a DTD definition
+          d = @stream.read(1) || ""
+          if d == "?" # It's a DTD. Skip until we've consumed a >.
+            while true
+              q = @stream.read(1)
+              if q == ">"
+                break
+              end
+            end
+          else # It's not a DTD. Push that ? into lookahead.
+            @peeked_char = d
+            response << c
+            if !n.nil?
+              n = n-1
+            end
+          end
+        else # No special behavior
+          response << c
+          if !n.nil?
+            n -= 1
+          end
+        end
+      end
+      return response
+    end
+  end
+
+  ##
+  # Return a stream which concatenates all the streams passed to it.
+  #
+  class ConcatenatedStream < IO
+    def initialize(*streams)
+      @streams = streams
+    end
+
+    def close()
+      @streams.each do |stream|
+        stream.close()
+      end
+    end
+
+    def read(n=nil)
+      response = ""
+      while n.nil? or n > 0
+        if @streams.empty? # No streams left
+          break
+        else # We have streams left.
+          chunk = @streams[0].read(n) || ""
+          found_n = chunk.length()
+          if n.nil? or chunk.length() < n
+            @streams.shift()
+          end
+          if !n.nil?
+            n -= chunk.length()
+          end
+
+          response << chunk
+        end
+      end
+      if response == ""
+        return nil
+      else
+        return response
+      end
+    end
+  end
+
 end

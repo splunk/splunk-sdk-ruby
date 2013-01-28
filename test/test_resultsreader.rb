@@ -14,12 +14,12 @@ class TestResultsReader < Test::Unit::TestCase
   test_data = eval(open("test/resultsreader_test_data.rb").read())
 
   xml_libraries.each do |xml_library|
-    Splunk::require_xml_library(xml_library)
     test_data.each_entry do |test, expected|
       version = test[0]
       name = test[1]
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_#{name}"
       define_method(test_name.intern()) do
+        Splunk::require_xml_library(xml_library)
         file = File.open("test/data/results/#{version}/#{name}.xml")
         reader = ResultsReader.new(file)
         assert_equal(expected[:is_preview], reader.is_preview?)

@@ -144,17 +144,23 @@ class JobsTestCase < TestCaseWithSplunkConnection
   end
 
   def test_timeline
+    original_xml_library = $splunk_xml_library
     job = @service.jobs.create(QUERY, JOB_ARGS)
     assert_eventually_true() { job.is_done?() }
-    Splunk::require_xml_library(:rexml)
-    timeline = job.timeline()
-    assert_true(timeline.is_a?(Array))
 
-    Splunk::require_xml_library(:nokogiri)
-    timeline = job.timeline()
-    assert_true(timeline.is_a?(Array))
+    begin
+      Splunk::require_xml_library(:rexml)
+      timeline = job.timeline()
+      assert_true(timeline.is_a?(Array))
 
-    job.cancel()
+      Splunk::require_xml_library(:nokogiri)
+      timeline = job.timeline()
+      assert_true(timeline.is_a?(Array))
+    ensure
+      # Have to reset the XML library or test_resultsreader gets unhappy.
+      Splunk::require_xml_library(original_xml_library)
+      job.cancel()
+    end
   end
 
   def test_enable_preview
