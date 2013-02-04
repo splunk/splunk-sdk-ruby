@@ -71,7 +71,7 @@ module Splunk
   # *Example:*
   #
   #     require 'splunk-sdk-ruby'
-  #     service = Splunk::Connect(:username => "admin", :password => "changeme")
+  #     service = Splunk::connect(:username => "admin", :password => "changeme")
   #
   def self.connect(args)
     Service.new(args).login()

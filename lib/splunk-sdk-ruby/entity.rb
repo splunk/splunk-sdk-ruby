@@ -120,7 +120,7 @@ module Splunk
     # The links typically include keys such as +"list"+, +"edit"+, or
     # +"disable"+.
     #
-    # Returns: a Hash of Strings to Strings.
+    # Returns: a Hash of Strings to URL objects.
     #
     def links()
       return @state["links"]

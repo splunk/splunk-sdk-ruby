@@ -25,7 +25,7 @@ require_relative 'splunk_http_error'
 require_relative 'synonyms'
 
 module Splunk
-  # Class representing a collection on Splunk.
+  # Class representing a collection in Splunk.
   #
   # +Collection+s are groups of items, usually of class +Entity+ or one of its
   # subclasses, but occasionally another +Collection+. Usually you will obtain
