@@ -172,16 +172,21 @@ module Splunk
     ##
     # Create a blocking search without transforming search commands.
     #
-    # +create+_stream+ starts a search _query_, and any optional arguments
+    # +create_export+ starts a search _query_, and any optional arguments
     # specified in a hash (which are identical to those taken by +create+).
     # It then blocks until the job is finished, and returns the events
     # found by the job before any transforming search commands (equivalent
     # to calling +events+ on a +Job+).
     #
-    # Returns: a stream readable by +ResultsReader+.
+    # Returns: a stream readable by +MultiResultsReader+.
     #
+    def create_export(query, args={}) # :nodoc:
+      jobs.create_export(query, args)
+    end
+
     def create_stream(query, args={})
-      jobs.create_stream(query, args)
+      warn "[DEPRECATION] Service#create_stream is deprecated. Use Service#create_export instead."
+      jobs.create_export(query, args)
     end
 
     ##
