@@ -15,8 +15,12 @@
 #++
 
 ##
-# +resultsreader.rb+ provides +ResultsReader+, an object to incrementally parse
-# XML streams of results from Splunk search jobs into Ruby objects.
+# +resultsreader.rb+ provides classes to incrementally parse the XML output from
+# Splunk search jobs. For most search jobs you will want +ResultsReader+, which
+# handles a single results set. However, the running a blocking export job from
+# the +search/jobs/export endpoint+ sends back a stream of results sets, all but
+# the last of which are previews. In this case, you should use the
+# +MultiResultsReader+, which will let you iterate over the results sets.
 #
 # By default, +ResultsReader+ will try to use Nokogiri for XML parsing. If
 # Nokogiri isn't available, it will fall back to REXML, which ships with Ruby
@@ -37,6 +41,11 @@ module Splunk
   # +ResultsReader is an Enumerable, so it has methods such as +each+ and
   # +each_with_index+. However, since it's a stream parser, once you iterate
   # through it once, it will thereafter be empty.
+  #
+  # Do not use +ResultsReader+ with the results of the +create_export+ or
+  # +create_stream+ methods on +Service+ or +Jobs+. These methods use endpoints
+  # which return a different set of data structures. Use +MultiResultsReader+
+  # instead for those cases.
   #
   # The ResultsReader object has two additional methods:
   #
@@ -105,6 +114,7 @@ module Splunk
 
         @is_preview = @iteration_fiber.resume
         @fields = @iteration_fiber.resume
+        @reached_end = false
       end
     end
 
@@ -117,12 +127,22 @@ module Splunk
             yielder << result
           end
         end
+        @reached_end = true
       end
 
       if block_given? # Apply the enumerator to a block if we have one
         enum.each() { |e| yield e }
       else
         enum # Otherwise return the enumerator itself
+      end
+    end
+
+    ##
+    # Skip the rest of the events in this ResultsReader.
+    #
+    def spool()
+      if !@reached_end
+        each() {|result|}
       end
     end
   end
@@ -143,14 +163,20 @@ module Splunk
   # based upon the current state (as stored in `@state`).
   #
   # The parser initially runs until it has determined if the results are
-  # a preview, and it has read the field order. Then it calls `Fiber.yield`
-  # to return those two values. When `Fiber.resume` is called, it will
-  # continue and thereafter call `Fiber.yield` with every result as it
-  # finishes parsing it.
+  # a preview, then calls +Fiber.yield+ to return it. Then it continues and
+  # tries to yield a field order, and then any results. (It will always yield
+  # a field order, even if it is empty). At the end of a results set, it yields
+  # +:end_of_results_set+.
   #
   class ResultsListener # :nodoc:
     def initialize()
-      @fields = nil # nil when no fieldOrder element has been found.
+      # @fields holds the accumulated list of fields from the fieldOrder
+      # element. If there has been no accumulation, it is set to
+      # :no_fieldOrder_found. For empty results sets, there is often no
+      # fieldOrder element, but we still want to yield an empty Array at the
+      # right point, so if we reach the end of a results element and @fields
+      # is still :no_fieldOrder_found, we yield an empty array at that point.
+      @fields = :no_fieldOrder_found
       @state = :base
       @states = {
           # Toplevel state.
@@ -170,7 +196,9 @@ module Splunk
               end,
               :end_element => lambda do |name|
                 if name == "results"
-                  Fiber.yield([]) if @fields.nil? # no fieldOrder element in this set
+                  Fiber.yield([]) if @fields == :no_fieldOrder_found
+                  # Reset the fieldOrder
+                  @fields = :no_fieldOrder_found
                   Fiber.yield(:end_of_results_set)
                 end
               end
@@ -351,6 +379,119 @@ module Splunk
   end
 
   ##
+  # Version of ResultsReader that accepts an external parsing state.
+  #
+  # ResultsReader sets up its own Fiber for doing SAX parsing of the XML,
+  # but for the MultiResultsReader, we want to share a single fiber among
+  # all the results readers that we create. PuppetResultsReader takes
+  # the fiber, is_preview, and fields information from its constructor
+  # and then exposes the same methods as ResultsReader.
+  #
+  # You should never create an instance of PuppetResultsReader by hand. It
+  # will be passed back from iterating over a MultiResultsReader.
+  #
+  class PuppetResultsReader < ResultsReader
+    def initialize(fiber, is_preview, fields)
+      @iteration_fiber = fiber
+      @is_preview = is_preview
+      @fields = fields
+    end
+  end
+
+  ##
+  # Parser for the XML results sets returned by blocking export jobs.
+  #
+  # The methods +create_export+ and +create_stream+ on +Jobs+ and +Service+
+  # do not return data in quite the same format as other search jobs in Splunk.
+  # They will return a sequence of preview results sets, and then (if they are
+  # not real time searches) a final results set.
+  #
+  # MultiResultsReader takes the stream returned by such a call, and provides
+  # iteration over each results set, or access to only the final, non-preview
+  # results set.
+  #
+  #
+  # *Examples*:
+  #     require 'splunk-sdk-ruby'
+  #
+  #     service = Splunk::connect(:username => "admin", :password => "changeme")
+  #
+  #     stream = service.jobs.create_export("search index=_internal | head 10")
+  #
+  #     readers = MultiResultsReader.new(stream)
+  #     readers.each do |reader|
+  #         puts "New result set (preview=#{reader.is_preview?})"
+  #         reader.each do |result|
+  #             puts result
+  #         end
+  #     end
+  #
+  #     # Alternately
+  #     reader = readers.final_results()
+  #     reader.each do |result|
+  #         puts result
+  #     end
+  #
+  class MultiResultsReader
+    include Enumerable
+
+    def initialize(text_or_stream)
+      stream = normalize_stream(text_or_stream)
+      listener = ResultsListener.new()
+      @iteration_fiber = Fiber.new do
+        if $splunk_xml_library == :nokogiri
+          parser = Nokogiri::XML::SAX::Parser.new(listener)
+          edited_stream = ConcatenatedStream.new(
+              StringIO.new("<fake-root-element>"),
+              XMLDTDFilter.new(stream),
+              StringIO.new("</fake-root-element>")
+          )
+          parser.parse(edited_stream)
+        else # Use REXML
+          REXML::Document.parse_stream(stream, listener)
+        end
+      end
+    end
+
+    def each()
+      enum = Enumerator.new() do |yielder|
+        if !@iteration_fiber.nil? # Handle the case of empty files
+          begin
+            while true
+              is_preview = @iteration_fiber.resume
+              fields = @iteration_fiber.resume
+              reader = PuppetResultsReader.new(@iteration_fiber, is_preview, fields)
+              yielder << reader
+              # Finish extracting any events that the user didn't read.
+              # Otherwise the next results reader will start in the middle of
+              # the previous results set.
+              reader.spool()
+            end
+          rescue FiberError
+          end
+        end
+      end
+
+      if block_given? # Apply the enumerator to a block if we have one
+        enum.each() { |e| yield e }
+      else
+        enum # Otherwise return the enumerator itself
+      end
+    end
+
+    def final_results()
+      each do |reader|
+        if reader.is_preview?
+          reader.each() {|event|}
+        else
+          return reader
+        end
+      end
+    end
+  end
+
+
+  ##
   # Stream transformer that filters out XML DTD definitions.
   #
   # XMLDTDFilter takes anything between <? and > to be a DTD. It does no
@@ -450,63 +591,14 @@ module Splunk
     end
   end
 
-  class ResultsSubsetReader < ResultsReader
-    def initialize(fiber, is_preview, fields)
-      @iteration_fiber = fiber
-      @is_preview = is_preview
-      @fields = fields
-    end
-  end
 
-  class ResultsSetReader
-    include Enumerable
-
-    def initialize(text_or_stream)
-      stream = normalize_stream(text_or_stream)
-      listener = ResultsListener.new()
-      @iteration_fiber = Fiber.new do
-        if $splunk_xml_library == :nokogiri
-          parser = Nokogiri::XML::SAX::Parser.new(listener)
-          edited_stream = ConcatenatedStream.new(
-              StringIO.new("<fake-root-element>"),
-              XMLDTDFilter.new(stream),
-              StringIO.new("</fake-root-element>")
-          )
-          parser.parse(edited_stream)
-        else # Use REXML
-          REXML::Document.parse_stream(stream, listener)
-        end
-      end
-    end
-
-    def each(skip_previews=false)
-      enum = Enumerator.new() do |yielder|
-        if !@iteration_fiber.nil? # Handle the case of empty files
-          begin
-            while true
-              is_preview = @iteration_fiber.resume
-              if skip_previews and is_preview
-                begin
-                  response = @iteration_fiber.resume
-                end while response != :end_of_results_set
-              else
-                fields = @iteration_fiber.resume
-                yielder << ResultsSubsetReader.new(@iteration_fiber, is_preview, fields)
-              end
-            end
-          rescue FiberError
-          end
-        end
-      end
-
-      if block_given? # Apply the enumerator to a block if we have one
-        enum.each() { |e| yield e }
-      else
-        enum # Otherwise return the enumerator itself
-      end
-    end
-  end
-
+  ##
+  # Make _text_or_stream_ into a stream-like object.
+  #
+  # ResultsReader and MultiResultsReader both accept strings and stream-like
+  # objects, but internally need something stream-like. This function normalizes
+  # to something stream-like.
+  #
   def normalize_stream(text_or_stream)
     if text_or_stream.nil?
       stream = StringIO.new("")
@@ -516,5 +608,4 @@ module Splunk
       stream = text_or_stream
     end
   end
-
 end
