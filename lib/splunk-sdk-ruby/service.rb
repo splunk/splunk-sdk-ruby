@@ -16,6 +16,7 @@
 
 require_relative 'atomfeed'
 require_relative 'collection'
+require_relative 'collection/apps'
 require_relative 'collection/configurations'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
@@ -100,7 +101,7 @@ module Splunk
     #     end
     #
     def apps
-      Collection.new(self, PATH_APPS_LOCAL)
+      Apps.new(self, PATH_APPS_LOCAL)
     end
 
     ##
@@ -298,11 +299,14 @@ module Splunk
     #     service = Splunk::connect(:username => 'admin', :password => 'foo')
     #     puts svc.settings.read
     #     # Prints:
-    #     #    {"SPLUNK_DB" => "/opt/4.3/splunkbeta/var/lib/splunk",
-    #     #     "SPLUNK_HOME" => "/opt/4.3/splunkbeta",
+    #     #    {"SPLUNK_DB" => "/path/to/splunk_home/var/lib/splunk",
+    #     #     "SPLUNK_HOME" => "/path/to/splunk_home",
     #     #     ...}
     #
     def settings
+      # Though settings looks like a collection on the server, it always has
+      # a single entity, of the same name, giving the actual settings. We access
+      # that entity directly rather than putting a collection inbetween.
       Entity.new(self, Splunk::namespace(:sharing => "default"),
                  PATH_SETTINGS, "settings").refresh()
     end
