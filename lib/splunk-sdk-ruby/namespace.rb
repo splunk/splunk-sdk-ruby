@@ -179,7 +179,10 @@ module Splunk
   class DefaultNamespace # :nodoc:
     include Singleton
     include Namespace
-    def is_proper?() false end
+    # A services/ namespace always uses the current user
+    # and current app, neither of which are wildcards, so this
+    # namespace is guaranteed to be proper.
+    def is_proper?() true end
     def to_path_fragment() ["services"] end
   end
 

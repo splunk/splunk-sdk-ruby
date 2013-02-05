@@ -30,17 +30,29 @@ module Splunk
     def initialize(service, resource, entity_class=Entity)
       super(service, resource, entity_class)
 
+      # CaseInsensitiveCollection is only currently used for users and roles,
+      # both of which require @always_fetch=true. This property is not inherent
+      # to CaseInsensitiveCollections in any particular way. It was just a
+      # convenient place to put it.
       @always_fetch = true
     end
 
-    ##
-    # Creates an item in this collection.
-    #
-    # This method only exists because the users endpoints don't return the
-    # created entity.
-    #
+    # The following methods only downcase the name they are passed, and should
+    # be invisible to the user.
     def create(name, args={}) # :nodoc:
       super(name.downcase(), args)
+    end
+
+    def delete(name, namespace=nil) # :nodoc:
+      super(name.downcase(), namespace)
+    end
+
+    def fetch(name, namespace=nil) # :nodoc:
+      super(name.downcase(), namespace)
+    end
+
+    def has_key?(name) # :nodoc:
+      super(name.downcase())
     end
   end
 end

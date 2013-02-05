@@ -43,14 +43,14 @@ module Splunk
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:
       @service = service
       @namespace = namespace
+      if !@namespace.is_proper?
+        raise StandardError.new("Must provide a proper namespace to Entity (found: #{@namespace}")
+      end
       @resource = resource
       @name = name
       @state = state
       if !state # If the state was not provided, we need to fetch it.
-        begin
-          refresh()
-        rescue EntityNotReady
-        end
+        refresh()
       end
     end
 
@@ -129,6 +129,9 @@ module Splunk
     ##
     # Return all or a specified subset of key/value pairs on this +Entity+
     #
+    # DEPRECATED. Use fetch and +[]+ instead (since entities now cache their
+    # state).
+    #
     # In the absence of arguments, returns a Hash of all the fields on this
     # +Entity+. If you specify one or more +String+s or +Array+s of +String+s,
     # all the keys specified in the arguments will be returned in the Hash.
@@ -137,6 +140,7 @@ module Splunk
     #          as values.
     #
     def read(*field_list)
+      warn "[DEPRECATION] Entity#read is deprecated. Use [] and fetch instead."
       if field_list.empty?
         return @state["content"].clone()
       else
@@ -175,10 +179,9 @@ module Splunk
         # ready, in which case you get back empty bodies.
         raise EntityNotReady.new((@resource + [name]).join("/"))
       end
+      # We are guaranteed a unique entity, since entities must have
+      # proper namespaces.
       feed = AtomFeed.new(response.body)
-
-      raise AmbiguousEntityReference.new("Found multiple entities matching" +
-            " name and namespace.") if feed.entries.length > 1
       @state = feed.entries[0]
       self
     end

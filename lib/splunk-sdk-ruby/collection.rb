@@ -180,18 +180,12 @@ module Splunk
         namespace = @service.namespace
       end
 
-      # We may have multiple entities matching _name_, in which case we insist
-      # that the caller provide a namespace that disambiguates the name.
-      response = @service.request(:resource => @resource + [name],
-                                  :namespace => namespace)
-      feed = AtomFeed.new(response.body)
-      if feed.entries.length > 1
-        raise AmbiguousEntityReference.new("Multiple entities named " +
-                                               "#{name}. Please specify a" +
-                                               "namespace.")
+      # We don't want to handle any cases about deleting ambiguously named
+      # entities.
+      if !namespace.is_proper?
+        raise StandardError.new("Must provide a proper namespace to delete an entity.")
       end
 
-      # At this point we know that the name is unambiguous, so we delete it.
       @service.request(:method => :DELETE,
                        :namespace => namespace,
                        :resource => @resource + [name])

@@ -161,7 +161,7 @@ class TestCollection < TestCaseWithSplunkConnection
                                        :app => "search",
                                        :owner => "admin")).name)
 
-    assert_raises(Splunk::AmbiguousEntityReference) do
+    assert_raises(StandardError) do
       wildcard_saved_searches.delete(search_name)
     end
 

@@ -97,7 +97,7 @@ class TestNamespaces < Test::Unit::TestCase
   def test_propriety
     assert_true(Splunk::namespace(:sharing => "global").is_proper?)
     assert_true(Splunk::namespace(:sharing => "system").is_proper?)
-    assert_false(Splunk::namespace(:sharing => "default").is_proper?)
+    assert_true(Splunk::namespace(:sharing => "default").is_proper?)
     assert_true(Splunk::namespace(:sharing => "app", :app => "search").is_proper?)
     assert_false(Splunk::namespace(:sharing => "app", :app => "-").is_proper?)
     assert_true(Splunk::namespace(:sharing => "app", :app => "").is_proper?)

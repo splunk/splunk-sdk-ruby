@@ -43,8 +43,14 @@ module Splunk
   # +"1"+ before you will get anything useful from +preview+.
   #
   class Job < Entity
-    def initialize(service, sid)
-      super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid)
+    def initialize(service, sid, state=nil)
+      begin
+        super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid, state)
+      rescue EntityNotReady
+        # Jobs may not be ready (and so cannot be refreshed) when they are
+        # first created, so Entity#initialize may throw an EntityNotReady
+        # exception. It's nothing to be concerned about for jobs.
+      end
     end
 
     ##
