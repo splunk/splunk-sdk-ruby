@@ -57,9 +57,14 @@ class TestResultsReader < Test::Unit::TestCase
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
         file = File.open("test/data/export/#{version}/export_results.xml")
-        reader = ResultsReader.new(file, skip_previews=true)
-        assert_results_reader_equals(tests["without_preview"], reader)
-        assert_false(reader.has_more_results?)
+        reader = ResultsSetReader.new(file)
+        n_results_sets = 0
+        reader.each_with_index(skip_previews=true) do |rr|
+          expected = tests["without_preview"]
+          assert_results_reader_equals(expected, rr)
+          n_results_sets += 1
+        end
+        assert_equal(1, n_results_sets)
       end
 
       # with preview
@@ -67,12 +72,14 @@ class TestResultsReader < Test::Unit::TestCase
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
         file = File.open("test/data/export/#{version}/export_results.xml")
-        reader = ResultsReader.new(file)
-        tests["with_preview"].each do |expected|
-          assert_true(reader.has_more_results?)
-          assert_results_reader_equals(expected, reader)
+        reader = ResultsSetReader.new(file)
+        n_results_sets = 0
+        reader.each_with_index do |rr, index|
+          expected = tests["with_preview"][index]
+          assert_results_reader_equals(expected, rr)
+          n_results_sets += 1
         end
-        assert_false(reader.has_more_results?)
+        assert_equal(tests["with_preview"].length, n_results_sets)
       end
 
     end

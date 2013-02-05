@@ -83,13 +83,7 @@ module Splunk
     attr_reader :fields
 
     def initialize(text_or_stream)
-      if text_or_stream.nil?
-        stream = StringIO.new("")
-      elsif !text_or_stream.respond_to?(:read)
-        stream = StringIO.new(text_or_stream.strip)
-      else
-        stream = text_or_stream
-      end
+      stream = normalize_stream(text_or_stream)
 
       if stream.eof?
         @is_preview = nil
@@ -103,28 +97,24 @@ module Splunk
         @iteration_fiber = Fiber.new do
           if $splunk_xml_library == :nokogiri
             parser = Nokogiri::XML::SAX::Parser.new(listener)
-            edited_stream = ConcatenatedStream.new(
-                StringIO.new("<fake-root-element>"),
-                XMLDTDFilter.new(stream),
-                StringIO.new("</fake-root-element>")
-            )
-            parser.parse(edited_stream)
+            parser.parse(stream)
           else # Use REXML
             REXML::Document.parse_stream(stream, listener)
           end
         end
 
-        @is_preview, @fields = @iteration_fiber.resume
+        @is_preview = @iteration_fiber.resume
+        @fields = @iteration_fiber.resume
       end
     end
 
     def each()
       enum = Enumerator.new() do |yielder|
         if !@iteration_fiber.nil? # Handle the case of empty files
-          result = @iteration_fiber.resume
-          while result != nil
-            yielder << result
+          while true
             result = @iteration_fiber.resume
+            break if result.nil? or result == :end_of_results_set
+            yielder << result
           end
         end
       end
@@ -160,18 +150,18 @@ module Splunk
   #
   class ResultsListener # :nodoc:
     def initialize()
-      @fields = []
-      @header_sent = false
-      @is_preview = nil
+      @fields = nil # nil when no fieldOrder element has been found.
       @state = :base
       @states = {
           # Toplevel state.
           :base => {
               :start_element => lambda do |name, attributes|
-                if name == "results" and !@header_sent
-                  @is_preview = attributes["preview"] == "1"
+                if name == "results"
+                  is_preview = attributes["preview"] == "1"
+                  Fiber.yield(is_preview)
                 elsif name == "fieldOrder"
-                  @state = :field_order if !@header_sent
+                  @state = :field_order
+                  @fields = []
                 elsif name == "result"
                   @state = :result
                   @current_offset = Integer(attributes["offset"])
@@ -179,9 +169,9 @@ module Splunk
                 end
               end,
               :end_element => lambda do |name|
-                if name == "results" and !@header_sent
-                  @header_sent = true
-                  Fiber.yield @is_preview, @fields
+                if name == "results"
+                  Fiber.yield([]) if @fields.nil? # no fieldOrder element in this set
+                  Fiber.yield(:end_of_results_set)
                 end
               end
           },
@@ -195,10 +185,9 @@ module Splunk
                 end
               end,
               :end_element => lambda do |name|
-                if name == "fieldOrder" and !@header_sent
+                if name == "fieldOrder"
                   @state = :base
-                  @header_sent = true
-                  Fiber.yield @is_preview, @fields
+                  Fiber.yield(@fields)
                 end
               end,
           },
@@ -458,6 +447,73 @@ module Splunk
       else
         return response
       end
+    end
+  end
+
+  class ResultsSubsetReader < ResultsReader
+    def initialize(fiber, is_preview, fields)
+      @iteration_fiber = fiber
+      @is_preview = is_preview
+      @fields = fields
+    end
+  end
+
+  class ResultsSetReader
+    include Enumerable
+
+    def initialize(text_or_stream)
+      stream = normalize_stream(text_or_stream)
+      listener = ResultsListener.new()
+      @iteration_fiber = Fiber.new do
+        if $splunk_xml_library == :nokogiri
+          parser = Nokogiri::XML::SAX::Parser.new(listener)
+          edited_stream = ConcatenatedStream.new(
+              StringIO.new("<fake-root-element>"),
+              XMLDTDFilter.new(stream),
+              StringIO.new("</fake-root-element>")
+          )
+          parser.parse(edited_stream)
+        else # Use REXML
+          REXML::Document.parse_stream(stream, listener)
+        end
+      end
+    end
+
+    def each(skip_previews=false)
+      enum = Enumerator.new() do |yielder|
+        if !@iteration_fiber.nil? # Handle the case of empty files
+          begin
+            while true
+              is_preview = @iteration_fiber.resume
+              if skip_previews and is_preview
+                begin
+                  response = @iteration_fiber.resume
+                end while response != :end_of_results_set
+              else
+                fields = @iteration_fiber.resume
+                yielder << ResultsSubsetReader.new(@iteration_fiber, is_preview, fields)
+              end
+            end
+          rescue FiberError
+          end
+        end
+      end
+
+      if block_given? # Apply the enumerator to a block if we have one
+        enum.each() { |e| yield e }
+      else
+        enum # Otherwise return the enumerator itself
+      end
+    end
+  end
+
+  def normalize_stream(text_or_stream)
+    if text_or_stream.nil?
+      stream = StringIO.new("")
+    elsif !text_or_stream.respond_to?(:read)
+      stream = StringIO.new(text_or_stream.strip)
+    else
+      stream = text_or_stream
     end
   end
 
