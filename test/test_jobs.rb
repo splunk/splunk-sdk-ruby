@@ -167,6 +167,9 @@ class JobsTestCase < TestCaseWithSplunkConnection
     begin
       install_app_from_collection("sleep_command")
       job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
+      while !job.is_ready?()
+        sleep(0.1)
+      end
       assert_equal("0", job["isPreviewEnabled"])
       job.enable_preview()
       assert_eventually_true(1000) do
@@ -192,12 +195,15 @@ class LongJobTestCase < JobsTestCase
 
     install_app_from_collection("sleep_command")
     @job = @service.jobs.create("search index=_internal | sleep 20")
+    while !@job.is_ready?()
+      sleep(0.1)
+    end
   end
 
   def teardown
     if @job
       @job.cancel()
-      assert_eventually_true() do
+      assert_eventually_true(50) do
         !@service.jobs.has_key?(@job.sid)
       end
     end
@@ -263,7 +269,7 @@ class RealTimeJobTestCase < JobsTestCase
     sleep(1)
     new_priority = 3
     @job.set_priority(new_priority)
-    assert_eventually_true(10) do
+    assert_eventually_true(50) do
       @job.refresh()
       fail("Job finished before priority was set.") if @job.is_done?()
       @job["priority"] == "3"

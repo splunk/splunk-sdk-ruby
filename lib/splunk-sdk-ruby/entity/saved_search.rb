@@ -59,8 +59,10 @@ module Splunk
       # field on args if it's not already set. This, of course, has a race
       # condition if someone else has set the search since the last time the
       # entity was refreshed.
-      need_search = @state["content"]["eai:attributes"]["requiredFields"].has_key?("search")
-      if needs_search && !args.has_key?(:search) && !args.has_key?("search")
+      #
+      # It would be nice to check if "search" is in the requiredFields list
+      # on the entity, but that isn't always returned
+      if !args.has_key?(:search) && !args.has_key?("search")
         args[:search] = fetch("search")
       end
       super(args)

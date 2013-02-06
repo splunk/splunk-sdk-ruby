@@ -31,10 +31,10 @@ module Splunk
     # This class is unusual: it is the element of a collection itself,
     # and its elements are entities.
 
-    def initialize(service, name, namespace)
+    def initialize(service, name, namespace=nil)
       super(service, ["configs", "conf-#{name}"], entity_class=Stanza)
       @name = name
-      @namespace = namespace
+      @namespace = namespace || service.namespace
     end
 
     def create(name, args={})
