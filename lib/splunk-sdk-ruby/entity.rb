@@ -16,6 +16,7 @@
 
 require_relative 'ambiguous_entity_reference'
 require_relative 'atomfeed'
+require_relative 'entity_not_ready'
 require_relative 'synonyms'
 
 module Splunk
@@ -42,6 +43,10 @@ module Splunk
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:
       @service = service
       @namespace = namespace
+      if !@namespace.is_proper?
+        raise StandardError.new("Must provide a proper namespace to " +
+                                    "Entity (found: #{@namespace}")
+      end
       @resource = resource
       @name = name
       @state = state
@@ -116,7 +121,7 @@ module Splunk
     # The links typically include keys such as +"list"+, +"edit"+, or
     # +"disable"+.
     #
-    # Returns: a Hash of Strings to Strings.
+    # Returns: a Hash of Strings to URL objects.
     #
     def links()
       return @state["links"]
@@ -124,6 +129,9 @@ module Splunk
 
     ##
     # Return all or a specified subset of key/value pairs on this +Entity+
+    #
+    # DEPRECATED. Use fetch and +[]+ instead (since entities now cache their
+    # state).
     #
     # In the absence of arguments, returns a Hash of all the fields on this
     # +Entity+. If you specify one or more +String+s or +Array+s of +String+s,
@@ -133,6 +141,7 @@ module Splunk
     #          as values.
     #
     def read(*field_list)
+      warn "[DEPRECATION] Entity#read is deprecated. Use [] and fetch instead."
       if field_list.empty?
         return @state["content"].clone()
       else
@@ -166,10 +175,14 @@ module Splunk
     def refresh()
       response = @service.request(:resource => @resource + [name],
                                   :namespace => @namespace)
+      if response.code == 204 or response.body.nil?
+        # This code is here primarily to handle the case of a job not yet being
+        # ready, in which case you get back empty bodies.
+        raise EntityNotReady.new((@resource + [name]).join("/"))
+      end
+      # We are guaranteed a unique entity, since entities must have
+      # proper namespaces.
       feed = AtomFeed.new(response.body)
-
-      raise AmbiguousEntityReference.new("Found multiple entities matching" +
-            " name and namespace.") if feed.entries.length > 1
       @state = feed.entries[0]
       self
     end

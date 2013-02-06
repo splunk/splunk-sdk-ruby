@@ -27,6 +27,7 @@ require 'net/http'
 require_relative 'splunk_http_error'
 require_relative 'version'
 require_relative 'xml_shim'
+require_relative 'namespace'
 
 module Splunk
   DEFAULT_HOST = 'localhost'
@@ -202,7 +203,7 @@ module Splunk
       # <response>
       # <sessionKey>da950729652f8255c230afe37bdf8b97</sessionKey>
       # </response>
-      @token = text_at_xpath("//sessionKey", response.body)
+      @token = Splunk::text_at_xpath("//sessionKey", response.body)
 
       self
     end
@@ -431,17 +432,14 @@ module Splunk
     # Returns: this +Context+.
     #
     def restart(timeout=nil)
-      if !timeout.nil?
-        # If we're waiting for a timeout, set a message saying that restart is
-        # required. It will be cleared when Splunk comes back up, but we
-        # otherwise have no way to determine if Splunk has actually gone down.
-        request(:method => :POST,
-                :namespace => Splunk::namespace(:sharing => "default"),
-                :resource => ["messages"],
-                :body => {"name" => "restart_required",
-                          "value" => "Message set by restart method" +
-                              " of the Splunk Ruby SDK"})
-      end
+      # Set a message saying that restart is required. Otherwise we have no
+      # way of knowing if Splunk has actually gone down for a restart or not.
+      request(:method => :POST,
+              :namespace => Splunk::namespace(:sharing => "default"),
+              :resource => ["messages"],
+              :body => {"name" => "restart_required",
+                        "value" => "Message set by restart method" +
+                            " of the Splunk Ruby SDK"})
 
       # Make the actual restart request.
       request(:resource => ["server", "control", "restart"])
@@ -476,7 +474,7 @@ module Splunk
         # when @token != nil on the Context. Instead, make
         # a request directly.
         request(:resource => ["data", "indexes"])
-      rescue Errno::ECONNREFUSED, EOFError
+      rescue Errno::ECONNREFUSED, EOFError, Errno::ECONNRESET
         return false
       rescue SplunkHTTPError
         # Splunk is up, because it responded with a proper HTTP error
@@ -496,23 +494,27 @@ module Splunk
     # message on the server; +false+ otherwise.
     #
     def server_requires_restart?()
-      begin
-        request(:resource => ["messages", "restart_required"])
-        return true
-      rescue Errno::ECONNREFUSED, EOFError
-        return true
-      rescue SplunkHTTPError => err
-        if err.code == 401
-          # The messages endpoint requires authentication.
-          logout()
-          login()
-          return server_requires_restart?()
-        elsif err.code == 404
-          return false
-        else
-          raise err
+      begin # We must have two layers of rescue, because the login in the
+            # SplunkHTTPError rescue can also throw Errno::ECONNREFUSED.
+        begin
+          request(:resource => ["messages", "restart_required"])
+          return true
+        rescue SplunkHTTPError => err
+          if err.code == 401
+            # The messages endpoint requires authentication.
+            logout()
+            login()
+            return server_requires_restart?()
+          elsif err.code == 404
+            return false
+          else
+            raise err
+          end
         end
+      rescue Errno::ECONNREFUSED, EOFError, Errno::ECONNRESET
+        return true
       end
     end
+
   end
 end

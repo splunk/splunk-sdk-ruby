@@ -42,7 +42,7 @@ module Splunk
       end
 
       response = @service.request(request_args)
-      entity = Message.new(@service, namespace(:sharing => "system"),
+      entity = Message.new(@service, Splunk::namespace(:sharing => "system"),
                            @resource, name)
       return entity
     end

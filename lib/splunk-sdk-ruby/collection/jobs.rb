@@ -15,6 +15,7 @@
 #++
 
 require_relative '../collection'
+require_relative '../entity/job'
 
 ##
 # Provides a class representing the collection of jobs in Splunk.
@@ -60,7 +61,7 @@ module Splunk
       response = @service.request(:method => :POST,
                                   :resource => @resource,
                                   :body => args)
-      sid = text_at_xpath("/response/sid", response.body)
+      sid = Splunk::text_at_xpath("/response/sid", response.body)
       Job.new(@service, sid)
     end
 
@@ -87,20 +88,25 @@ module Splunk
     ##
     # Create a blocking search without transforming search commands.
     #
-    # +create+_stream+ starts a search _query_, and any optional arguments
+    # +create_export+ starts a search _query_, and any optional arguments
     # specified in a hash (which are identical to those taken by +create+).
     # It then blocks until the job is finished, and returns the events
     # found by the job before any transforming search commands (equivalent
     # to calling +events+ on a +Job+).
     #
-    # Returns: a stream readable by +ResultsReader+.
+    # Returns: a stream readable by +MultiResultsReader+.
     #
-    def create_stream(query, args={})
+    def create_export(query, args={})
       args["search"] = query
       response = @service.request(:method => :GET,
                                   :resource => @resource + ["export"],
                                   :query => args)
       return response.body
+    end
+
+    def create_stream(query, args={}) # :nodoc:
+      warn "[DEPRECATION] Jobs#create_stream is deprecated. Use Jobs#create_export instead."
+      create_export(query, args)
     end
   end
 end

@@ -40,13 +40,18 @@ module Splunk
       return ConfigurationFile.new(@service, name)
     end
 
-    def create(name)
+    def create(name, args={})
       # Don't bother catching the response. It either succeeds and returns
       # an empty body, or fails and throws a SplunkHTTPError.
-      @service.request({:method => :POST,
-                        :resource => PATH_CONFS,
-                        :body => {"__conf" => name}})
-      return ConfigurationFile.new(@service, name)
+      request_args = {:method => :POST,
+                      :resource => PATH_CONFS,
+                      :body => {"__conf" => name}}
+      if args.has_key?(:namespace)
+        request_args[:namespace] = args[:namespace]
+      end
+      @service.request(request_args)
+      return ConfigurationFile.new(@service, name,
+                                   args[:namespace] || @service.namespace)
     end
 
     def delete(name)

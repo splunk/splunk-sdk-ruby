@@ -3,7 +3,7 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class MessagesTestCase < SplunkTestCase
+class MessagesTestCase < TestCaseWithSplunkConnection
   def test_message
     messages = @service.messages
     messages.create("sdk_message", :value => "Moose on the roof")

@@ -25,6 +25,15 @@ module Splunk
   ##
   # A class to represent a Splunk asynchronous search job.
   #
+  # When you create a job, you need to wait for it to be ready before you can
+  # interrogate it in an useful way. Typically, you will write something like
+  #
+  #     job = @service.jobs.create("search *")
+  #     while !job.is_ready?
+  #       sleep(0.2)
+  #     end
+  #     # Now the job is ready to use.
+  #
   # The most important methods on +Job+ beyond those provided by +Entity+
   # are those that fetch results (+results+, +preview+), and those that control
   # the job's execution (+cancel+, +pause+, +unpause+, +finalize+).
@@ -34,9 +43,15 @@ module Splunk
   # +"1"+ before you will get anything useful from +preview+.
   #
   class Job < Entity
-    def initialize(service, sid)
-      super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid)
-      refresh() # Jobs don't return their state on creation
+    def initialize(service, sid, state=nil)
+      @sid = sid
+      begin
+        super(service, Splunk::namespace(:sharing => "global"), PATH_JOBS, sid, state)
+      rescue EntityNotReady
+        # Jobs may not be ready (and so cannot be refreshed) when they are
+        # first created, so Entity#initialize may throw an EntityNotReady
+        # exception. It's nothing to be concerned about for jobs.
+      end
     end
 
     ##
@@ -128,9 +143,30 @@ module Splunk
     #
     # Returns: +true+ or +false+.
     #
-    def is_done()
-      refresh()
-      return fetch("isDone") == "1"
+    def is_done?()
+      begin
+        refresh()
+        return fetch("isDone") == "1"
+      rescue EntityNotReady
+        return false
+      end
+    end
+
+    ##
+    # Returns whether the search job is ready.
+    #
+    # +is_ready+ refreshes the +Job+, so once the job is ready, you need
+    # not call +refresh+ an additional time.
+    #
+    # Returns: +true+ or +false+.
+    #
+    def is_ready?()
+      begin
+        refresh()
+        return true
+      rescue EntityNotReady
+        return false
+      end
     end
 
     ##
@@ -215,15 +251,22 @@ module Splunk
     #
     # Returns: a +String+.
     #
-    def sid
-      fetch("sid")
-    end
+    attr_reader :sid
 
     ##
     # Returns the distribution over time of the events available so far.
     #
     # See the {REST docs for this call}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs.2F.7Bsearch_id.7D.2Ftimeline]
     # for more info on valid parameters and results.
+    #
+    # Each bucket is represented as a Hash with the following fields:
+    # +:available_buckets+, +:event_count+, +:time_in_seconds+ (number of
+    # seconds since the epoch), +:bucket_duration+ (how much time this bucket
+    # covers), +:finished_scanning+ (is scanning for events in this bucket
+    # complete), +:earliest_timezone+ and +:latest_timezone+ (which can be
+    # different, for example when daylight savings time starts during a bucket's
+    # duration), and +:time+ (a string representing the bucket's time in human
+    # readable form).
     #
     # Returns: an +Array+ of +Hash+es describing each time bucket.
     #
@@ -233,13 +276,13 @@ module Splunk
       if $splunk_xml_library == :nokogiri
         doc = Nokogiri::XML(response.body)
         matches = doc.xpath("/timeline/bucket").map() do |bucket|
-          {:a => Integer(bucket.attributes["a"].to_s),
-           :c => Integer(bucket.attributes["c"].to_s),
-           :t => Float(bucket.attributes["t"].to_s),
-           :d => Integer(bucket.attributes["d"].to_s),
-           :f => Integer(bucket.attributes["f"].to_s),
-           :etz => Integer(bucket.attributes["etz"].to_s),
-           :ltz => Integer(bucket.attributes["ltz"].to_s),
+          {:available_buckets => Integer(bucket.attributes["a"].to_s),
+           :event_count => Integer(bucket.attributes["c"].to_s),
+           :time_in_seconds => Float(bucket.attributes["t"].to_s),
+           :bucket_duration => Integer(bucket.attributes["d"].to_s),
+           :finished_scanning => Integer(bucket.attributes["f"].to_s),
+           :earliest_timezone => Integer(bucket.attributes["etz"].to_s),
+           :latest_timezone => Integer(bucket.attributes["ltz"].to_s),
            :time => bucket.children.to_s}
         end
         return matches
@@ -247,13 +290,13 @@ module Splunk
         doc = REXML::Document.new(response.body)
         matches = []
         matches = doc.elements.each("/timeline/bucket") do |bucket|
-          {:a => Integer(bucket.attributes["a"]),
-           :c => Integer(bucket.attributes["c"]),
-           :t => Float(bucket.attributes["t"]),
-           :d => Integer(bucket.attributes["d"]),
-           :f => Integer(bucket.attributes["f"]),
-           :etz => Integer(bucket.attributes["etz"]),
-           :ltz => Integer(bucket.attributes["ltz"]),
+          {:available_buckets => Integer(bucket.attributes["a"]),
+           :event_count => Integer(bucket.attributes["c"]),
+           :time_in_seconds => Float(bucket.attributes["t"]),
+           :bucket_duration => Integer(bucket.attributes["d"]),
+           :finished_scanning => Integer(bucket.attributes["f"]),
+           :earliest_timezone => Integer(bucket.attributes["etz"]),
+           :latest_timezone => Integer(bucket.attributes["ltz"]),
            :time => bucket.children.join("")}
         end
         return matches

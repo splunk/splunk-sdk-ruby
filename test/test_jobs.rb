@@ -7,7 +7,7 @@ QUERY = "search index=_internal | head 3"
 JOB_ARGS = {:earliest_time => "-1m", :latest_time => "now",
             :status_buckets => 10}
 
-class JobsTestCase < SplunkTestCase
+class JobsTestCase < TestCaseWithSplunkConnection
   def test_create_with_garbage_fails
     assert_raises(SplunkHTTPError) do
       @service.jobs.create("aweaj;awfaw faf'adf")
@@ -71,22 +71,22 @@ class JobsTestCase < SplunkTestCase
 
   def test_stream_with_garbage_fails
     assert_raises(SplunkHTTPError) do
-      @service.jobs.create_stream("abavadfa;ejwfawfasdfadf wfw").to_a()
+      @service.jobs.create_export("abavadfa;ejwfawfasdfadf wfw").to_a()
     end
   end
 
   def test_stream
-    stream = @service.jobs.create_stream(QUERY)
+    stream = @service.jobs.create_export(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end
 
   ##
-  # Test that the convenience method Service#create_stream behaves the same
-  # way as Jobs#create_stream.
+  # Test that the convenience method Service#create_export behaves the same
+  # way as Jobs#create_export.
   #
   def test_stream_on_service
-    stream = @service.create_stream(QUERY)
+    stream = @service.create_export(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end
@@ -97,7 +97,11 @@ class JobsTestCase < SplunkTestCase
     created_jobs = []
 
     (1..3).each() do |i|
-      created_jobs << jobs.create("search index=_internal | head #{i}")
+      job = jobs.create("search index=_internal | head #{i}")
+      while !job.is_ready?
+        sleep(0.1)
+      end
+      created_jobs << job
     end
 
     each_jobs = []
@@ -115,7 +119,7 @@ class JobsTestCase < SplunkTestCase
 
   def test_preview_and_events
     job = @service.jobs.create(QUERY, JOB_ARGS)
-    assert_eventually_true() { job.is_done() }
+    assert_eventually_true() { job.is_done?() }
     assert_true(Integer(job['eventCount']) <= 3)
 
     preview_stream = job.preview()
@@ -140,30 +144,48 @@ class JobsTestCase < SplunkTestCase
   end
 
   def test_timeline
+    original_xml_library = $splunk_xml_library
     job = @service.jobs.create(QUERY, JOB_ARGS)
-    assert_eventually_true() { job.is_done() }
-    Splunk::require_xml_library(:rexml)
-    timeline = job.timeline()
-    assert_true(timeline.is_a?(Array))
+    assert_eventually_true() { job.is_done?() }
 
-    Splunk::require_xml_library(:nokogiri)
-    timeline = job.timeline()
-    assert_true(timeline.is_a?(Array))
+     begin
+      Splunk::require_xml_library(:rexml)
+      timeline = job.timeline()
+      assert_true(timeline.is_a?(Array))
 
-    job.cancel()
+      Splunk::require_xml_library(:nokogiri)
+      timeline = job.timeline()
+      assert_true(timeline.is_a?(Array))
+    ensure
+      # Have to reset the XML library or test_resultsreader gets unhappy.
+      Splunk::require_xml_library(original_xml_library)
+      job.cancel()
+    end
   end
 
   def test_enable_preview
-    install_app_from_collection("sleep_command")
-    job = @service.jobs.create("search index=_internal | sleep 2")
-    assert_equal("0", job["isPreviewEnabled"])
-    job.enable_preview()
-    assert_eventually_true(10) do
-      job.refresh()
-      fail("Job finished before preview enabled") if job.is_done()
-      job["isPreviewEnabled"] == "1"
+    begin
+      install_app_from_collection("sleep_command")
+      job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
+      while !job.is_ready?()
+        sleep(0.1)
+      end
+      assert_equal("0", job["isPreviewEnabled"])
+      job.enable_preview()
+      assert_eventually_true(1000) do
+        job.refresh()
+        fail("Job finished before preview enabled") if job.is_done?()
+        job["isPreviewEnabled"] == "1"
+      end
+    ensure
+      job.cancel()
+      assert_eventually_true do
+        !@service.jobs.contains?(job.sid)
+      end
+      # We have to wait for jobs to be properly killed or we can't delete
+      # the sleep_command app in teardown on some platforms.
+      sleep(4)
     end
-    job.cancel()
   end
 end
 
@@ -173,12 +195,15 @@ class LongJobTestCase < JobsTestCase
 
     install_app_from_collection("sleep_command")
     @job = @service.jobs.create("search index=_internal | sleep 20")
+    while !@job.is_ready?()
+      sleep(0.1)
+    end
   end
 
   def teardown
     if @job
       @job.cancel()
-      assert_eventually_true() do
+      assert_eventually_true(50) do
         !@service.jobs.has_key?(@job.sid)
       end
     end
@@ -199,13 +224,17 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
-    sleep(4)
-    old_ttl = Integer(@job.refresh()["ttl"])
-    @job.touch()
-    sleep(0.5)
-    new_ttl = Integer(@job.refresh()["ttl"])
-    if new_ttl == old_ttl
-      fail("Didn't wait long enough to make ttl change meaningful.")
+    i = 2
+    while i < 20
+      sleep(i)
+      old_ttl = Integer(@job.refresh()["ttl"])
+      @job.touch()
+      new_ttl = Integer(@job.refresh()["ttl"])
+      if new_ttl > old_ttl
+        break
+      else
+        i += 1
+      end
     end
     assert_true(new_ttl > old_ttl)
   end
@@ -219,7 +248,9 @@ class RealTimeJobTestCase < JobsTestCase
                                 :earliest_time => "rt-1d",
                                 :latest_time => "rt",
                                 :priority => 5)
-
+    while !@job.is_ready?
+      sleep(0.2)
+    end
   end
 
   def teardown
@@ -238,9 +269,9 @@ class RealTimeJobTestCase < JobsTestCase
     sleep(1)
     new_priority = 3
     @job.set_priority(new_priority)
-    assert_eventually_true(10) do
+    assert_eventually_true(50) do
       @job.refresh()
-      fail("Job finished before priority was set.") if @job.is_done()
+      fail("Job finished before priority was set.") if @job.is_done?()
       @job["priority"] == "3"
     end
   end

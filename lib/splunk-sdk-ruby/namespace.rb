@@ -77,7 +77,7 @@ module Splunk
   #
   # Returns: a +Namespace+.
   #
-  def eai_acl_to_namespace(eai_acl)
+  def self.eai_acl_to_namespace(eai_acl)
     namespace(:sharing => eai_acl["sharing"],
               :app => eai_acl["app"],
               :owner => eai_acl["owner"])
@@ -104,7 +104,7 @@ module Splunk
   #
   # Returns: a +Namespace+.
   #
-  def namespace(args)
+  def self.namespace(args)
     sharing = args.fetch(:sharing, "default")
     owner = args.fetch(:owner, nil)
     app = args.fetch(:app, nil)
@@ -179,7 +179,10 @@ module Splunk
   class DefaultNamespace # :nodoc:
     include Singleton
     include Namespace
-    def is_proper?() false end
+    # A services/ namespace always uses the current user
+    # and current app, neither of which are wildcards, so this
+    # namespace is guaranteed to be proper.
+    def is_proper?() true end
     def to_path_fragment() ["services"] end
   end
 
