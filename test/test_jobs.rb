@@ -71,22 +71,22 @@ class JobsTestCase < TestCaseWithSplunkConnection
 
   def test_stream_with_garbage_fails
     assert_raises(SplunkHTTPError) do
-      @service.jobs.create_stream("abavadfa;ejwfawfasdfadf wfw").to_a()
+      @service.jobs.create_export("abavadfa;ejwfawfasdfadf wfw").to_a()
     end
   end
 
   def test_stream
-    stream = @service.jobs.create_stream(QUERY)
+    stream = @service.jobs.create_export(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end
 
   ##
-  # Test that the convenience method Service#create_stream behaves the same
-  # way as Jobs#create_stream.
+  # Test that the convenience method Service#create_export behaves the same
+  # way as Jobs#create_export.
   #
   def test_stream_on_service
-    stream = @service.create_stream(QUERY)
+    stream = @service.create_export(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end
@@ -148,7 +148,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
     job = @service.jobs.create(QUERY, JOB_ARGS)
     assert_eventually_true() { job.is_done?() }
 
-    begin
+     begin
       Splunk::require_xml_library(:rexml)
       timeline = job.timeline()
       assert_true(timeline.is_a?(Array))

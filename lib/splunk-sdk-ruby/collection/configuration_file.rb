@@ -31,9 +31,18 @@ module Splunk
     # This class is unusual: it is the element of a collection itself,
     # and its elements are entities.
 
-    def initialize(service, name)
+    def initialize(service, name, namespace)
       super(service, ["configs", "conf-#{name}"], entity_class=Stanza)
       @name = name
+      @namespace = namespace
+    end
+
+    def create(name, args={})
+      body_args = args.clone()
+      if !args.has_key?(:namespace)
+        body_args[:namespace] = @namespace
+      end
+      super(name, body_args)
     end
 
     attr_reader :name

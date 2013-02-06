@@ -44,7 +44,8 @@ module Splunk
       @service = service
       @namespace = namespace
       if !@namespace.is_proper?
-        raise StandardError.new("Must provide a proper namespace to Entity (found: #{@namespace}")
+        raise StandardError.new("Must provide a proper namespace to " +
+                                    "Entity (found: #{@namespace}")
       end
       @resource = resource
       @name = name

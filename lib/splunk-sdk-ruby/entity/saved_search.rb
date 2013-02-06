@@ -43,7 +43,7 @@ module Splunk
                                   :resource => @resource + [@name, "history"])
       feed = AtomFeed.new(response.body)
       return feed.entries.map do |entry|
-        Job.new(@service, entry["title"])
+        Job.new(@service, entry["title"], entry)
       end
     end
 
@@ -59,7 +59,8 @@ module Splunk
       # field on args if it's not already set. This, of course, has a race
       # condition if someone else has set the search since the last time the
       # entity was refreshed.
-      if !args.has_key?(:search) && !args.has_key?("search")
+      need_search = @state["content"]["eai:attributes"]["requiredFields"].has_key?("search")
+      if needs_search && !args.has_key?(:search) && !args.has_key?("search")
         args[:search] = fetch("search")
       end
       super(args)
