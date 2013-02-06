@@ -27,6 +27,46 @@
 # 1.9. See +xml_shim.rb+ for how to alter this behavior.
 #
 
+#--
+# There are two basic designs we could have used for handling the
+# search/jobs/export output. We could either have the user call
+# ResultsReader#each multiple times, each time going through the next results
+# set, or we could do what we have here and have an outer iterator that yields
+# distinct ResultsReader objects for each results set.
+#
+# The outer iterator is syntactically somewhat clearer, but you must invalidate
+# the previous ResultsReader objects before yielding a new one so that code
+# like
+#
+#     readers = []
+#     outer_iter.each do |reader|
+#         readers << reader
+#     end
+#     readers[2].each do |result|
+#         puts result
+#     end
+#
+# will throw an error on the second each. The right behavior is to throw an
+# exception in the ResultsReader each if it is invoked out of order. This
+# problem doesn't affect the all-in-one design.
+#
+# However, in the all-in-one design, it is impossible to set the is_preview and
+# fields instance variables of the ResultsReader correctly between invocations
+# of each. This makes code with the all-in-one design such as
+#
+#     while reader.is_preview
+#         reader.each do |result|
+#           ...
+#         end
+#     end
+#
+# If the ... contains a break, then there is no way to set is_preview correctly
+# before the next iteration of the while loop. This problem does not affect
+# the outer iterator design, and Fred Ross and Yunxin Wu were not able to come
+# up with a way to make it work in the all-in-one design, so the SDK uses the
+# outer iterator design.
+#++
+
 require 'stringio'
 
 require_relative 'xml_shim'
@@ -121,6 +161,7 @@ module Splunk
     def each()
       enum = Enumerator.new() do |yielder|
         if !@iteration_fiber.nil? # Handle the case of empty files
+          @reached_end = false
           while true
             result = @iteration_fiber.resume
             break if result.nil? or result == :end_of_results_set
@@ -142,7 +183,7 @@ module Splunk
     #
     def spool()
       if !@reached_end
-        each() {|result|}
+        each() { |result|}
       end
     end
   end
@@ -392,9 +433,22 @@ module Splunk
   #
   class PuppetResultsReader < ResultsReader
     def initialize(fiber, is_preview, fields)
+      @valid = true
       @iteration_fiber = fiber
       @is_preview = is_preview
       @fields = fields
+    end
+
+    def each()
+      if !@valid
+        raise StandardError.new("Cannot iterate on ResultsReaders out of order.")
+      else
+        super()
+      end
+    end
+
+    def invalidate()
+      @valid = false
     end
   end
 
@@ -466,6 +520,7 @@ module Splunk
               # Otherwise the next results reader will start in the middle of
               # the previous results set.
               reader.spool()
+              reader.invalidate()
             end
           rescue FiberError
           end
@@ -482,7 +537,7 @@ module Splunk
     def final_results()
       each do |reader|
         if reader.is_preview?
-          reader.each() {|event|}
+          reader.each() { |event|}
         else
           return reader
         end

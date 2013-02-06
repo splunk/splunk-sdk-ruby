@@ -68,14 +68,19 @@ class TestResultsReader < Test::Unit::TestCase
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
         file = File.open("test/data/export/#{version}/export_results.xml")
-        reader = MultiResultsReader.new(file)
+        multireader = MultiResultsReader.new(file)
         n_results_sets = 0
-        reader.each_with_index do |rr, index|
+        readers = []
+        multireader.each_with_index do |rr, index|
+          readers << rr
           expected = tests["with_preview"][index]
           assert_results_reader_equals(expected, rr)
           n_results_sets += 1
         end
         assert_equal(tests["with_preview"].length, n_results_sets)
+        assert_raise do # Out of order invocation should raise an error
+          readers[0].each()
+        end
       end
 
     end
