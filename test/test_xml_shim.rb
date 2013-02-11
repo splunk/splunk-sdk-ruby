@@ -3,26 +3,26 @@ require 'splunk-sdk-ruby'
 
 include Splunk
 
-class TestXMLShim < SplunkTestCase
+class TestXMLShim < Test::Unit::TestCase
   def test_no_matches_with_rexml
-    require_xml_library(:rexml)
-    assert_nil(text_at_xpath("//msg", "<html>Hi</html>"))
+    Splunk::require_xml_library(:rexml)
+    assert_nil(Splunk::text_at_xpath("//msg", "<html>Hi</html>"))
   end
 
   def test_no_matches_with_nokogiri
-    require_xml_library(:nokogiri)
-    assert_nil(text_at_xpath("//msg", "<html>Hi</html>"))
+    Splunk::require_xml_library(:nokogiri)
+    assert_nil(Splunk::text_at_xpath("//msg", "<html>Hi</html>"))
   end
 
   def test_matches_with_nokogiri
     Splunk::require_xml_library(:nokogiri)
-    m = text_at_xpath("//msg", "<response><msg>Boris &amp; Natasha</msg></response>")
+    m = Splunk::text_at_xpath("//msg", "<response><msg>Boris &amp; Natasha</msg></response>")
     assert_equal("Boris & Natasha", m)
   end
 
   def test_matches_with_rexml
-    require_xml_library(:rexml)
-    m = text_at_xpath("//msg", "<response><msg>Boris &amp; Natasha</msg></response>")
+    Splunk::require_xml_library(:rexml)
+    m = Splunk::text_at_xpath("//msg", "<response><msg>Boris &amp; Natasha</msg></response>")
     assert_equal("Boris & Natasha", m)
   end
 end

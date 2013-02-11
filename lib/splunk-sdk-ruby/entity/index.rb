@@ -52,7 +52,6 @@ module Splunk
     #
     def attach(args={})
       args[:index] = @name
-      path = "receivers/stream?#{URI.encode_www_form(args)}"
 
       path = (@service.namespace.to_path_fragment() + ["receivers","stream"]).
           map {|fragment| URI::encode(fragment)}.
@@ -71,7 +70,7 @@ module Splunk
     end
 
     ##
-    # Delete all events in this index.
+    # Delete all events in this index. DEPRECATED.
     #
     # +clean+ will wait until the operation completes, or _timeout_
     # seconds have passed. By default, _timeout_ is 100 seconds.
@@ -82,6 +81,7 @@ module Splunk
     # Returns: the +Index+.
     #
     def clean(timeout=100)
+      warn "[DEPRECATION] Index#clean is deprecated. Delete the index instead."
       refresh()
       original_state = read(['maxTotalDataSizeMB', 'frozenTimePeriodInSecs'])
       was_disabled_initially = fetch("disabled") == "1"
@@ -116,7 +116,7 @@ module Splunk
     end
 
     ##
-    # Tell Splunk to roll the hot buckets in this index now.
+    # Tell Splunk to roll the hot buckets in this index now. DEPRECATED.
     #
     # A Splunk index is a collection of buckets containing events. A bucket
     # begins life "hot", where events may be written into it. At some point,
@@ -128,6 +128,7 @@ module Splunk
     # Returns: the +Index+.
     #
     def roll_hot_buckets()
+      warn "[DEPRECATION] Index#roll_hot_buckets is deprecated."
       @service.request(:method => :POST,
                        :resource => @resource + [@name, "roll-hot-buckets"])
       return self

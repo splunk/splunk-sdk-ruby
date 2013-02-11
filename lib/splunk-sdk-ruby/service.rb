@@ -16,14 +16,17 @@
 
 require_relative 'atomfeed'
 require_relative 'collection'
+require_relative 'collection/apps'
 require_relative 'collection/configurations'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
+require_relative 'collection/case_insensitive_collection'
 require_relative 'context'
 require_relative 'entity'
 require_relative 'entity/index'
 require_relative 'entity/job'
 require_relative 'entity/message'
+require_relative 'entity/saved_search'
 require_relative 'entity/stanza'
 
 ##
@@ -44,6 +47,7 @@ module Splunk
   PATH_INDEXES = ["data","indexes"]
   PATH_CONFS = ["properties"]
   PATH_CONF = ["configs"]
+  PATH_SAVED_SEARCHES = ["saved", "searches"]
   PATH_STANZA = ["configs","conf-%s","%s"]
   PATH_JOBS = ["search", "jobs"]
   PATH_EXPORT = ["search", "jobs", "export"]
@@ -68,9 +72,9 @@ module Splunk
   # *Example:*
   #
   #     require 'splunk-sdk-ruby'
-  #     service = Splunk::Connect(:username => "admin", :password => "changeme")
+  #     service = Splunk::connect(:username => "admin", :password => "changeme")
   #
-  def connect(args)
+  def self.connect(args)
     Service.new(args).login()
   end
 
@@ -97,7 +101,7 @@ module Splunk
     #     end
     #
     def apps
-      Collection.new(self, PATH_APPS_LOCAL)
+      Apps.new(self, PATH_APPS_LOCAL)
     end
 
     ##
@@ -169,16 +173,21 @@ module Splunk
     ##
     # Create a blocking search without transforming search commands.
     #
-    # +create+_stream+ starts a search _query_, and any optional arguments
+    # +create_export+ starts a search _query_, and any optional arguments
     # specified in a hash (which are identical to those taken by +create+).
     # It then blocks until the job is finished, and returns the events
     # found by the job before any transforming search commands (equivalent
     # to calling +events+ on a +Job+).
     #
-    # Returns: a stream readable by +ResultsReader+.
+    # Returns: a stream readable by +MultiResultsReader+.
     #
+    def create_export(query, args={}) # :nodoc:
+      jobs.create_export(query, args)
+    end
+
     def create_stream(query, args={})
-      jobs.create_stream(query, args)
+      warn "[DEPRECATION] Service#create_stream is deprecated. Use Service#create_export instead."
+      jobs.create_export(query, args)
     end
 
     ##
@@ -267,7 +276,15 @@ module Splunk
     #          this Splunk instance.
     #
     def roles
-      Collection.new(self, PATH_ROLES)
+      CaseInsensitiveCollection.new(self, PATH_ROLES)
+    end
+
+    ##
+    #
+    #
+    #
+    def saved_searches
+      Collection.new(self, PATH_SAVED_SEARCHES, entity_class=SavedSearch)
     end
 
     ##
@@ -282,12 +299,16 @@ module Splunk
     #     service = Splunk::connect(:username => 'admin', :password => 'foo')
     #     puts svc.settings.read
     #     # Prints:
-    #     #    {"SPLUNK_DB" => "/opt/4.3/splunkbeta/var/lib/splunk",
-    #     #     "SPLUNK_HOME" => "/opt/4.3/splunkbeta",
+    #     #    {"SPLUNK_DB" => "/path/to/splunk_home/var/lib/splunk",
+    #     #     "SPLUNK_HOME" => "/path/to/splunk_home",
     #     #     ...}
     #
     def settings
-      Entity.new(self, namespace(), PATH_SETTINGS, "settings").refresh()
+      # Though settings looks like a collection on the server, it always has
+      # a single entity, of the same name, giving the actual settings. We access
+      # that entity directly rather than putting a collection inbetween.
+      Entity.new(self, Splunk::namespace(:sharing => "default"),
+                 PATH_SETTINGS, "settings").refresh()
     end
 
     ##
@@ -308,7 +329,7 @@ module Splunk
     # Return a +Collection+ of the users defined on Splunk.
     #
     def users
-      Collection.new(self, PATH_USERS)
+      CaseInsensitiveCollection.new(self, PATH_USERS)
     end
   end
 end

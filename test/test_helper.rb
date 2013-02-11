@@ -61,11 +61,11 @@ end
 
 DEFAULT_RESTART_TIMEOUT = 500 # seconds
 
-class SplunkTestCase < Test::Unit::TestCase
+class TestCaseWithSplunkConnection < Test::Unit::TestCase
   def setup
     super
     @splunkrc = read_splunkrc()
-    @service = Service.new(@splunkrc).login()
+    @service = Splunk::Service.new(@splunkrc).login()
     @installed_apps = []
 
     if @service.server_requires_restart?
@@ -79,13 +79,15 @@ class SplunkTestCase < Test::Unit::TestCase
       fail("Test left server in a state requiring restart.")
     end
 
-    @installed_apps.each() do |app_name|
-      @service.apps.delete(app_name)
-      assert_eventually_true() do
-        !@service.apps.has_key?(app_name)
-      end
-      if @service.server_requires_restart?
-        clear_restart_message(@service)
+    if @service.splunk_version[0..1] != [4,2]
+      @installed_apps.each() do |app_name|
+        @service.apps.delete(app_name)
+        assert_eventually_true() do
+          !@service.apps.has_key?(app_name)
+        end
+        if @service.server_requires_restart?
+          clear_restart_message(@service)
+        end
       end
     end
 
@@ -219,7 +221,7 @@ class SplunkTestCase < Test::Unit::TestCase
   def set_restart_message(service,
                           message="Ruby SDK test suite asked for a restart.")
     service.request(:method => :POST,
-            :namespace => namespace(:sharing => "default"),
+            :namespace => Splunk::namespace(:sharing => "default"),
             :resource => ["messages"],
             :body => {"name" => "restart_required",
                       "value" => "Message set by restart method" +

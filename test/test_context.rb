@@ -4,7 +4,7 @@ require "splunk-sdk-ruby"
 include Splunk
 
 # Test the helper functions in test_helper.rb
-class TestHelpers < SplunkTestCase
+class TestHelpers < TestCaseWithSplunkConnection
   def test_temporary_name
     assert_true(temporary_name().start_with?("delete-me"))
   end
@@ -21,7 +21,7 @@ class TestHelpers < SplunkTestCase
   end
 end
 
-class TestContext < SplunkTestCase
+class TestContext < TestCaseWithSplunkConnection
   def test_login()
     service = Context.new(@splunkrc)
     service.login()
@@ -32,7 +32,11 @@ class TestContext < SplunkTestCase
     ["ASCII", "UTF-8"].each() do |encoding|
       values = {}
       @splunkrc.each() do |key, value|
-        values[key] = value.clone().force_encoding(encoding)
+        if value.is_a?(String)
+          values[key] = value.clone().force_encoding(encoding)
+        else
+          values[key] = value
+        end
       end
       service = Context.new(values).login()
       assert_logged_in(service)

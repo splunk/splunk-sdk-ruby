@@ -51,7 +51,7 @@ module Splunk
   #
   # Returns no value of interest.
   #
-  def require_xml_library(library)
+  def self.require_xml_library(library)
     if library == :nokogiri
       require 'nokogiri'
       $splunk_xml_library = :nokogiri
@@ -92,7 +92,7 @@ module Splunk
   #     text_at_xpath("/a", "<a>Alpha</a> <a>Beta</a>") == "Alpha"
   #     text_at_xpath("/a", "<b>Quill pen</b>") == nil
   #
-  def text_at_xpath(xpath, text)
+  def self.text_at_xpath(xpath, text)
     if text.nil? or text.length == 0
       return nil
     elsif $splunk_xml_library == :nokogiri

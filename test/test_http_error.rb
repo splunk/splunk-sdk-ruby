@@ -21,7 +21,7 @@ end
 
 include Splunk
 
-class TestHTTPError < SplunkTestCase
+class TestHTTPError < TestCaseWithSplunkConnection
   def test_error_with_empty_message
     response = MockResponse.new(code=400, message="Meep",
                                 headers={}, body="")
