@@ -151,8 +151,12 @@ module Splunk
       response = @service.request(request_args)
 
       if @always_fetch
-        response = @service.request(:method => :GET,
-                                    :resource => @resource + [name])
+        fetch_args = {:method => :GET,
+                      :resource => @resource + [name]}
+        if args.has_key?(namespace)
+          fetch_args[:namespace] = args[:namespace]
+        end
+        response = @service.request(fetch_args)
       end
       feed = AtomFeed.new(response.body)
       raise StandardError.new("No entities returned") if feed.entries.empty?
@@ -182,8 +186,8 @@ module Splunk
 
       # We don't want to handle any cases about deleting ambiguously named
       # entities.
-      if !namespace.is_proper?
-        raise StandardError.new("Must provide a proper namespace to delete an entity.")
+      if !namespace.is_exact?
+        raise StandardError.new("Must provide an exact namespace to delete an entity.")
       end
 
       @service.request(:method => :DELETE,

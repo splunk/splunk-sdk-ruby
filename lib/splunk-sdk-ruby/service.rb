@@ -185,6 +185,7 @@ module Splunk
       jobs.create_export(query, args)
     end
 
+    # Deprecated. Use create_export instead.
     def create_stream(query, args={})
       warn "[DEPRECATION] Service#create_stream is deprecated. Use Service#create_export instead."
       jobs.create_export(query, args)

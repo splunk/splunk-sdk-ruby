@@ -24,9 +24,9 @@
 # use for the query.
 #
 # Some namespaces can contain wildcards or default values filled in by Splunk.
-# We call such namespaces improper, since they cannot be the namespace of an
+# We call such namespaces wildcard, since they cannot be the namespace of an
 # entity, only a query. Namespaces which can be the namespace of an entity we
-# call proper.
+# call exact.
 #
 # We distinguish six kinds of namespace, each of which is represented by a
 # separate class:
@@ -41,7 +41,7 @@
 #   in Splunk.
 # * +AppNamespace+, one per application installed in the Splunk instance.
 # * +AppReferenceNamespace+, which is the namespace that applications themselves
-#   live in. It differs from +DefaultNamespace+ only in that it is a proper
+#   live in. It differs from +DefaultNamespace+ only in that it is a exact
 #   namespace.
 # * The user namespaces, which are defined by a user _and_ an application.
 #
@@ -139,16 +139,16 @@ module Splunk
   ##
   # A mixin that fills the role of an abstract base class.
   #
-  # Namespaces have two methods: +is_proper?+ and +to_path_fragment+, and
+  # Namespaces have two methods: +is_exact?+ and +to_path_fragment+, and
   # can be compared for equality.
   #
   module Namespace
     ##
-    # Is this a proper namespace?
+    # Is this a exact namespace?
     #
     # Returns: +true+ or +false+.
     #
-    def is_proper?() end
+    def is_exact?() end
 
     ##
     # Returns the URL prefix corresponding to this namespace.
@@ -165,14 +165,14 @@ module Splunk
   class GlobalNamespace # :nodoc:
     include Singleton
     include Namespace
-    def is_proper?() true end
+    def is_exact?() true end
     def to_path_fragment() ["servicesNS", "nobody", "system"] end
   end
 
   class SystemNamespace # :nodoc:
     include Singleton
     include Namespace
-    def is_proper?() true end
+    def is_exact?() true end
     def to_path_fragment() ["servicesNS", "nobody", "system"] end
   end
 
@@ -181,15 +181,15 @@ module Splunk
     include Namespace
     # A services/ namespace always uses the current user
     # and current app, neither of which are wildcards, so this
-    # namespace is guaranteed to be proper.
-    def is_proper?() true end
+    # namespace is guaranteed to be exact.
+    def is_exact?() true end
     def to_path_fragment() ["services"] end
   end
 
   class AppReferenceNamespace # :nodoc:
     include Singleton
     include Namespace
-    def is_proper?() true end
+    def is_exact?() true end
     def to_path_fragment() ["services"] end
   end
 
@@ -205,7 +205,7 @@ module Splunk
       other.is_a?(AppNamespace) && @app == other.app
     end
 
-    def is_proper?()
+    def is_exact?()
       @app != "-"
     end
 
@@ -228,7 +228,7 @@ module Splunk
           @user == other.user
     end
 
-    def is_proper?()
+    def is_exact?()
       (@app != "-") && (@user != "-")
     end
 

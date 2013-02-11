@@ -23,7 +23,7 @@ config = {
     :host => "localhost",
     :port => 8089,
     :username => "admin",
-    :password => "admin"
+    :password => "changeme"
 }
 
 # Create a Service logged into Splunk, and print the authentication token
