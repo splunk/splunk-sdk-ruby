@@ -15,9 +15,9 @@ class TestResultsReader < Test::Unit::TestCase
   def assert_results_reader_equals(expected, reader)
     assert_equal(expected["is_preview"], reader.is_preview?)
     assert_equal(expected["fields"], reader.fields)
-    #if expected.has_key?("messages")
-    #  assert_equal(expected["messages"], reader.messages)
-    #end
+    if expected.has_key?("messages")
+      assert_equal(expected["messages"], reader.messages)
+    end
 
     n_results = 0
     reader.each_with_index do |result, index|

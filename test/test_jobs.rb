@@ -148,7 +148,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
     job = @service.jobs.create(QUERY, JOB_ARGS)
     assert_eventually_true() { job.is_done?() }
 
-     begin
+    begin
       Splunk::require_xml_library(:rexml)
       timeline = job.timeline()
       assert_true(timeline.is_a?(Array))
@@ -183,7 +183,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
         !@service.jobs.contains?(job.sid)
       end
       # We have to wait for jobs to be properly killed or we can't delete
-      # the sleep_command app in teardown on some platforms.
+      # the sleep_command app in teardown on Windows.
       sleep(4)
     end
   end

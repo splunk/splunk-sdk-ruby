@@ -181,7 +181,7 @@ module Splunk
     ##
     # Skip the rest of the events in this ResultsReader.
     #
-    def spool()
+    def skip_remaining_results()
       if !@reached_end
         each() { |result|}
       end
@@ -495,6 +495,8 @@ module Splunk
       @iteration_fiber = Fiber.new do
         if $splunk_xml_library == :nokogiri
           parser = Nokogiri::XML::SAX::Parser.new(listener)
+          # Nokogiri requires a unique root element, which we are fabricating
+          # here, while REXML is fine with multiple root elements in a stream.
           edited_stream = ConcatenatedStream.new(
               StringIO.new("<fake-root-element>"),
               XMLDTDFilter.new(stream),
@@ -519,10 +521,16 @@ module Splunk
               # Finish extracting any events that the user didn't read.
               # Otherwise the next results reader will start in the middle of
               # the previous results set.
-              reader.spool()
+              reader.skip_remaining_results()
               reader.invalidate()
             end
           rescue FiberError
+            # After the last result element, the next evaluation of
+            # 'is_preview = @iteration_fiber.resume' above will throw a
+            # FiberError when the fiber terminates without yielding any
+            # additional values. We handle the control flow in this way so
+            # that the final code in the fiber to handle cleanup always gets
+            # run.
           end
         end
       end
@@ -534,10 +542,20 @@ module Splunk
       end
     end
 
+    ##
+    # Return a ResultsReader over only the non-preview results.
+    #
+    # If you run this method against a real time search job, which only ever
+    # produces preview results, it will loop forever. If you run it against
+    # a non-reporting system (that is, one that filters and extracts fields
+    # from events, but doesn't calculate a whole new set of events), you will
+    # get only the first few results, since you should be using the normal
+    # ResultsReader, not MultiResultsReader, in that case.
+    #
     def final_results()
       each do |reader|
         if reader.is_preview?
-          reader.each() { |event|}
+          reader.skip_remaining_events()
         else
           return reader
         end
@@ -658,6 +676,7 @@ module Splunk
     if text_or_stream.nil?
       stream = StringIO.new("")
     elsif !text_or_stream.respond_to?(:read)
+      # Strip because the XML libraries can be pissy.
       stream = StringIO.new(text_or_stream.strip)
     else
       stream = text_or_stream

@@ -70,7 +70,7 @@ module Splunk
     end
 
     ##
-    # Delete all events in this index. DEPRECATED.
+    # Delete all events in this index. DEPRECATED: Delete the index instead.
     #
     # +clean+ will wait until the operation completes, or _timeout_
     # seconds have passed. By default, _timeout_ is 100 seconds.

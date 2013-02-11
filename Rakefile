@@ -7,8 +7,8 @@ require 'date'
 spec = Gem::Specification.new do |s|
   s.name = "splunk-sdk"
   s.version = "0.1.0"
-  s.author = "Frederick Ross"
-  s.email = "fross@splunk.com"
+  s.author = "Splunk"
+  s.email = "devinfo@splunk.com"
   s.homepage = "http://dev.splunk.com"
   s.summary = "SDK for easily working with Splunk from Ruby."
   s.description = s.summary

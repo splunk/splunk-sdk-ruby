@@ -38,14 +38,8 @@
 * Job#setpriority renamed to Job#set_priority.
 * Job#disable_preview removed, since a working test scenario couldn't be found
   for it.
-* Collection's constructor arguments have been changed from service, name,
-  and a dictionary of procedures to perform operations to service, path to the
-  collection as a list of strings, one per path component, and a class
-  to use to represent entities in the Collection.
-* Entity's constructor has changed from taking service, path, and name to taking
-  a service, namespace, path to the containing collection as an Array of
-  String's, one per path component, the entity's name, and an optional initial
-  state.
+* Collection's constructor arguments have changed.
+* Entity's constructor arguments have changed.
 * SplunkError has been removed, and SplunkHTTPError has been made a direct
   subclass of StandardError.
 * Deleted SearchResults, since it was superseded by ResultsReader.
@@ -53,7 +47,6 @@
   been removed. That is, hash.key is no longer a synonym for hash["key"].
 * The urlencode method previously monkeypatched onto Hash has been removed.
 * Service#create_collection was removed.
-* Version in version.rb set to 0.1.0.
 
 ### New features and APIs
 
@@ -66,8 +59,10 @@
   objects. See the header comments of namespace.rb for a detailed description
   of Splunk namespaces and their representation in this SDK.
 * All XML handling is shimmed to work with either Nokogiri or REXML. It tries
-  Nokogiri first, and falls back to REXML, unless the user explicitly calls
-  require_xml_library. See xml_shim.rb for all this behavior.
+  Nokogiri first, which can process XML vastly faster, and falls back to REXML,
+  which will be present in all Ruby installs. The user may all call
+  require_xml_library to force the SDK to use a Nokogiri or REXML. See
+  xml_shim.rb for all this behavior.
 * Added documentation throughout the SDK.
 * The unit testing suite has been completely rewritten and expanded.
 * Added a ResultsReader class to parse and iterate over sets of XML results from
@@ -93,12 +88,12 @@
   * Collection#each, when called without a block, now returns an enumerator over
     all elements in the collection.
   * Added an optional namespace argument to Collection#delete and
-    Collection#fetch so entities can be specified uniquely even the presence of
-    name collisions.
+    Collection#fetch so entities can be specified uniquely even in the presence
+    of name collisions.
   * Added new methods to Collection, mostly designed to recapitulate the
-    relevant methods of Hash. Synonym sets are separated by slashes,
-    and names in a set of synonyms that already existed are surrounded by square
-    brackets:
+    relevant methods of Hash. In the notation below, synonym sets are separated
+    by slashes, and names in a set of synonyms that already existed are
+    surrounded by square brackets:
     * [contains?]/has_key?/include?/key?/member?
     * [list]/values/to_a
     * each_key
@@ -110,9 +105,9 @@
     * length
     * resource
     * service
-* Added methods to Entity. Synonym sets are separated by slashes,
-  and names in a set of synonyms that already existed are surrounded by square
-  brackets:
+* Added methods to Entity. In the notation below, synonym sets are separated
+  by slashes, and names in a set of synonyms that already existed are
+  surrounded by square brackets:
   * content
   * delete
   * fetch/[ [] ]
@@ -123,12 +118,11 @@
   * service
 * Entities now cache their state. To update the cache, call the entity's refresh
   method.
-* Added method roll_hot_buckets to Index.
 * Index#clean takes a timeout instead of waiting forever. If no timeout is
   specified, a default value will be used.
-* Added new methods to Job. Synonym sets are separated by slashes,
-  and names in a set of synonyms that already existed are surrounded by square
-  brackets:
+* Added new methods to Job. In the notation below, synonym sets are separated
+  by slashes, and names in a set of synonyms that already existed are
+  surrounded by square brackets:
   * control
   * is_done?
   * is_ready?
@@ -137,9 +131,9 @@
   entities have the following additional methods beyond Entity:
   * dispatch
   * history
-* Added the following methods to Stanza (was: Conf). Synonym sets are separated
-  by slashes, and names in a set of synonyms that already existed are surrounded
-  by square brackets:
+* Added the following methods to Stanza (was: Conf). In the notation below, synonym sets are separated
+  by slashes, and names in a set of synonyms that already existed are
+  surrounded by square brackets:
   * length
   * update/[submit]
 * Added new custom exceptions:

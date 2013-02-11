@@ -43,8 +43,8 @@ module Splunk
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:
       @service = service
       @namespace = namespace
-      if !@namespace.is_proper?
-        raise StandardError.new("Must provide a proper namespace to " +
+      if !@namespace.is_exact?
+        raise StandardError.new("Must provide an exact namespace to " +
                                     "Entity (found: #{@namespace}")
       end
       @resource = resource
@@ -181,7 +181,7 @@ module Splunk
         raise EntityNotReady.new((@resource + [name]).join("/"))
       end
       # We are guaranteed a unique entity, since entities must have
-      # proper namespaces.
+      # exact namespaces.
       feed = AtomFeed.new(response.body)
       @state = feed.entries[0]
       self

@@ -23,7 +23,7 @@ config = {
     :host => "localhost",
     :port => 8089,
     :username => "admin",
-    :password => "admin"
+    :password => "changeme"
 }
 
 # First we connect to Splunk. We'll use this service for all the work in this
