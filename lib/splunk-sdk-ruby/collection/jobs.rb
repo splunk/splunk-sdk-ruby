@@ -104,6 +104,7 @@ module Splunk
       return response.body
     end
 
+    # Deprecated.
     def create_stream(query, args={}) # :nodoc:
       warn "[DEPRECATION] Jobs#create_stream is deprecated. Use Jobs#create_export instead."
       create_export(query, args)

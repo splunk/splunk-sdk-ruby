@@ -23,7 +23,7 @@ config = {
     :host => "localhost",
     :port => 8089,
     :username => "admin",
-    :password => "admin"
+    :password => "changeme"
 }
 
 # First open a connection to Splunk.
@@ -43,7 +43,7 @@ end
 # We can write single events to the index with the Index#submit method.
 example_index.submit("This is a test event.")
 
-# And we'll make sure it is actually there.
+# And we'll wait until it has probably been indexed.
 sleep(1) # Indexing isn't instantaneous.
 stream = service.create_oneshot("search index=#{INDEX_NAME}")
 results = Splunk::ResultsReader.new(stream)
@@ -64,7 +64,7 @@ ensure
   socket.close() # You must make sure the socket gets closed.
 end
 
-# Again we'll make sure the events arrived.
+# Again we'll wait until it's probably been indexed.
 sleep(3) # Indexing isn't instantaneous.
 stream = service.create_oneshot("search index=#{INDEX_NAME}")
 results = Splunk::ResultsReader.new(stream)
