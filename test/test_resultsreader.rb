@@ -80,6 +80,25 @@ class TestResultsReader < Test::Unit::TestCase
         end
       end
 
+      # nonreporting
+      test_name = "test_#{xml_library}_#{version.gsub("/\./", "_")}_nonreporting"
+      if tests.has_key?("nonreporting")
+        define_method(test_name.intern) do
+          Splunk::require_xml_library(xml_library)
+          file = File.open("test/data/export/#{version}/nonreporting.xml")
+          multireader = MultiResultsReader.new(file)
+          n_results_sets = 0
+          readers = []
+          multireader.each_with_index do |rr, index|
+            readers << rr
+            expected = tests["nonreporting"][index]
+            assert_results_reader_equals(expected, rr)
+            n_results_sets += 1
+          end
+          assert_equal(1, n_results_sets)
+        end
+      end
+
     end
   end
 

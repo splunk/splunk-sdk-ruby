@@ -218,17 +218,23 @@ module Splunk
       # right point, so if we reach the end of a results element and @fields
       # is still :no_fieldOrder_found, we yield an empty array at that point.
       @fields = :no_fieldOrder_found
+      @concatenate = false
+      @is_preview = nil
       @state = :base
       @states = {
           # Toplevel state.
           :base => {
               :start_element => lambda do |name, attributes|
                 if name == "results"
-                  is_preview = attributes["preview"] == "1"
-                  Fiber.yield(is_preview)
+                  if !@concatenate
+                    @is_preview = attributes["preview"] == "1"
+                    Fiber.yield(@is_preview)
+                  end
                 elsif name == "fieldOrder"
-                  @state = :field_order
-                  @fields = []
+                  if !@concatenate
+                    @state = :field_order
+                    @fields = []
+                  end
                 elsif name == "result"
                   @state = :result
                   @current_offset = Integer(attributes["offset"])
@@ -236,11 +242,16 @@ module Splunk
                 end
               end,
               :end_element => lambda do |name|
-                if name == "results"
+                if name == "results" and !@concatenate
                   Fiber.yield([]) if @fields == :no_fieldOrder_found
-                  # Reset the fieldOrder
-                  @fields = :no_fieldOrder_found
-                  Fiber.yield(:end_of_results_set)
+
+                  if !@is_preview # Start concatenating events
+                    @concatenate = true
+                  else
+                    # Reset the fieldOrder
+                    @fields = :no_fieldOrder_found
+                    Fiber.yield(:end_of_results_set)
+                  end
                 end
               end
           },
@@ -258,7 +269,7 @@ module Splunk
                   @state = :base
                   Fiber.yield(@fields)
                 end
-              end,
+              end
           },
           # When the parser in `:field_order` state encounters
           # a `field` element, it jumps to this state to record it.
