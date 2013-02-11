@@ -555,7 +555,7 @@ module Splunk
     def final_results()
       each do |reader|
         if reader.is_preview?
-          reader.skip_remaining_events()
+          reader.skip_remaining_results()
         else
           return reader
         end
