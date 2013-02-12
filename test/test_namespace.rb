@@ -95,20 +95,20 @@ class TestNamespaces < Test::Unit::TestCase
   end
 
   def test_propriety
-    assert_true(Splunk::namespace(:sharing => "global").is_proper?)
-    assert_true(Splunk::namespace(:sharing => "system").is_proper?)
-    assert_true(Splunk::namespace(:sharing => "default").is_proper?)
-    assert_true(Splunk::namespace(:sharing => "app", :app => "search").is_proper?)
-    assert_false(Splunk::namespace(:sharing => "app", :app => "-").is_proper?)
-    assert_true(Splunk::namespace(:sharing => "app", :app => "").is_proper?)
+    assert_true(Splunk::namespace(:sharing => "global").is_exact?)
+    assert_true(Splunk::namespace(:sharing => "system").is_exact?)
+    assert_true(Splunk::namespace(:sharing => "default").is_exact?)
+    assert_true(Splunk::namespace(:sharing => "app", :app => "search").is_exact?)
+    assert_false(Splunk::namespace(:sharing => "app", :app => "-").is_exact?)
+    assert_true(Splunk::namespace(:sharing => "app", :app => "").is_exact?)
     assert_true(Splunk::namespace(:sharing => "user", :app => "search",
-                                  :owner => "boris").is_proper?)
+                                  :owner => "boris").is_exact?)
     assert_false(Splunk::namespace(:sharing => "user", :app => "-",
-                                   :owner => "boris").is_proper?)
+                                   :owner => "boris").is_exact?)
     assert_false(Splunk::namespace(:sharing => "user", :app => "search",
-                                   :owner => "-").is_proper?)
+                                   :owner => "-").is_exact?)
     assert_false(Splunk::namespace(:sharing => "user", :app => "-",
-                                   :owner => "-").is_proper?)
+                                   :owner => "-").is_exact?)
   end
 
   def test_path_segments

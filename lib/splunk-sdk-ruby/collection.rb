@@ -153,7 +153,7 @@ module Splunk
       if @always_fetch
         fetch_args = {:method => :GET,
                       :resource => @resource + [name]}
-        if args.has_key?(namespace)
+        if args.has_key?(:namespace)
           fetch_args[:namespace] = args[:namespace]
         end
         response = @service.request(fetch_args)

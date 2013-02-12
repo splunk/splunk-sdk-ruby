@@ -110,7 +110,8 @@ class JobsTestCase < TestCaseWithSplunkConnection
       each_jobs << job.sid
     end
 
-    assert_equal(each_jobs, jobs.values().map() { |j| j.sid })
+    values_jobs = jobs.values().map() { |j| j.sid }
+    assert_equal(each_jobs, values_jobs)
 
     created_jobs.each do |job|
       job.cancel()
