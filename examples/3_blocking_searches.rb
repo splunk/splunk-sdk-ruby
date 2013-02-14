@@ -70,7 +70,7 @@ end
 # transforming search commands, you can call create_stream instead. It is
 # identical to create_oneshot, but returns the events produced before any
 # transforming search commands, and will thus run somewhat faster.
-stream = service.create_stream("search index=_internal | head 1",
+stream = service.create_export("search index=_internal | head 1",
                                :earliest_time => "-1h",
                                :latest_time => "now")
 results = Splunk::ResultsReader.new(stream)

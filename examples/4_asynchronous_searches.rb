@@ -30,7 +30,7 @@ config = {
 service = Splunk::connect(config)
 
 # For longer running jobs, you don't want to wait until the job finishes, as
-# create_oneshot in 3_retrieve_data.rb does. In this case, use the
+# create_oneshot in 3_blocking_searches.rb does. In this case, use the
 # create_search method of Service. Instead of returning a stream, it creates
 # an asynchronous job on the server and returns a Job object referencing it.
 job = service.create_search("search index=_internal | head 1",
