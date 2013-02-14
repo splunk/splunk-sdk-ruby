@@ -132,7 +132,14 @@ module Splunk
     attr_reader :fields
 
     def initialize(text_or_stream)
-      stream = normalize_stream(text_or_stream)
+      if text_or_stream.nil?
+        stream = StringIO.new("")
+      elsif !text_or_stream.respond_to?(:read)
+        # Strip because the XML libraries can be pissy.
+        stream = StringIO.new(text_or_stream.strip)
+      else
+        stream = text_or_stream
+      end
 
       if stream.eof?
         @is_preview = nil
@@ -501,7 +508,15 @@ module Splunk
     include Enumerable
 
     def initialize(text_or_stream)
-      stream = normalize_stream(text_or_stream)
+      if text_or_stream.nil?
+        stream = StringIO.new("")
+      elsif !text_or_stream.respond_to?(:read)
+        # Strip because the XML libraries can be pissy.
+        stream = StringIO.new(text_or_stream.strip)
+      else
+        stream = text_or_stream
+      end
+
       listener = ResultsListener.new()
       @iteration_fiber = Fiber.new do
         if $splunk_xml_library == :nokogiri
@@ -672,25 +687,6 @@ module Splunk
       else
         return response
       end
-    end
-  end
-
-
-  ##
-  # Make _text_or_stream_ into a stream-like object.
-  #
-  # ResultsReader and MultiResultsReader both accept strings and stream-like
-  # objects, but internally need something stream-like. This function normalizes
-  # to something stream-like.
-  #
-  def normalize_stream(text_or_stream)
-    if text_or_stream.nil?
-      stream = StringIO.new("")
-    elsif !text_or_stream.respond_to?(:read)
-      # Strip because the XML libraries can be pissy.
-      stream = StringIO.new(text_or_stream.strip)
-    else
-      stream = text_or_stream
     end
   end
 end
