@@ -71,16 +71,16 @@ Add this line to your application's Gemfile:
 
 And then execute the following:
 
-    $ bundle
+    bundle
 
 If you are not using Bundler, you can install it like this:
 
-    $ gem build splunk-sdk-ruby.gemspec
-    $ gem install splunk-sdk-ruby
+    gem build splunk-sdk-ruby.gemspec
+    gem install splunk-sdk-ruby
 
-You can also bypass GitHub altogether by installing the SDK from Rubygems:
+You can also bypass GitHub altogether by installing the SDK from RubyGems:
 
-    $ gem install splunk-sdk-ruby
+    gem install splunk-sdk-ruby
 
 ### Examples and unit tests
 This Preview release of the Splunk SDK for Ruby includes a few examples and unit
@@ -101,7 +101,8 @@ another copy and run it against that.
 
 Second, the versions of Rake and Test::Unit that ship with various Ruby versions
 are broken. They work enough to install the SDK, but you cannot run the unit
-tests or do any real development. You need to install the latest versions:
+tests or do any real development. You need to install the latest versions of each
+from RubyGems:
 
     gem install rake
     gem install test-unit
@@ -151,19 +152,24 @@ put the credentials of a Splunk instance whose security concerns you in a
 
 In the base directory where you installed the Splunk SDK for Ruby, run
 
-    $ rake test
+    rake test
 
 It should run many tests without error.
 
-To generate the code coverage of the test suite, run
+To generate code coverage of the test suite, first ensure you've installed
+the latest version of [SimpleCov](http://rubygems.org/gems/simplecov): 
 
-    $ rake test COVERAGE=true
+    gem install simplecov
 
-It will produce a directory called coverage. Open coverage/index.html to
+To generate the code coverage, run:
+
+    rake test COVERAGE=true
+
+It will produce a directory called **coverage**. Open coverage/index.html to
 see the coverage report.
 
-**Note**: To protect your Splunk password, you may want to delete the .splunkrc file when
-you are done running the unit tests.
+**Note**: To protect your Splunk password, you may want to delete the .splunkrc 
+file when you are done running the unit tests.
 
 ## Overview 
 
