@@ -70,6 +70,7 @@
 require 'stringio'
 
 require_relative 'xml_shim'
+require_relative 'collection/jobs' # To access ExportStream
 
 module Splunk
   # ResultsReader parses Splunk's XML format for results into Ruby objects.
@@ -85,7 +86,9 @@ module Splunk
   # Do not use +ResultsReader+ with the results of the +create_export+ or
   # +create_stream+ methods on +Service+ or +Jobs+. These methods use endpoints
   # which return a different set of data structures. Use +MultiResultsReader+
-  # instead for those cases.
+  # instead for those cases. If you do use +ResultsReader+, it will return
+  # a concatenation of all non-preview events in the stream, but that behavior
+  # should be considered deprecated, and will result in a warning.
   #
   # The ResultsReader object has two additional methods:
   #
@@ -134,6 +137,16 @@ module Splunk
     def initialize(text_or_stream)
       if text_or_stream.nil?
         stream = StringIO.new("")
+      elsif stream.is_a?(ExportStream)
+        # The sensible behavior on streams from the export endpoints is to
+        # skip all preview results and concatenate all others. The export
+        # functions wrap their streams in ExportStream to mark that they need
+        # this special handling.
+        @is_export = true
+        @reader = MultiResultsReader.new(text_or_stream).final_results()
+        @is_preview = @reader.is_preview?
+        @fields = @reader.fields
+        return
       elsif !text_or_stream.respond_to?(:read)
         # Strip because the XML libraries can be pissy.
         stream = StringIO.new(text_or_stream.strip)
@@ -144,6 +157,8 @@ module Splunk
       if stream.eof?
         @is_preview = nil
         @fields = []
+      elsif stream.is_a?(ExportStream)
+
       else
         # We use a SAX parser. listener is the event handler, but a SAX
         # parser won't usually transfer control during parsing. In order
@@ -166,16 +181,25 @@ module Splunk
     end
 
     def each()
-      enum = Enumerator.new() do |yielder|
-        if !@iteration_fiber.nil? # Handle the case of empty files
-          @reached_end = false
-          while true
-            result = @iteration_fiber.resume
-            break if result.nil? or result == :end_of_results_set
-            yielder << result
+      # If we have been passed a stream from an export endpoint, it should be
+      # marked as such, and we handle it differently.
+      if @is_export
+        warn "[DEPRECATED] Do not use ResultsReader on the output of the " +
+                 "export endpoint. Use MultiResultsReader instead."
+        reader = MultiResultsReader.new(@stream).final_results()
+        enum = reader.each()
+      else
+        enum = Enumerator.new() do |yielder|
+          if !@iteration_fiber.nil? # Handle the case of empty files
+            @reached_end = false
+            while true
+              result = @iteration_fiber.resume
+              break if result.nil? or result == :end_of_results_set
+              yielder << result
+            end
           end
+          @reached_end = true
         end
-        @reached_end = true
       end
 
       if block_given? # Apply the enumerator to a block if we have one
