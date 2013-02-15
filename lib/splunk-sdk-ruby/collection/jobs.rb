@@ -14,6 +14,8 @@
 # under the License.
 #++
 
+require 'delegate'
+
 require_relative '../collection'
 require_relative '../entity/job'
 
@@ -101,13 +103,34 @@ module Splunk
       response = @service.request(:method => :GET,
                                   :resource => @resource + ["export"],
                                   :query => args)
-      return response.body
+      return ExportStream.new(response.body)
     end
 
     # Deprecated.
     def create_stream(query, args={}) # :nodoc:
       warn "[DEPRECATION] Jobs#create_stream is deprecated. Use Jobs#create_export instead."
       create_export(query, args)
+    end
+  end
+
+  ##
+  # Marks streams returned by the export endpoint for special handling.
+  #
+  # ResultsReader is supposed to handle streams from export differently
+  # from those from other endpoints, so we use this delegator to mark them.
+  #
+  class ExportStream < Delegator
+    def initialize(obj)
+      super                  # pass obj to Delegator constructor, required
+      @delegate = obj # store obj for future use
+    end
+
+    def __getobj__()
+      @delegate
+    end
+
+    def __setobj__(obj)
+      @delegate = obj
     end
   end
 end
