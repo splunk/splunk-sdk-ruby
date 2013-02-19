@@ -18,10 +18,10 @@ module Splunk
   ##
   # Exception thrown when a request found multiple matching entities.
   #
-  # An entity is uniquely defined by its name plus its namespace, so when
-  # trying to fetch an entity by name alone, it is possible to get multiple
-  # results. Methods that are supposed to return a single entity throw
-  # this error in that case.
+  # An entity is uniquely defined by its name plus its namespace, so when you
+  # try to fetch an entity by name alone, it is possible to get multiple
+  # results. In that case, methods that are supposed to return a single entity 
+  # throw this error.
   #
   class AmbiguousEntityReference < StandardError
   end

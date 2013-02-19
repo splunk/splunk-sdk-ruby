@@ -15,14 +15,15 @@
 # under the License.
 #++
 #
-# The Splunk SDK for Ruby provides an idiomatic interface to Splunk
-# from Ruby. To use it, add
+# The Splunk SDK for Ruby provides an idiomatic interface to Splunk from 
+# Ruby. To use it, add
 #
 #     require 'splunk-sdk-ruby'
 #
 # to the top of your source file. All the code in the SDK is in the +Splunk+
 # module. Once you have included the SDK, create a connection to your Splunk
-# instance with (changing host, port, username, and password to your values):
+# instance with the following (changing host, port, username, and password to 
+# your values):
 #
 #     service = Splunk::Service.new(:host => "localhost",
 #                                   :port => 8089,
