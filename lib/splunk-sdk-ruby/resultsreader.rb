@@ -78,7 +78,7 @@ module Splunk
   # try to use Nokogiri, and if it is not available will fall back to REXML. If
   # you want other behavior, see +xml_shim.rb+ for how to set the XML library.
   #
-  # +ResultsReader is an Enumerable, so it has methods such as +each+ and
+  # +ResultsReader is an +Enumerable+, so it has methods such as +each+ and
   # +each_with_index+. However, since it's a stream parser, once you iterate
   # through it once, it will thereafter be empty.
   #
@@ -89,11 +89,11 @@ module Splunk
   #
   # The ResultsReader object has two additional methods:
   #
-  # * `is_preview?` return a boolean value saying if these results are
-  #   a preview from an unfinished search or not.
-  # * `fields` returns an array of all the fields that may appear in a result
+  # * +is_preview?+ returns a Boolean value that indicates whether these 
+  #   results are a preview from an unfinished search or not
+  # * +fields+ returns an array of all the fields that may appear in a result
   #   in this set, in the order they should be displayed (if you're going
-  #   to make a table or the like).
+  #   to make a table or the like)
   #
   # *Example*:
   #
@@ -127,7 +127,7 @@ module Splunk
     #
     # Note that any given result will contain a subset of these fields.
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     attr_reader :fields
 
@@ -138,10 +138,10 @@ module Splunk
         @is_preview = nil
         @fields = []
       else
-        # We use a SAX parser. listener is the event handler, but a SAX
-        # parser won't usually transfer control during parsing. In order
-        # to incrementally return results as we parse, we have to put
-        # the parser into a Fiber from which we can yield.
+        # We use a SAX parser. +listener+ is the event handler, but a SAX
+        # parser won't usually transfer control during parsing. 
+        # To incrementally return results as we parse, we have to put
+        # the parser into a +Fiber+ from which we can yield.
         listener = ResultsListener.new()
         @iteration_fiber = Fiber.new do
           if $splunk_xml_library == :nokogiri
@@ -179,7 +179,7 @@ module Splunk
     end
 
     ##
-    # Skip the rest of the events in this ResultsReader.
+    # Skips the rest of the events in this ResultsReader.
     #
     def skip_remaining_results()
       if !@reached_end

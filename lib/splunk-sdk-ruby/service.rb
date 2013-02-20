@@ -110,7 +110,7 @@ module Splunk
     # Capabilities are a fixed list on the server, so this method returns
     # an +Array+ rather than an +Entity+.
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     # *Example:*
     #
@@ -208,7 +208,7 @@ module Splunk
     # Splunk instance) and +"cpu_arch"+ (what CPU Splunk is running on), and
     # +"os_name"+ (the name of the operating system Splunk is running on).
     #
-    # Returns: A +Hash+ which has +String+s as both keys and values.
+    # Returns: A +Hash+ which has +Strings+ as both keys and values.
     #
     def info
       response = request(:namespace => Splunk::namespace(:sharing => "default"),

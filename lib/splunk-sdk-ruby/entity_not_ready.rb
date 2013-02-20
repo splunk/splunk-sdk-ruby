@@ -16,7 +16,7 @@
 
 module Splunk
   ##
-  # Exception throws when fetching from an entity returns HTTP code 204.
+  # Exception thrown when fetching from an entity returns HTTP code 204.
   #
   # This primarily comes up with jobs. When a job is not yet ready, fetching
   # it from the server returns code 204, and we want to handle it specially.

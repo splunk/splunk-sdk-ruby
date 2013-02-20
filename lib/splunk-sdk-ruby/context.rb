@@ -15,10 +15,10 @@
 #++
 
 ##
-# Provides +Context+, the basic class representing a connection to a Splunk
-# server. +Context+ is minimal, and only handles authentication and calls to
-# the REST API. For most use, you will want to use its subclass +Service+, which
-# adds convenient methods to access the various collections and entities
+# Provides the +Context+ class, the basic class representing a connection to a 
+# Splunk server. +Context+ is minimal, and only handles authentication and calls 
+# to the REST API. For most uses, you will want to use its subclass +Service+, 
+# which adds convenient methods to access the various collections and entities
 # on Splunk.
 #
 
@@ -36,17 +36,17 @@ module Splunk
 
   # Class encapsulating a connection to a Splunk server.
   #
-  # This class is used for lower level REST-based control of Splunk.
+  # This class is used for lower-level REST-based control of Splunk.
   # For most use, you will want to use +Context+'s subclass +Service+, which
   # provides convenient access to Splunk's various collections and entities.
   #
-  # To use +Context+, create a new +Context+ with a hash of arguments giving
-  # the details of the connection, and call +login+ on it:
+  # To use the +Context+ class, create a new +Context+ with a hash of arguments 
+  # giving the details of the connection, and call the +login+ method on it:
   #
   #     context = Splunk::Context.new(:username => "admin",
   #                                   :password => "changeme").login()
   #
-  # +Context#new+ takes a hash of keyword arguments. The keys it understands
+  # +Context+#+new+ takes a hash of keyword arguments. The keys it understands
   # are:
   #
   # * +:username+ - log in to Splunk as this user (no default)
@@ -59,7 +59,7 @@ module Splunk
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
   #
   # If you specify a token, you need not specify a username or password, nor
-  # do you need to call +login+.
+  # do you need to call the +login+ method.
   #
   # +Context+ provides three other important methods:
   #
@@ -94,7 +94,7 @@ module Splunk
     ##
     # The host to connect to.
     #
-    # Defaults to +"localhost"+.
+    # Defaults to "+localhost+".
     #
     # Returns: a +String+.
     #
@@ -112,7 +112,7 @@ module Splunk
     ##
     # The authentication token on Splunk.
     #
-    # Is this +Context+ is not logged in, this is +nil+. Otherwise it is a
+    # If this +Context+ is not logged in, this is +nil+. Otherwise it is a
     # +String+ that is passed with each request.
     #
     # Returns: a +String+ or +nil+.
@@ -150,7 +150,7 @@ module Splunk
     attr_reader :namespace
 
     ##
-    # Open a TCP socket to the Splunk HTTP server.
+    # Opens a TCP socket to the Splunk HTTP server.
     #
     # If the +scheme+ field of this +Context+ is +:https+, this method returns
     # an +SSLSocket+. If +scheme+ is +:http+, a +TCPSocket+ is returned. Due to
@@ -174,12 +174,12 @@ module Splunk
     end
 
     ##
-    # Log into Splunk and set the token field on this +Context+.
+    # Logs into Splunk and set the token field on this +Context+.
     #
-    # +login+ assumes that the +Context+ has a username and password set.
-    # You cannot pass them as arguments to this method. On a successful login,
-    # the token field of the +Context+ is set to the token returned by Splunk,
-    # and all further requests to the server will send this token.
+    # The +login+ method assumes that the +Context+ has a username and password 
+    # set. You cannot pass them as arguments to this method. On a successful 
+    # login, the token field of the +Context+ is set to the token returned by 
+    # Splunk, and all further requests to the server will send this token.
     #
     # If this +Context+ already has a token that is not +nil+, it is already
     # logged in, and this method is a nop.
@@ -209,7 +209,7 @@ module Splunk
     end
 
     ##
-    # Log out of Splunk.
+    # Logs out of Splunk.
     #
     # This sets the @token attribute to +nil+.
     #
@@ -221,47 +221,48 @@ module Splunk
     end
 
     ##
-    # Issue an HTTP(S) request to the Splunk instance.
+    # Issues an HTTP(S) request to the Splunk instance.
     #
-    # +request+ does not take a URL. Instead, it takes a hash of optional
-    # arguments specifying an action in the REST API. This avoids the problem
-    # knowing whether a given piece of data is URL encoded or not.
+    # The +request+ method does not take a URL. Instead, it takes a hash of 
+    # optional arguments specifying an action in the REST API. This avoids the 
+    # problem knowing whether a given piece of data is URL encoded or not.
     #
     # The arguments are:
     #
     # * +method+: The HTTP method to use (one of +:GET+, +:POST+, or +:DELETE+;
-    #   default: +:GET+)
+    #   default: +:GET+).
     # * +namespace+: The namespace to request a resource from Splunk in. Must
     #   be a +Namespace+ object. (default: the value of +@namespace+ on
-    #   this +Context+).
+    #   this +Context+)
     # * +resource+: An array of strings specifying the components of the path
     #   to the resource after the namespace. The strings should not be URL
-    #   encoded, as that will be handled by +request+. (default: +[]+).
+    #   encoded, as that will be handled by +request+. (default: [])
     # * +query+: A hash containing the values to be encoded as
     #   the query (the part following +?+) in the URL. Nothing should be URL
     #   encoded as +request+ will do the encoding. If you need to pass multiple
     #   values for the same key, insert them as an Array as the value of their
     #   key into the Hash, and they will be properly encoded as a sequence of
-    #   entries with the same key. (default: +{}+)
+    #   entries with the same key. (default: {})
     # * +headers+: A hash containing the values to be encoded as headers. None
     #   should be URL encoded, and the +request+ method will automatically add
     #   headers for +User-Agent+ and Splunk authentication for you. Keys must
     #   be unique, so the values must be strings, not arrays, unlike for
-    #   +query+. (default: +{}+).
+    #   +query+. (default: {})
     # * +body+: Either a hash to be encoded as the body of a POST request, or
     #   a string to be used as the raw, already encoded body of a POST request.
     #   If you pass a hash, you can pass multiple values for the same key by
     #   encoding them as an Array, which will be properly set as multiple
     #   instances of the same key in the POST body. Nothing in the hash should
     #   be URL encoded, as +request+ will handle all such encoding.
-    #   (default: +{}+)
+    #   (default: {})
     #
-    # If Splunk responds with an HTTP code 2xx, +request+ returns an HTTP
-    # response object (the import methods of which are +code+, +message+,
-    # and +body+, and +each+ to enumerate over the response headers). If the HTTP
-    # code is not 2xx, +request+ raises a +SplunkHTTPError+.
+    # If Splunk responds with an HTTP code 2xx, the +request+ method returns 
+    # an HTTP response object (the import methods of which are +code+, 
+    # +message+, and +body+, and +each+ to enumerate over the response 
+    # headers). If the HTTP code is not 2xx, +request+ raises a 
+    # +SplunkHTTPError+.
     #
-    # *Examples*
+    # *Examples:*
     #
     #     c = Splunk::connect(username="admin", password="changeme")
     #     # Get a list of the indexes in this Splunk instance.
@@ -302,7 +303,7 @@ module Splunk
                                     "found: #{namespace}")
       end
 
-      # Construct the URL for the request
+      # Construct the URL for the request.
       url = ""
       url << "#{(scheme || @scheme).to_s}://"
       url << "#{host || @host}:#{(port || @port).to_s}/"
@@ -318,40 +319,42 @@ module Splunk
     end
 
     ##
-    # Make a request to the Splunk server given a prebuilt URL.
+    # Makes a request to the Splunk server given a prebuilt URL.
     #
     # Unless you are using a URL that was returned by the Splunk server
     # as part of an Atom feed, you should prefer the +request+ method, which
     # has much clearer semantics.
     #
-    # +request_by_url+ takes a hash of arguments. The recognized arguments are:
+    # The +request_by_url+ method takes a hash of arguments. The recognized 
+    # arguments are:
     #
     # * +:url+: (a +URI+ object or a +String+) The URL, including authority, to
     #   make a request to.
-    # * +:method+: (+:GET+, +:POST+, or +:DELETE+) the HTTP method to use.
+    # * +:method+: (+:GET+, +:POST+, or +:DELETE+) The HTTP method to use.
     # * +query+: A hash containing the values to be encoded as
     #   the query (the part following +?+) in the URL. Nothing should be URL
     #   encoded as +request+ will do the encoding. If you need to pass multiple
-    #   values for the same key, insert them as an Array as the value of their
+    #   values for the same key, insert them as an +Array+ as the value of their
     #   key into the Hash, and they will be properly encoded as a sequence of
-    #   entries with the same key. (default: +{}+)
+    #   entries with the same key. (default: {})
     # * +headers+: A hash containing the values to be encoded as headers. None
     #   should be URL encoded, and the +request+ method will automatically add
     #   headers for +User-Agent+ and Splunk authentication for you. Keys must
     #   be unique, so the values must be strings, not arrays, unlike for
-    #   +query+. (default: +{}+).
+    #   +query+. (default: {})
     # * +body+: Either a hash to be encoded as the body of a POST request, or
     #   a string to be used as the raw, already encoded body of a POST request.
     #   If you pass a hash, you can pass multiple values for the same key by
-    #   encoding them as an Array, which will be properly set as multiple
+    #   encoding them as an +Array+, which will be properly set as multiple
     #   instances of the same key in the POST body. Nothing in the hash should
     #   be URL encoded, as +request+ will handle all such encoding.
-    #   (default: +{}+)
+    #   (default: {})
     #
-    # If Splunk responds with an HTTP code 2xx, +request+ returns an HTTP
-    # response object (the import methods of which are +code+, +message+,
-    # and +body+, and +each+ to enumerate over the response headers). If the HTTP
-    # code is not 2xx, +request+ raises a +SplunkHTTPError+.
+    # If Splunk responds with an HTTP code 2xx, the +request_by_url+ method 
+    # returns an HTTP response object (the import methods of which are +code+, 
+    # +message+, and +body+, and +each+ to enumerate over the response 
+    # headers). If the HTTP code is not 2xx, the +request_by_url+ method 
+    # raises a +SplunkHTTPError+.
     #
     def request_by_url(args)
       url = args.fetch(:url)
@@ -390,7 +393,7 @@ module Splunk
         request.body = URI.encode_www_form(body)
       end
 
-      # Issue the request
+      # Issue the request.
       response = Net::HTTP::start(
           url.hostname, url.port,
           :use_ssl => url.scheme == 'https',
@@ -400,7 +403,7 @@ module Splunk
         http.request(request)
       end
 
-      # Handle any errors
+      # Handle any errors.
       if !response.is_a?(Net::HTTPSuccess)
         raise SplunkHTTPError.new(response)
       else
@@ -409,16 +412,16 @@ module Splunk
     end
 
     ##
-    # Restart this Splunk instance.
+    # Restarts this Splunk instance.
     #
-    # +restart+ may be called with an optional timeout. If you pass a timeout,
-    # +restart+ will wait up to that number of seconds for the server to come
-    # back up before returning. If +restart+ did not time out, it leaves the
-    # Context logged in when it returns.
+    # The +restart+ method may be called with an optional timeout. If you pass 
+    # a timeout, +restart+ will wait up to that number of seconds for the 
+    # server to come back up before returning. If +restart+ did not time out, 
+    # it leaves the +Context+ logged in when it returns.
     #
-    # If the timeout is, omitted, +restart+ returns immediately, and you will
-    # have to ascertain if Splunk has come back up yourself, for example with
-    # code like:
+    # If the timeout is, omitted, the +restart+ method returns immediately, and
+    # you will have to ascertain if Splunk has come back up yourself, for 
+    # example with code like:
     #
     #     context = Context.new(...).login()
     #     context.restart()
@@ -447,9 +450,8 @@ module Splunk
       # Clear our old token, which will no longer work after the restart.
       logout()
 
-      # If timeout is nil, return immediately. If timeout is a positive
-      # integer, wait for +timeout+ seconds for the server to come back
-      # up.
+      # If +timeout+ is +nil+, return immediately. If timeout is a positive
+      # integer, wait for +timeout+ seconds for the server to come back up.
       if !timeout.nil?
         Timeout::timeout(timeout) do
           while !server_accepting_connections? || server_requires_restart?
@@ -458,7 +460,7 @@ module Splunk
         end
       end
 
-      # Return the Context.
+      # Return the +Context+.
       self
     end
 

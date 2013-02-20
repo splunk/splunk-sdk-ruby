@@ -157,7 +157,7 @@ module Splunk
     # are _not_ URL encoded. You need to URL encode them when
     # you construct your URL.
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     def to_path_fragment() end
   end
