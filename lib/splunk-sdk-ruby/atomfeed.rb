@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -22,9 +22,9 @@
 require_relative 'xml_shim'
 
 #--
-# Nokogiri returns attribute values as an object on which we have to call
+# Nokogiri returns attribute values as objects on which we have to call
 # `#text`. REXML returns Strings. To make them both work, add a `text` method to
-# String which returns itself.
+# String that returns itself.
 #++
 class String # :nodoc:
   def text
@@ -33,10 +33,9 @@ class String # :nodoc:
 end
 
 #--
-# For compatibility with Nokogiri, we add a method `text`
-# which, like Nokogiri's `text` method, returns the contents
-# without escaping entities. This is identical to REXML's
-# value method.
+# For compatibility with Nokogiri, we add a method `text`, which, like 
+# Nokogiri's `text` method, returns the contents without escaping entities. 
+# This is identical to REXML's `value` method.
 #++
 #if $splunk_xml_library == :rexml
 #  class REXML::Text # :nodoc:
@@ -48,13 +47,13 @@ end
 
 module Splunk
   ##
-  # Read an Atom XML feed into a Ruby object.
+  # Reads an Atom XML feed into a Ruby object.
   #
   # +AtomFeed.new+ accepts either a string or any object with a +read+ method.
   # It parses that as an Atom feed and exposes two read-only fields, +metadata+
-  # and +entries+. +metadata+ is a hash of all the header fields of the feed.
-  # +entries+ is a list of hashes giving the details of each entry in the
-  # feed.
+  # and +entries+. The +metadata+ field is a hash of all the header fields of 
+  # the feed. The +entries+ field is a list of hashes giving the details of 
+  # each entry in the feed.
   #
   # *Example:*
   #
@@ -99,8 +98,8 @@ module Splunk
       #
       #     <entry>...details of entry...</entry>
       #
-      # To handle both, we have to check if <feed> is there
-      # or not before skipping.
+      # To handle both, we have to check whether <feed> is there
+      # before skipping.
       if doc.root.name == "feed"
         @metadata, @entries = read_feed(doc.root)
       elsif doc.root.name == "entry"
@@ -114,24 +113,24 @@ module Splunk
     ##
     # The header fields of the feed.
     #
-    # Typically this has keys such as +"author"+, +"title"+, and
-    # +"totalResults"+.
+    # Typically this has keys such as "+author+", "+title+", and
+    # "+totalResults+".
     #
-    # Returns: a Hash with Strings as keys.
+    # Returns: a +Hash+ with +Strings+ as keys.
     #
     attr_reader :metadata
 
     ##
     # The entries in the feed.
     #
-    # Returns: an Array containing hashes representing each entry in the feed.
+    # Returns: an +Array+ containing +Hashes+ that represent each entry in the feed.
     #
     attr_reader :entries
 
     private # All methods below here are internal to AtomFeed.
 
     ##
-    # Produce a +String+ from the children of _element_.
+    # Produces a +String+ from the children of _element_.
     #
     # _element_ should be either a REXML or Nokogiri element.
     #
@@ -150,10 +149,10 @@ module Splunk
     end
 
     ##
-    # Read a feed from the the XML in _feed_.
+    # Reads a feed from the the XML in _feed_.
     #
-    # Returns: +[metadata, entries]+, where +metadata+ is a hash of feed
-    # headers, and +entries+ is an +Array+ of +Hash+es representing the feed.
+    # Returns: [+metadata, entries+], where +metadata+ is a hash of feed
+    # headers, and +entries+ is an +Array+ of +Hashes+ representing the feed.
     #
     def read_feed(feed)
       metadata = {"links" => {}, "messages" => []}
@@ -196,9 +195,9 @@ module Splunk
     end
 
     ##
-    # Read a single entry from the XML in _entry_.
+    # Reads a single entry from the XML in _entry_.
     #
-    # Returns: a Hash representing the entry.
+    # Returns: a +Hash+ representing the entry.
     #
     def read_entry(entry)
       result = {"links" => {}}
@@ -217,10 +216,10 @@ module Splunk
     end
 
     ##
-    # Read a name and link from the XML in _link_.
+    # Reads a name and link from the XML in _link_.
     #
-    # Returns: +[name, link]+, where +name+ is a +String+ giving the name of
-    # the link, and +link+ is a +URI+.
+    # Returns: [+name, link+], where _name_ is a +String+ giving the name of
+    # the link, and _link_ is a +URI+.
     #
     def read_link(link)
       # To handle elements of the form:
@@ -232,7 +231,7 @@ module Splunk
     end
 
     ##
-    # Read a single field of an entry from the XML in _field_.
+    # Reads a single field of an entry from the XML in _field_.
     #
     # Returns: a single value (either a +String+ or a +URI+).
     #
@@ -261,7 +260,7 @@ module Splunk
     end
 
     ##
-    # Read a simple field.
+    # Reads a simple field.
     #
     # Returns: a +String+ or a +URI+.
     #
@@ -275,7 +274,7 @@ module Splunk
     end
 
     ##
-    # Read a dictionary from the XML in _dict_.
+    # Reads a dictionary from the XML in _dict_.
     #
     # Returns: a +Hash+.
     #
@@ -291,7 +290,7 @@ module Splunk
     end
 
     ##
-    # Read an Array from the XML in _list_.
+    # Reads an +Array+ from the XML in _list_.
     #
     # Returns: an +Array+.
     #
@@ -306,7 +305,7 @@ module Splunk
     end
 
     ##
-    # Read the author from its special tag.
+    # Reads the author from its special tag.
     #
     # Returns: a +String+.
     #
@@ -317,6 +316,7 @@ module Splunk
       # In REXML, sets of elements are indexed starting at 1 to match
       # XPath. In Nokogiri they are indexed starting at 0. To work around
       # this, we coerce it to an array, which is always indexed starting at 0.
+      #
       return Array(author.elements)[0].text
     end
   end

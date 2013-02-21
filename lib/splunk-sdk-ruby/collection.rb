@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,7 +15,7 @@
 #++
 
 ##
-# Provides +Collection+, representing collections in Splunk.
+# Provides the +Collection+ class, which represents a collection in Splunk.
 #
 
 require_relative 'ambiguous_entity_reference'
@@ -27,13 +27,13 @@ require_relative 'synonyms'
 module Splunk
   # Class representing a collection in Splunk.
   #
-  # +Collection+s are groups of items, usually of class +Entity+ or one of its
-  # subclasses, but occasionally another +Collection+. Usually you will obtain
-  # a +Collection+ by calling one of the convenience methods on +Service+.
+  # A +Collection+ is a group of items, usually of class +Entity+ or one of its
+  # subclasses, but occasionally another +Collection+. Usually you obtain a
+  # +Collection+ by calling one of the convenience methods on +Service+.
   #
-  # +Collection+s are enumerable, and implement many of the methods found on
+  # A +Collection+ is enumerable, and implements many of the methods found on
   # +Hash+, so methods like +each+, +select+, and +delete_if+ all work, as does
-  # fetching a member of the +Collection+ with +[]+.
+  # fetching a member of the +Collection+ with [].
   #
   class Collection
     include Enumerable
@@ -48,15 +48,15 @@ module Splunk
       # in a collection. It is usually -1, but some collections use 0.
       @infinite_count = -1
 
-      # @always_fetch tells whether, when creating an entity in this collection
-      # never to bother trying to parse the response, and to always fetch
-      # the new state after the fact. This is necessary for some collections,
-      # such as users, which don't return the newly created object.
+      # @always_fetch tells whether, when creating an entity in this collection,
+      # to bother trying to parse the response and always fetch the new state 
+      # after the fact. This is necessary for some collections, such as users, 
+      # which don't return the newly created object.
       @always_fetch = false
     end
 
     ##
-    # The service via which this +Collection+ refers to Splunk.
+    # The service through which this +Collection+ refers to Splunk.
     #
     # Returns: a +Service+.
     #
@@ -65,9 +65,9 @@ module Splunk
     ##
     # The path after the namespace to reach this collection.
     #
-    # For example, for apps +resource+ will be +["apps", "local"]+.
+    # For example, for apps +resource+ will be ["+apps+", "+local+"].
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     attr_reader :resource
 
@@ -90,7 +90,7 @@ module Splunk
     # visible in this collection named _name_, you _must_ provide a namespace
     # or +assoc+ will raise an +AmbiguousEntityReference+ error.
     #
-    # Returns: an +Array+ of +[+_name_+, +_entity_+]+ or +nil+ if there is
+    # Returns: an +Array+ of [_name_, _entity_] or +nil+ if there is
     # no matching element.
     #
     def assoc(name, namespace=nil)
@@ -107,7 +107,7 @@ module Splunk
     #
     # The Atom entry should be in the form of an entry from +AtomFeed+.
     #
-    # Returns: An object of class +@entity_class+.
+    # Returns: An object of class @+entity_class+.
     #
     def atom_entry_to_entity(entry)
       name = entry["title"]
@@ -171,7 +171,7 @@ module Splunk
     # Entities from different namespaces may have the same name, so if you are
     # connected to Splunk using a namespace with wildcards in it, there may
     # be multiple entities in the collection with the same name. In this case
-    # you must specify a namespace as well, or +delete+ will raise an
+    # you must specify a namespace as well, or the +delete+ method will raise an
     # AmbiguousEntityReference error.
     #
     # *Example:*
@@ -197,7 +197,7 @@ module Splunk
     end
 
     ##
-    # Delete all entities on this collection for which the block returns true.
+    # Deletes all entities on this collection for which the block returns true.
     #
     # If block is omitted, returns an enumerator over all members of the
     # collection.
@@ -217,13 +217,13 @@ module Splunk
     ##
     # Calls block once for each item in the collection.
     #
-    # +each+ takes three optional arguments as well:
+    # The +each+ method takes three optional arguments as well:
     #
     # * +count+ sets the maximum number of entities to fetch (integer >= 0)
     # * +offset+ sets how many items to skip before returning items in the
     #   collection (integer >= 0)
     # * +page_size+ sets how many items at a time should be fetched from the
-    #   server and processed before fetching another set.
+    #   server and processed before fetching another set
     #
     # The block is called with the entity as its argument.
     #
@@ -282,27 +282,27 @@ module Splunk
     end
 
     ##
-    # Identical to +each+.
+    # Identical to the +each+ method.
     #
     synonym "each_value", "each"
 
     ##
-    # Identical to +each+, but the block is passed the entity's name.
+    # Identical to the +each+ method, but the block is passed the entity's name.
     #
     def each_key(args={}, &block)
       each(args).map() { |e| e.name }.each(&block)
     end
 
     ##
-    # Identical to +each+, but the block is passed both the entity's name,
-    # and the entity.
+    # Identical to the +each+ method, but the block is passed both the entity's 
+    # name, and the entity.
     #
     def each_pair(args={}, &block)
       each(args).map() { |e| [e.name, e] }.each(&block)
     end
 
     ##
-    # Return whether there are any entities in this collection.
+    # Returns whether there are any entities in this collection.
     #
     # Returns: +true+ or +false+.
     #
@@ -311,7 +311,7 @@ module Splunk
     end
 
     ##
-    # Fetch _name_ from this collection.
+    # Fetches _name_ from this collection.
     #
     # If _name_ does not exist, returns +nil+. Otherwise returns the element.
     # If, due to wildcards in your namespace, there are two entities visible
@@ -348,7 +348,7 @@ module Splunk
     synonym "[]", "fetch"
 
     ##
-    # Return whether there is an entity named _name_ in this collection.
+    # Returns whether there is an entity named _name_ in this collection.
     #
     # Returns: a boolean.
     # Synonyms: contains?, include?, key?, member?
@@ -372,16 +372,16 @@ module Splunk
     synonym "member?", "has_key?"
 
     ##
-    # Return an +Array+ of all entity names in the +Collection+.
+    # Returns an +Array+ of all entity names in the +Collection+.
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     def keys()
       return values().map() { |e| e.name }
     end
 
     ##
-    # Return the number of entities in this collection.
+    # Returns the number of entities in this collection.
     #
     # Returns: a nonnegative +Integer+.
     # Synonyms: +size+.
@@ -393,17 +393,17 @@ module Splunk
     synonym "size", "length"
 
     ##
-    # Return an Array of the entities in this collection.
+    # Returns an +Array+ of the entities in this collection.
     #
-    # +values+ takes three optional arguments:
+    # The +values+ method takes three optional arguments:
     #
     # * +count+ sets the maximum number of entities to fetch (integer >= 0)
     # * +offset+ sets how many items to skip before returning items in the
     #   collection (integer >= 0)
     # * +page_size+ sets how many items at a time should be fetched from the
-    #   server and processed before fetching another set.
+    #   server and processed before fetching another set
     #
-    # Returns: an +Array+ of +@entity_class+.
+    # Returns: an +Array+ of @entity_class.
     # Synonyms: +list+, +to_a+.
     #
     def values(args={})

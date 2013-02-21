@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -18,10 +18,10 @@ module Splunk
   ##
   # Exception thrown when a request found multiple matching entities.
   #
-  # An entity is uniquely defined by its name plus its namespace, so when
-  # trying to fetch an entity by name alone, it is possible to get multiple
-  # results. Methods that are supposed to return a single entity throw
-  # this error in that case.
+  # An entity is uniquely defined by its name plus its namespace, so when you
+  # try to fetch an entity by name alone, it is possible to get multiple
+  # results. In that case, this error is thrown by methods that are supposed 
+  # to return only a single entity.
   #
   class AmbiguousEntityReference < StandardError
   end

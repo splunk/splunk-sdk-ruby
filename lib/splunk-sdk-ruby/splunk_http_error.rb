@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,7 +15,7 @@
 #++
 
 ##
-# Define a exception to carry all errors returned by Splunk.
+# Defines an exception to carry all errors returned by Splunk.
 
 require_relative 'xml_shim'
 

@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,7 +16,7 @@
 
 module Splunk
   ##
-  # Exception throws when fetching from an entity returns HTTP code 204.
+  # Exception thrown when fetching from an entity returns HTTP code 204.
   #
   # This primarily comes up with jobs. When a job is not yet ready, fetching
   # it from the server returns code 204, and we want to handle it specially.

@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -24,14 +24,15 @@ module Splunk
   # Class representing individual entities in Splunk.
   #
   # +Entity+ objects represent individual items such as indexes, users, roles,
-  # etc. They are usually contained within Collection objects.
+  # etc. They are usually contained within +Collection+ objects.
   #
   # The basic, identifying information for an +Entity+ (name, namespace, path
   # of the collection containing entity, and the service it's on) is all
   # accessible via getters (+name+, +namespace+, +resource+, +service+). All
   # the fields containing the +Entity+'s state, such as the capabilities of
-  # a role or whether an app should check for updates, are accessible with the
-  # +[]+ operator (e.g., +role["capabilities"]+ or +app["check_for_updates"]+).
+  # a role or whether an app should check for updates, are accessible with 
+  # the [] operator (for instance, +role+["+capabilities+"] or 
+  # +app+["+check_for_updates+"]).
   #
   # +Entity+ objects cache their state, so each lookup of a field does not
   # make a roundtrip to the server. The state may be refreshed by calling
@@ -63,7 +64,7 @@ module Splunk
     attr_reader :name
 
     ##
-    # The namespace of this Entity
+    # The namespace of this Entity.
     #
     # Returns: a +Namespace+.
     #
@@ -72,9 +73,9 @@ module Splunk
     ##
     # The path of the collection this entity lives in.
     #
-    # For example, on an app this will be +["apps", "local"]+.
+    # For example, on an app this will be ["+apps+", "+local+"].
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     attr_reader :resource
 
@@ -86,7 +87,7 @@ module Splunk
     attr_reader :service
 
     ##
-    # Delete this entity from the server.
+    # Deletes this entity from the server.
     #
     # Returns: +nil+.
     #
@@ -97,7 +98,7 @@ module Splunk
     end
 
     ##
-    # Fetch the field _key_ on this entity.
+    # Fetches the field _key_ on this entity.
     #
     # You may provide a default value. All values are returned
     # as strings.
@@ -116,29 +117,29 @@ module Splunk
     synonym "[]", "fetch"
 
     ##
-    # Return a Hash of the links associated with this entity.
+    # Returns a Hash of the links associated with this entity.
     #
-    # The links typically include keys such as +"list"+, +"edit"+, or
-    # +"disable"+.
+    # The links typically include keys such as "+list+", "+edit+", or
+    # "+disable+".
     #
-    # Returns: a Hash of Strings to URL objects.
+    # Returns: a +Hash+ of +Strings+ to URL objects.
     #
     def links()
       return @state["links"]
     end
 
     ##
-    # Return all or a specified subset of key/value pairs on this +Entity+
-    #
-    # DEPRECATED. Use fetch and +[]+ instead (since entities now cache their
+    # DEPRECATED. Use +fetch+ and [] instead (since entities now cache their
     # state).
     #
-    # In the absence of arguments, returns a Hash of all the fields on this
-    # +Entity+. If you specify one or more +String+s or +Array+s of +String+s,
-    # all the keys specified in the arguments will be returned in the Hash.
+    # Returns all or a specified subset of key/value pairs on this +Entity+
     #
-    # Returns: a Hash with Strings as keys, and Strings or Hashes or Arrays
-    #          as values.
+    # In the absence of arguments, returns a Hash of all the fields on this
+    # +Entity+. If you specify one or more +Strings+ or +Arrays+ of +Strings+,
+    # all the keys specified in the arguments will be returned in the +Hash+.
+    #
+    # Returns: a +Hash+ with +Strings+ as keys, and +Strings+ or +Hashes+ or 
+    # +Arrays+ as values.
     #
     def read(*field_list)
       warn "[DEPRECATION] Entity#read is deprecated. Use [] and fetch instead."
@@ -155,20 +156,20 @@ module Splunk
     end
 
     ##
-    # Return the metadata for this Entity.
+    # Returns the metadata for this +Entity+.
     #
     # This method is identical to
     #
-    #     entity.read(['eai:acl', 'eai:attributes')
+    #     entity.read('eai:acl', 'eai:attributes')
     #
-    # Returns: a Hash with the keys +"eai:acl"+ and +"eai:attributes"+.
+    # Returns: a +Hash+ with the keys "+eai:acl+" and "+eai:attributes+".
     #
     def readmeta
       read('eai:acl', 'eai:attributes')
     end
 
     ##
-    # Refresh the cached state of this +Entity+.
+    # Refreshes the cached state of this +Entity+.
     #
     # Returns: the +Entity+.
     #
@@ -190,11 +191,11 @@ module Splunk
     ##
     # Updates the values on the Entity specified in the arguments.
     #
-    # The arguments can be either a Hash or a sequence of +key => value+ pairs.
-    # This method does not refresh the +Entity+, so if you want to see the new
-    # values, you must call +refresh+ yourself.
+    # The arguments can be either a Hash or a sequence of +key+ => +value+ 
+    # pairs. This method does not refresh the +Entity+, so if you want to see 
+    # the new values, you must call +refresh+ yourself.
     #
-    # Whatever values you pass will be coerced to +String+s, so updating a
+    # Whatever values you pass will be coerced to +Strings+, so updating a
     # numeric field with an Integer, for example, will work perfectly well.
     #
     # Returns: the +Entity+.
@@ -219,7 +220,7 @@ module Splunk
     # As for +update+, _value_ may be anything that may be coerced sensibly
     # to a +String+.
     #
-    # Returns: the new value
+    # Returns: the new value.
     #
     def []=(key, value)
       update(key => value)
@@ -227,7 +228,7 @@ module Splunk
     end
 
     ##
-    # Disable this entity.
+    # Disables this entity.
     #
     # After a subsequent refresh, the "disabled" field will be set to "1".
     # Note that on some entities, such as indexes in Splunk 5.x, most other
@@ -243,7 +244,7 @@ module Splunk
     end
 
     ##
-    # Enable this entity.
+    # Enables this entity.
     #
     # After a subsequent refresh, the "disabled" field will be set to "0".
     #

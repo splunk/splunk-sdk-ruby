@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -30,7 +30,7 @@ require_relative 'entity/saved_search'
 require_relative 'entity/stanza'
 
 ##
-# This module provides the +Service+ class, which encapsulated the interaction
+# This module provides the +Service+ class, which encapsulates the interaction
 # with Splunk.
 #
 
@@ -67,7 +67,7 @@ module Splunk
   #     (defaults to nil)
   # * `:token` - a preauthenticated Splunk token (default to nil)
   #
-  # Returns: a logged in +Servie+ object.
+  # Returns: a logged in +Service+ object.
   #
   # *Example:*
   #
@@ -105,12 +105,12 @@ module Splunk
     end
 
     ##
-    # Return an Array of all the capabilities roles may have in Splunk.
+    # Returns an +Array+ of all the capabilities roles may have in Splunk.
     #
     # Capabilities are a fixed list on the server, so this method returns
     # an +Array+ rather than an +Entity+.
     #
-    # Returns: an +Array+ of +String+s.
+    # Returns: an +Array+ of +Strings+.
     #
     # *Example:*
     #
@@ -125,7 +125,7 @@ module Splunk
     end
 
     ##
-    # Return a +Collection+ of all the configuration files visible on Splunk.
+    # Returns a +Collection+ of all the configuration files visible on Splunk.
     #
     # The configurations you see are dependent on the namespace your +Service+
     # is connected with. So if you are connected in the system namespace, you
@@ -139,20 +139,20 @@ module Splunk
     # file.
     #
     # Returns: +Configurations+ (a subclass of +Collection+ containing
-    #          +ConfigurationFile+ objects).
+    # +ConfigurationFile+ objects).
     #
     def confs
       Configurations.new(self)
     end
 
     ##
-    # Create a blocking search.
+    # Creates a blocking search.
     #
-    # +create_oneshot+ starts a search _query_, and any optional arguments
-    # specified in a hash (which are identical to those taken by +create+).
-    # It then blocks until the job finished, and returns the results, as
-    # transformed by any transforming search commands in _query_ (equivalent
-    # to calling the +results+ method on a +Job+).
+    # The +create_oneshot+ method starts a search _query_, and any optional 
+    # arguments specified in a hash (which are identical to those taken by 
+    # +create+). It then blocks until the job finished, and returns the 
+    # results, as transformed by any transforming search commands in _query_ 
+    # (equivalent to calling the +results+ method on a +Job+).
     #
     # Returns: a stream readable by +ResultsReader+.
     #
@@ -161,23 +161,23 @@ module Splunk
     end
 
     ##
-    # Create an asynchronous search job.
+    # Creates an asynchronous search job.
     #
     # The search job requires a _query_, and takes a hash of other, optional
-    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST].
+    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs].
     #
     def create_search(query, args={})
       jobs.create(query, args)
     end
 
     ##
-    # Create a blocking search without transforming search commands.
+    # Creates a blocking search without transforming search commands.
     #
-    # +create_export+ starts a search _query_, and any optional arguments
-    # specified in a hash (which are identical to those taken by +create+).
-    # It then blocks until the job is finished, and returns the events
-    # found by the job before any transforming search commands (equivalent
-    # to calling +events+ on a +Job+).
+    # The +create_export+ method starts a search _query_, and any optional 
+    # arguments specified in a hash (which are identical to those taken by 
+    # the +create+ methods). It then blocks until the job is finished, and 
+    # returns the events found by the job before any transforming search 
+    # commands (equivalent to calling +events+ on a +Job+).
     #
     # Returns: a stream readable by +MultiResultsReader+.
     #
@@ -185,14 +185,14 @@ module Splunk
       jobs.create_export(query, args)
     end
 
-    # Deprecated. Use create_export instead.
+    # DEPRECATED. Use create_export instead.
     def create_stream(query, args={})
       warn "[DEPRECATION] Service#create_stream is deprecated. Use Service#create_export instead."
       jobs.create_export(query, args)
     end
 
     ##
-    # Return a +Collection+ of all +Index+ objects.
+    # Returns a +Collection+ of all +Index+ objects.
     #
     # +Index+ is a subclass of +Entity+, with additional methods for
     # manipulating indexes in particular.
@@ -202,13 +202,13 @@ module Splunk
     end
 
     ##
-    # Return a Hash containing Splunk's runtime information.
+    # Returns a +Hash+ containing Splunk's runtime information.
     #
-    # The Hash has keys such as +"build"+ (the number of the build of this
-    # Splunk instance) and +"cpu_arch"+ (what CPU Splunk is running on), and
-    # +"os_name"+ (the name of the operating system Splunk is running on).
+    # The +Hash+ has keys such as "+build+" (the number of the build of this
+    # Splunk instance) and "+cpu_arch+" (what CPU Splunk is running on), and
+    # "+os_name+" (the name of the operating system Splunk is running on).
     #
-    # Returns: A +Hash+ which has +String+s as both keys and values.
+    # Returns: A +Hash+ that has +Strings+ as both keys and values.
     #
     def info
       response = request(:namespace => Splunk::namespace(:sharing => "default"),
@@ -218,7 +218,7 @@ module Splunk
     end
 
     ##
-    # Return a collection of all the search jobs running on Splunk.
+    # Returns a collection of all the search jobs running on Splunk.
     #
     # The +Jobs+ object returned is a subclass of +Collection+, but also has
     # convenience methods for starting oneshot and streaming jobs as well as
@@ -258,23 +258,23 @@ module Splunk
     end
 
     ##
-    # Return a collection of the global messages on Splunk.
+    # Returns a collection of the global messages on Splunk.
     #
     # Messages include such things as warnings and notices that Splunk needs to
     # restart.
     #
-    # Returns: A +Collection+ of +Message+ objects (which are subclasses of
-    #          +Entity+).
+    # Returns: A +Collection+ of +Message+ objects (which are subclasses 
+    # of +Entity+).
     #
     def messages
       Messages.new(self, PATH_MESSAGES, entity_class=Message)
     end
 
     ##
-    # Return a collection of the roles on the system.
+    # Returns a collection of the roles on the system.
     #
     # Returns: A +Collection+ of +Entity+ objects representing the roles on
-    #          this Splunk instance.
+    # this Splunk instance.
     #
     def roles
       CaseInsensitiveCollection.new(self, PATH_ROLES)
@@ -291,8 +291,9 @@ module Splunk
     ##
     # Returns an +Entity+ of Splunk's mutable runtime information.
     #
-    # +settings+ includes values such as +"SPLUNK_DB"+ and +"SPLUNK_HOME"+.
-    # Unlike the values returned by +info+, these settings can be updated.
+    # The +settings+ method includes values such as "+SPLUNK_DB+" 
+    # and "+SPLUNK_HOME+". Unlike the values returned by the +info+ method, 
+    # these settings can be updated.
     #
     # Returns: an +Entity+ with all server settings.
     #
@@ -313,14 +314,14 @@ module Splunk
     end
 
     ##
-    # Return the version of Splunk this +Service+ is connected to.
+    # Returns the version of Splunk this +Service+ is connected to.
     #
     # The version is represented as an +Array+ of length 3, with each
     # of its components an integer. For example, on Splunk 4.3.5,
-    # +splunk_version+ would return +[4, 3, 5]+, while on Splunk 5.0.2,
-    # +splunk_version+ would return +[5, 0, 2]+.
+    # +splunk_version+ would return [+4, 3, 5+], while on Splunk 5.0.2,
+    # +splunk_version+ would return [+5, 0, 2+].
     #
-    # Returns: An +Array+ of +Integer+s of length 3.
+    # Returns: An +Array+ of +Integers+ of length 3.
     #
     def splunk_version
       info["version"].split(".").map() {|v| Integer(v)}

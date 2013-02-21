@@ -27,16 +27,13 @@ that are enabled by Splunk's unique capabilities.
 3.  Splunk, in using the Apache license, is not providing any warranties or 
     indemnification, or accepting any liabilities with the Preview SDK.
 
-4.  Splunk is not accepting any Contributions to the Preview release of 
-    the SDK. All Contributions during the Preview SDK will be returned without 
-    review.
-
 ## Getting started with the Splunk SDK for Ruby
 
 The Splunk SDK for Ruby contains code and some examples that show how to
 programmatically interact with Splunk for a variety of scenarios, including
 searching, saved searches, configuration, and many more. It's still not quite 
 complete and things like Inputs are missing. Stay tuned.
+
 
 ### Requirements
 
@@ -58,7 +55,7 @@ The Splunk SDK for Ruby requires Ruby 1.9.2 or later.
 Get the Splunk SDK for Ruby from [GitHub](https://www.github.com) and clone the
 resources to your computer. Use the following command:
 
-    git clone https://github.com/splunk/splunk-sdk-ruby.git
+    git clone https://github.com/splunk/splunk-sdk-ruby.git    
 
 ### Installing the Splunk SDK for Ruby
 
@@ -268,7 +265,7 @@ repository.
 ## Resources
 
 You can find anything having to do with developing on Splunk at the Splunk
-developer portal:
+Developer Portal:
 
 * <http://dev.splunk.com>
 

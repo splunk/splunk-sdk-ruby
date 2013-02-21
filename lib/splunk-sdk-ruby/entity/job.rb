@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -55,7 +55,7 @@ module Splunk
     end
 
     ##
-    # Cancel this search job.
+    # Cancels this search job.
     #
     # Cancelling the job stops the search and deletes the results cache.
     #
@@ -74,7 +74,7 @@ module Splunk
     end
 
     ##
-    # Issue a control request to this job.
+    # Issues a control request to this job.
     #
     # _args_ should be a hash with at least the key +:action+ (with a value such
     # as +"cancel"+ or +"setpriority"+).
@@ -113,7 +113,7 @@ module Splunk
     end
 
     ##
-    # Enable preview generation for this job.
+    # Enables preview generation for this job.
     #
     # Enabling previews may slow the search down considerably, but will
     # make the +preview+ method return events before the job is finished.
@@ -125,7 +125,7 @@ module Splunk
     end
 
     ##
-    # Finalize this search job.
+    # Finalizes this search job.
     #
     # Stops the search and provides whatever results have been obtained so far.
     # (retrievable via +results+).
@@ -170,7 +170,7 @@ module Splunk
     end
 
     ##
-    # Pause this search job.
+    # Pauses this search job.
     #
     # Use +unpause+ to resume.
     #
@@ -180,7 +180,7 @@ module Splunk
       control(:action => "pause")
     end
 
-    # Return a set of preview events from this +Job+.
+    # Returns a set of preview events from this +Job+.
     #
     # If the search job is finished, this method is identical to +results+.
     # Otherwise, it will return an empty results set unless preview is enabled
@@ -247,7 +247,7 @@ module Splunk
     end
 
     ##
-    # Return the +Job+'s search id.
+    # Return the +Job's+ search id.
     #
     # Returns: a +String+.
     #
@@ -304,7 +304,7 @@ module Splunk
     end
 
     ##
-    # Reset the time to live for this Job.
+    # Resets the time to live for this Job.
     #
     # Calling touch resets the remaining time to live for the Job to its
     # original value.
@@ -316,7 +316,7 @@ module Splunk
     end
 
     ##
-    # Set the time to live (TTL) of this +Job+.
+    # Sets the time to live (TTL) of this +Job+.
     #
     # The time to live is a number in seconds saying how long the search job
     # should be on the Splunk system before being deleted.
