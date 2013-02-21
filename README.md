@@ -56,25 +56,25 @@ resources to your computer.  Use the following command:
 
 ### Installing
 
-We highly recommend that you use _bundler_. See http://gembundler.com/ for more
-info.
+If you have cloned the Splunk SDK for Ruby from GitHub, you should first install the latest version of `rake` using
 
-Add this line to your application's Gemfile:
+    $ gem install rake
+
+Then you can install the Splunk SDK for Ruby by running the following command from the top level directory of the repository
+
+    $ rake test
+
+You can also install the Splunk SDK for Ruby directly from RubyGems, without cloning the repository or downloading the zip file, by running
+
+    $ gem install splunk-sdk-ruby
+
+If you are using the Splunk SDK for Ruby in an application, we highly recommend that you use [bundler](http://gembundler.com/), which will take care of installing your the prerequisites when you deploy your application. Add the following line to your application's Gemfile to make bundler aware of the Splunk SDK for Ruby
 
     gem 'splunk-sdk-ruby'
 
-And then execute:
+And then run the follwing command to install all your application's dependencies, including the Splunk SDK for Ruby
 
     $ bundle
-
-If you are not using bundler, than you can install it like this:
-
-    $ gem build splunk-sdk-ruby.gemspec
-    $ gem install splunk-sdk-ruby
-
-or install it from Rubygems without fetching it from GitHub at all with
-
-    $ gem install splunk-sdk-ruby
 
 ### Requirements
 
