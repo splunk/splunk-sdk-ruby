@@ -69,14 +69,15 @@ class JobsTestCase < TestCaseWithSplunkConnection
     end
   end
 
-  def test_stream_with_garbage_fails
+  def test_export_with_garbage_fails
     assert_raises(SplunkHTTPError) do
       @service.jobs.create_export("abavadfa;ejwfawfasdfadf wfw").to_a()
     end
   end
 
-  def test_stream
+  def test_export
     stream = @service.jobs.create_export(QUERY)
+    assert_true(stream.is_a?(ExportStream))
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
   end
@@ -85,10 +86,20 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # Test that the convenience method Service#create_export behaves the same
   # way as Jobs#create_export.
   #
-  def test_stream_on_service
+  def test_export_on_service
     stream = @service.create_export(QUERY)
     results = ResultsReader.new(stream).to_a()
     assert_equal(3, results.length())
+  end
+
+  ##
+  # Test that ResultsReader parses reporting export searches correctly
+  # (by only returning the final, nonpreview results).
+  #
+  def test_export_on_reporting_search
+    stream = @service.create_export("search index=_internal earliest=-2d | stats count(_raw) by method")
+    results = ResultsReader.new(stream).to_a()
+    assert_true(3 >= results.length())
   end
 
   def test_each_and_values
