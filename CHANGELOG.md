@@ -1,6 +1,6 @@
 # Splunk SDK for Ruby Changelog
 
-## Private preview to 0.1.0
+## Private Preview to 0.1.0
 
 ### Breaking changes
 
@@ -131,8 +131,8 @@
   entities have the following additional methods beyond Entity:
   * dispatch
   * history
-* Added the following methods to Stanza (was: Conf). In the notation below, synonym sets are separated
-  by slashes, and names in a set of synonyms that already existed are
+* Added the following methods to Stanza (was: Conf). In the notation below, synonym 
+  sets are separated by slashes, and names in a set of synonyms that already existed are
   surrounded by square brackets:
   * length
   * update/[submit]
