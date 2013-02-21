@@ -1,5 +1,6 @@
 # The Splunk Software Development Kit for Ruby (Preview Release)
 
+#### Version 0.1
 This Splunk Software Development Kit (SDK) contains library code and examples
 designed to enable developers to build applications using Splunk.
 
@@ -16,23 +17,20 @@ The Splunk developer platform enables developers to take advantage of the
 same technology used by the Splunk product to build exciting new applications
 that are enabled by Splunk's unique capabilities.
 
-## This SDK is a Preview Release
+1.  This Preview release is pre-beta, and therefore is incomplete and may have 
+    bugs. A Beta release is planned prior to a general release. 
 
-1.  This Preview release is a pre-beta release. It is incomplete and may have 
-    bugs. There is also a beta planned for release prior to a general release. 
-
-2.  The Apache license only applies to this SDK and no other Software provided 
+2.  The Apache license only applies to this SDK and no other software provided 
     by Splunk.
 
 3.  Splunk, in using the Apache license, is not providing any warranties or 
-    indemnification, or accepting any liabilities with the Preview SDK.
+    indemnification, or accepting any liabilities with the Preview of this SDK.
 
 ## Getting started with the Splunk SDK for Ruby
 
 The Splunk SDK for Ruby contains code and some examples that show how to
 programmatically interact with Splunk for a variety of scenarios, including
-searching, saved searches, configuration, and many more. It's still not quite 
-complete and things like Inputs are missing. Stay tuned.
+searching, saved searches, configuration, and many more. This SDK is still in progress and is missing features such as inputs. Stay tuned.
 
 
 ### Requirements
@@ -57,46 +55,48 @@ resources to your computer. Use the following command:
 
     git clone https://github.com/splunk/splunk-sdk-ruby.git    
 
+You can also download the SDK as a ZIP file, or install it directly (see below). 
+
+
 ### Installing the Splunk SDK for Ruby
 
 If you have cloned the Splunk SDK for Ruby from GitHub, you should first
-install the latest version of `rake` using
+install the latest version of `rake`. For example, open a command prompt and enter the following:
 
-    $ gem install rake
+    gem install rake
 
 Then you can install the Splunk SDK for Ruby by running the following
-command from the top level directory of the repository
+command from the root of the repository (**/splunk-sdk-ruby**):
 
-    $ rake test
+    rake install
 
-You can also install the Splunk SDK for Ruby directly from RubyGems,
-without cloning the repository or downloading the zip file, by running
+Or, install the Splunk SDK for Ruby directly from RubyGems,
+without cloning the repository or downloading the ZIP file, by running:
 
-    $ gem install splunk-sdk-ruby
+    gem install splunk-sdk-ruby
 
 If you are using the Splunk SDK for Ruby in an application, we highly
-recommend that you use [bundler](http://gembundler.com/), which will take
-care of installing your the prerequisites when you deploy your application.
-Add the following line to your application's Gemfile to make bundler aware
-of the Splunk SDK for Ruby
+recommend that you use [bundler](http://gembundler.com/), which installs the prerequisites when you deploy your application. Add the following line to your application's Gemfile to make bundler aware of the Splunk SDK for Ruby:
 
     gem 'splunk-sdk-ruby'
 
-And then run the follwing command to install all your application's
-dependencies, including the Splunk SDK for Ruby
+Then run the following command to install all of your application's
+dependencies, including the Splunk SDK for Ruby:
 
-    $ bundle
+    bundle
 
-There are examples located in several locations within the Splunk SDK for Ruby:
+#### Examples
 
-* The Overview section of this document
-* The **examples/** directory in the SDK for Ruby repository 
-* In-line with the code within the SDK, and in the documentation
+Examples are located in several locations within the Splunk SDK for Ruby:
+
+* The **/splunk-sdk-ruby/examples/** directory
+* Inline with the source code within the SDK
+* In the documentation on the [Splunk Developer Portal](http://dev.splunk.com/view/ruby-sdk/SP-CAAAENQ).
 
 #### Prepare for the unit tests
 
 First, do not run the test suite against your production Splunk server! Install
-another copy and run it against that.
+another copy of Splunk and run the test suite against that.
 
 Second, the versions of Rake and Test::Unit that ship with various Ruby versions
 are broken. They work enough to install the SDK, but you cannot run the unit
@@ -259,19 +259,56 @@ Here is example code to print the names of all the users in the system:
       puts user.name
     end
 
-For more examples, see the **examples/** directory in the SDK for Ruby 
+For more examples, see the **examples/** directory in the Splunk SDK for Ruby 
 repository.
 
-## Resources
+## Repository
 
-You can find anything having to do with developing on Splunk at the Splunk
-Developer Portal:
+<table>
 
-* <http://dev.splunk.com>
+<tr>
+<tr>
+<td><b>/examples</b></td>
+<td>Examples demonstrating various SDK features</td>
+</tr>
 
-The Splunk REST API is documented at:
+<tr>
+<td><b>/lib</b></td>
+<td>Source for the Splunk library modules</td>
+</tr>
 
-* <http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI>
+<tr>
+<td><b>/test</b></td>
+<td>Source for unit tests</td>
+</tr>
+
+</table>
+
+### Changelog
+
+The **CHANGELOG.md** file in the root of the repository contains a description
+of changes for each version of the SDK. You can also find it online at
+[https://github.com/splunk/splunk-sdk-ruby/blob/master/CHANGELOG.md](https://github.com/splunk/splunk-sdk-ruby/blob/master/CHANGELOG.md).
+
+### Branches
+
+The **master** branch always represents a stable and released version of the SDK.
+
+## Documentation and resources
+
+If you need to know more: 
+
+* For all things developer with Splunk, your main resource is the [Splunk Developer Portal](http://dev.splunk.com).
+
+* For conceptual and how-to documentation, see the [Overview of the Splunk SDK for Ruby](http://dev.splunk.com/view/SP-CAAAENQ).
+
+* For API reference documentation, see the [Splunk SDK for Ruby Reference](http://docs.splunk.com/Documentation/RubySDK).
+
+* For more about the Splunk REST API, see the [REST API Reference](http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI).
+
+* For more about about Splunk in general, see [Splunk>Docs](http://docs.splunk.com/Documentation/Splunk).
+
+* For more about this SDK's repository, see our [GitHub Wiki](https://github.com/splunk/splunk-sdk-ruby/wiki/).
 
 ## Community
 
@@ -321,10 +358,11 @@ If you would like to contribute to the SDK, go here for more information:
 
 ### Support
 
-* SDKs in Preview are not Splunk supported. Once the SDK for Ruby moves to 
+* SDKs in Preview are not Splunk supported. Once the Splunk SDK for Ruby moves to 
 an open beta we will provide more detail on support.
 
-* Issues should be filed here:  https://github.com/splunk/splunk-sdk-ruby/issues
+* File any issues on 
+   [GitHub](https://github.com/splunk/splunk-sdk-ruby/issues).
 
 ### Contact Us
 
