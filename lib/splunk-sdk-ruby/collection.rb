@@ -90,7 +90,7 @@ module Splunk
     # visible in this collection named _name_, you _must_ provide a namespace
     # or +assoc+ will raise an +AmbiguousEntityReference+ error.
     #
-    # Returns: an +Array+ of [+_name_+, +_entity_+] or +nil+ if there is
+    # Returns: an +Array+ of [_name_, _entity_] or +nil+ if there is
     # no matching element.
     #
     def assoc(name, namespace=nil)
@@ -107,7 +107,7 @@ module Splunk
     #
     # The Atom entry should be in the form of an entry from +AtomFeed+.
     #
-    # Returns: An object of class @entity_class.
+    # Returns: An object of class @+entity_class+.
     #
     def atom_entry_to_entity(entry)
       name = entry["title"]

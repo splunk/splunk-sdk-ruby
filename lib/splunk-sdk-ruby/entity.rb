@@ -31,8 +31,8 @@ module Splunk
   # accessible via getters (+name+, +namespace+, +resource+, +service+). All
   # the fields containing the +Entity+'s state, such as the capabilities of
   # a role or whether an app should check for updates, are accessible with 
-  # the [] operator (for instance, +role+["capabilities"] or 
-  # +app+["check_for_updates"]).
+  # the [] operator (for instance, +role+["+capabilities+"] or 
+  # +app+["+check_for_updates+"]).
   #
   # +Entity+ objects cache their state, so each lookup of a field does not
   # make a roundtrip to the server. The state may be refreshed by calling
