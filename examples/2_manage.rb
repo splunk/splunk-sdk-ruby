@@ -31,7 +31,8 @@ config = {
 service = Splunk::connect(config)
 
 # Service provides convenience methods to get to the various collections in
-# Splunk. For example, we'll list all the apps and all the users.
+# Splunk. For example, we'll list all the apps, all the users, and all the
+# search jobs.
 puts "Apps:"
 service.apps.each do |app|
   puts "  #{app.name}"
@@ -41,6 +42,11 @@ puts
 puts "User:"
 service.users.each do |user|
   puts "  #{user.name}"
+end
+
+puts "Jobs:"
+service.jobs.each do |job|
+  puts "  #{job.sid}: #{job["eventSearch"]}"
 end
 
 # Collections have most of the methods you would expect from Hash.
