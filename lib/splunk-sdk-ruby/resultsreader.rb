@@ -70,6 +70,7 @@
 require 'stringio'
 
 require_relative 'xml_shim'
+require_relative 'collection/jobs' # To access ExportStream
 
 module Splunk
   # +ResultsReader+ parses Splunk's XML format for results into Ruby objects.
@@ -85,7 +86,9 @@ module Splunk
   # Do not use +ResultsReader+ with the results of the +create_export+ or
   # +create_stream+ methods on +Service+ or +Jobs+. These methods use endpoints
   # which return a different set of data structures. Use +MultiResultsReader+
-  # instead for those cases.
+  # instead for those cases. If you do use +ResultsReader+, it will return
+  # a concatenation of all non-preview events in the stream, but that behavior
+  # should be considered deprecated, and will result in a warning.
   #
   # The ResultsReader object has two additional methods:
   #
@@ -132,11 +135,30 @@ module Splunk
     attr_reader :fields
 
     def initialize(text_or_stream)
-      stream = normalize_stream(text_or_stream)
+      if text_or_stream.nil?
+        stream = StringIO.new("")
+      elsif stream.is_a?(ExportStream)
+        # The sensible behavior on streams from the export endpoints is to
+        # skip all preview results and concatenate all others. The export
+        # functions wrap their streams in ExportStream to mark that they need
+        # this special handling.
+        @is_export = true
+        @reader = MultiResultsReader.new(text_or_stream).final_results()
+        @is_preview = @reader.is_preview?
+        @fields = @reader.fields
+        return
+      elsif !text_or_stream.respond_to?(:read)
+        # Strip because the XML libraries can be pissy.
+        stream = StringIO.new(text_or_stream.strip)
+      else
+        stream = text_or_stream
+      end
 
       if stream.eof?
         @is_preview = nil
         @fields = []
+      elsif stream.is_a?(ExportStream)
+
       else
         # We use a SAX parser. +listener+ is the event handler, but a SAX
         # parser won't usually transfer control during parsing. 
@@ -159,16 +181,25 @@ module Splunk
     end
 
     def each()
-      enum = Enumerator.new() do |yielder|
-        if !@iteration_fiber.nil? # Handle the case of empty files
-          @reached_end = false
-          while true
-            result = @iteration_fiber.resume
-            break if result.nil? or result == :end_of_results_set
-            yielder << result
+      # If we have been passed a stream from an export endpoint, it should be
+      # marked as such, and we handle it differently.
+      if @is_export
+        warn "[DEPRECATED] Do not use ResultsReader on the output of the " +
+                 "export endpoint. Use MultiResultsReader instead."
+        reader = MultiResultsReader.new(@stream).final_results()
+        enum = reader.each()
+      else
+        enum = Enumerator.new() do |yielder|
+          if !@iteration_fiber.nil? # Handle the case of empty files
+            @reached_end = false
+            while true
+              result = @iteration_fiber.resume
+              break if result.nil? or result == :end_of_results_set
+              yielder << result
+            end
           end
+          @reached_end = true
         end
-        @reached_end = true
       end
 
       if block_given? # Apply the enumerator to a block if we have one
@@ -218,17 +249,23 @@ module Splunk
       # right point, so if we reach the end of a results element and @fields
       # is still :no_fieldOrder_found, we yield an empty array at that point.
       @fields = :no_fieldOrder_found
+      @concatenate = false
+      @is_preview = nil
       @state = :base
       @states = {
           # Toplevel state.
           :base => {
               :start_element => lambda do |name, attributes|
                 if name == "results"
-                  is_preview = attributes["preview"] == "1"
-                  Fiber.yield(is_preview)
+                  if !@concatenate
+                    @is_preview = attributes["preview"] == "1"
+                    Fiber.yield(@is_preview)
+                  end
                 elsif name == "fieldOrder"
-                  @state = :field_order
-                  @fields = []
+                  if !@concatenate
+                    @state = :field_order
+                    @fields = []
+                  end
                 elsif name == "result"
                   @state = :result
                   @current_offset = Integer(attributes["offset"])
@@ -236,11 +273,16 @@ module Splunk
                 end
               end,
               :end_element => lambda do |name|
-                if name == "results"
+                if name == "results" and !@concatenate
                   Fiber.yield([]) if @fields == :no_fieldOrder_found
-                  # Reset the fieldOrder
-                  @fields = :no_fieldOrder_found
-                  Fiber.yield(:end_of_results_set)
+
+                  if !@is_preview # Start concatenating events
+                    @concatenate = true
+                  else
+                    # Reset the fieldOrder
+                    @fields = :no_fieldOrder_found
+                    Fiber.yield(:end_of_results_set)
+                  end
                 end
               end
           },
@@ -258,7 +300,7 @@ module Splunk
                   @state = :base
                   Fiber.yield(@fields)
                 end
-              end,
+              end
           },
           # When the parser in `:field_order` state encounters
           # a `field` element, it jumps to this state to record it.
@@ -490,7 +532,15 @@ module Splunk
     include Enumerable
 
     def initialize(text_or_stream)
-      stream = normalize_stream(text_or_stream)
+      if text_or_stream.nil?
+        stream = StringIO.new("")
+      elsif !text_or_stream.respond_to?(:read)
+        # Strip because the XML libraries can be pissy.
+        stream = StringIO.new(text_or_stream.strip)
+      else
+        stream = text_or_stream
+      end
+
       listener = ResultsListener.new()
       @iteration_fiber = Fiber.new do
         if $splunk_xml_library == :nokogiri
@@ -555,7 +605,7 @@ module Splunk
     def final_results()
       each do |reader|
         if reader.is_preview?
-          reader.skip_remaining_events()
+          reader.skip_remaining_results()
         else
           return reader
         end
@@ -661,25 +711,6 @@ module Splunk
       else
         return response
       end
-    end
-  end
-
-
-  ##
-  # Makes _text_or_stream_ into a stream-like object.
-  #
-  # +ResultsReader+ and +MultiResultsReader+ both accept strings and stream-like
-  # objects, but internally need something stream-like. This function normalizes
-  # to something stream-like.
-  #
-  def normalize_stream(text_or_stream)
-    if text_or_stream.nil?
-      stream = StringIO.new("")
-    elsif !text_or_stream.respond_to?(:read)
-      # Strip because the XML libraries can be pissy.
-      stream = StringIO.new(text_or_stream.strip)
-    else
-      stream = text_or_stream
     end
   end
 end

@@ -95,7 +95,8 @@ module Splunk
     # *Examples:*:
     #
     #     require 'splunk-sdk-ruby'
-    #     service = Splunk::Service.connect
+    #     service = Splunk::connect(:username => 'admin', 
+    #                               :password => 'changeme')
     #     service.apps.each do |app|
     #       puts app.name
     #     end
@@ -114,7 +115,8 @@ module Splunk
     #
     # *Example:*
     #
-    #   service = Service.connect(:username => 'admin', :password => 'changeme')
+    #   service = Splunk::connect(:username => 'admin', 
+    #                             :password => 'changeme')
     #   puts service.capabilities
     #   # Prints: ["admin_all_objects", "change_authentication",
     #   #          "change_own_password", "delete_by_keyword", ...]
