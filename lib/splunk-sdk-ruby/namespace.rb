@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -24,9 +24,9 @@
 # use for the query.
 #
 # Some namespaces can contain wildcards or default values filled in by Splunk.
-# We call such namespaces wildcard, since they cannot be the namespace of an
-# entity, only a query. Namespaces which can be the namespace of an entity we
-# call exact.
+# We call such namespaces _wildcard_, since they cannot be the namespace of an
+# entity, only a query. Namespaces that can be the namespace of an entity are
+# called _exact_.
 #
 # We distinguish six kinds of namespace, each of which is represented by a
 # separate class:

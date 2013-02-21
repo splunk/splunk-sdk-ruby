@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -116,21 +116,21 @@ module Splunk
     # Typically this has keys such as "+author+", "+title+", and
     # "+totalResults+".
     #
-    # Returns: a Hash with Strings as keys.
+    # Returns: a +Hash+ with +Strings+ as keys.
     #
     attr_reader :metadata
 
     ##
     # The entries in the feed.
     #
-    # Returns: an Array containing hashes representing each entry in the feed.
+    # Returns: an +Array+ containing +Hashes+ that represent each entry in the feed.
     #
     attr_reader :entries
 
     private # All methods below here are internal to AtomFeed.
 
     ##
-    # Produces a String from the children of _element_.
+    # Produces a +String+ from the children of _element_.
     #
     # _element_ should be either a REXML or Nokogiri element.
     #
@@ -152,7 +152,7 @@ module Splunk
     # Reads a feed from the the XML in _feed_.
     #
     # Returns: [+metadata, entries+], where +metadata+ is a hash of feed
-    # headers, and +entries+ is an +Array+ of +Hash+es representing the feed.
+    # headers, and +entries+ is an +Array+ of +Hashes+ representing the feed.
     #
     def read_feed(feed)
       metadata = {"links" => {}, "messages" => []}
@@ -197,7 +197,7 @@ module Splunk
     ##
     # Reads a single entry from the XML in _entry_.
     #
-    # Returns: a Hash representing the entry.
+    # Returns: a +Hash+ representing the entry.
     #
     def read_entry(entry)
       result = {"links" => {}}
@@ -218,8 +218,8 @@ module Splunk
     ##
     # Reads a name and link from the XML in _link_.
     #
-    # Returns: [+name, link+], where +name+ is a +String+ giving the name of
-    # the link, and +link+ is a +URI+.
+    # Returns: [+name, link+], where _name_ is a +String+ giving the name of
+    # the link, and _link_ is a +URI+.
     #
     def read_link(link)
       # To handle elements of the form:
@@ -290,7 +290,7 @@ module Splunk
     end
 
     ##
-    # Reads an Array from the XML in _list_.
+    # Reads an +Array+ from the XML in _list_.
     #
     # Returns: an +Array+.
     #

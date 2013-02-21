@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -42,7 +42,7 @@ module Splunk
 
     def create(name, args={})
       # Don't bother catching the response. It either succeeds and returns
-      # an empty body, or fails and throws a SplunkHTTPError.
+      # an empty body, or fails and throws a +SplunkHTTPError+.
       request_args = {:method => :POST,
                       :resource => PATH_CONFS,
                       :body => {"__conf" => name}}

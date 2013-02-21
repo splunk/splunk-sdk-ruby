@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -30,9 +30,9 @@ module Splunk
     def initialize(service, resource, entity_class=Entity)
       super(service, resource, entity_class)
 
-      # CaseInsensitiveCollection is only currently used for users and roles,
-      # both of which require @always_fetch=true. This property is not inherent
-      # to CaseInsensitiveCollections in any particular way. It was just a
+      # +CaseInsensitiveCollection+ is only currently used for users and roles,
+      # both of which require @+always_fetch=true+. This property is not inherent
+      # to +CaseInsensitiveCollection+ in any particular way. It was just a
       # convenient place to put it.
       @always_fetch = true
     end

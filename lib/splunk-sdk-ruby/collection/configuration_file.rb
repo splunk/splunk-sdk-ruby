@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -22,10 +22,10 @@ require_relative '../collection'
 
 module Splunk
   ##
-  # ConfigurationFile is a collection containing configuration stanzas.
+  # +ConfigurationFile+ is a collection containing configuration stanzas.
   #
   # This class's API is identical to +Collection+, so a user should not
-  # have to be aware of its existance.
+  # have to be aware of its existence.
   #
   class ConfigurationFile < Collection # :nodoc:
     # This class is unusual: it is the element of a collection itself,

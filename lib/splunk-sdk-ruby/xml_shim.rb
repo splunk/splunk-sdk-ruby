@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -75,7 +75,7 @@ module Splunk
   end
 
   ##
-  # Return the text contained in the first element matching _xpath_ in _text_.
+  # Returns the text contained in the first element matching _xpath_ in _text_.
   #
   # Arguments:
   # * _xpath_: (+String+) An XPath specifier. It should refer to an element

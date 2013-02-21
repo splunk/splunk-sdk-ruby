@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -29,7 +29,7 @@ module Splunk
     synonym "submit", "update"
 
     ##
-    # Return the number of elements in the stanza.
+    # Returns the number of elements in the stanza.
     #
     # The actual Atom feed returned will have extra fields giving metadata
     # about the stanza, which will not be counted.

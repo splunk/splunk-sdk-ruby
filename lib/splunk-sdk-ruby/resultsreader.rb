@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -30,12 +30,12 @@
 #--
 # There are two basic designs we could have used for handling the
 # search/jobs/export output. We could either have the user call
-# ResultsReader#each multiple times, each time going through the next results
+# +ResultsReader#each+ multiple times, each time going through the next results
 # set, or we could do what we have here and have an outer iterator that yields
-# distinct ResultsReader objects for each results set.
+# distinct +ResultsReader+ objects for each results set.
 #
 # The outer iterator is syntactically somewhat clearer, but you must invalidate
-# the previous ResultsReader objects before yielding a new one so that code
+# the previous +ResultsReader+ objects before yielding a new one so that code
 # like
 #
 #     readers = []
@@ -47,11 +47,11 @@
 #     end
 #
 # will throw an error on the second each. The right behavior is to throw an
-# exception in the ResultsReader each if it is invoked out of order. This
+# exception in the +ResultsReader+ each if it is invoked out of order. This
 # problem doesn't affect the all-in-one design.
 #
 # However, in the all-in-one design, it is impossible to set the is_preview and
-# fields instance variables of the ResultsReader correctly between invocations
+# fields instance variables of the +ResultsReader+ correctly between invocations
 # of each. This makes code with the all-in-one design such as
 #
 #     while reader.is_preview
@@ -72,7 +72,7 @@ require 'stringio'
 require_relative 'xml_shim'
 
 module Splunk
-  # ResultsReader parses Splunk's XML format for results into Ruby objects.
+  # +ResultsReader+ parses Splunk's XML format for results into Ruby objects.
   #
   # You can use both Nokogiri and REXML. By default, the +ResultsReader+ will
   # try to use Nokogiri, and if it is not available will fall back to REXML. If
@@ -189,7 +189,7 @@ module Splunk
   end
 
   ##
-  # ResultsListener is the SAX event handler for ResultsReader.
+  # +ResultsListener+ is the SAX event handler for +ResultsReader+.
   #
   # The authors of Nokogiri decided to make their SAX interface
   # slightly incompatible with that of REXML. For example, REXML
@@ -420,16 +420,16 @@ module Splunk
   end
 
   ##
-  # Version of ResultsReader that accepts an external parsing state.
+  # Version of +ResultsReader+ that accepts an external parsing state.
   #
-  # ResultsReader sets up its own Fiber for doing SAX parsing of the XML,
-  # but for the MultiResultsReader, we want to share a single fiber among
-  # all the results readers that we create. PuppetResultsReader takes
+  # +ResultsReader+ sets up its own Fiber for doing SAX parsing of the XML,
+  # but for the +MultiResultsReader+, we want to share a single fiber among
+  # all the results readers that we create. +PuppetResultsReader+ takes
   # the fiber, is_preview, and fields information from its constructor
   # and then exposes the same methods as ResultsReader.
   #
-  # You should never create an instance of PuppetResultsReader by hand. It
-  # will be passed back from iterating over a MultiResultsReader.
+  # You should never create an instance of +PuppetResultsReader+ by hand. It
+  # will be passed back from iterating over a +MultiResultsReader+.
   #
   class PuppetResultsReader < ResultsReader
     def initialize(fiber, is_preview, fields)
@@ -460,7 +460,7 @@ module Splunk
   # They will return a sequence of preview results sets, and then (if they are
   # not real time searches) a final results set.
   #
-  # MultiResultsReader takes the stream returned by such a call, and provides
+  # +MultiResultsReader+ takes the stream returned by such a call, and provides
   # iteration over each results set, or access to only the final, non-preview
   # results set.
   #
@@ -527,7 +527,7 @@ module Splunk
           rescue FiberError
             # After the last result element, the next evaluation of
             # 'is_preview = @iteration_fiber.resume' above will throw a
-            # FiberError when the fiber terminates without yielding any
+            # +FiberError+ when the fiber terminates without yielding any
             # additional values. We handle the control flow in this way so
             # that the final code in the fiber to handle cleanup always gets
             # run.
@@ -543,14 +543,14 @@ module Splunk
     end
 
     ##
-    # Return a ResultsReader over only the non-preview results.
+    # Returns a +ResultsReader+ over only the non-preview results.
     #
     # If you run this method against a real time search job, which only ever
     # produces preview results, it will loop forever. If you run it against
     # a non-reporting system (that is, one that filters and extracts fields
     # from events, but doesn't calculate a whole new set of events), you will
     # get only the first few results, since you should be using the normal
-    # ResultsReader, not MultiResultsReader, in that case.
+    # +ResultsReader+, not +MultiResultsReader+, in that case.
     #
     def final_results()
       each do |reader|
@@ -567,7 +567,7 @@ module Splunk
   ##
   # Stream transformer that filters out XML DTD definitions.
   #
-  # XMLDTDFilter takes anything between <? and > to be a DTD. It does no
+  # +XMLDTDFilter+ takes anything between <? and > to be a DTD. It does no
   # escaping of quoted text.
   #
   class XMLDTDFilter < IO
@@ -625,7 +625,7 @@ module Splunk
   end
 
   ##
-  # Return a stream which concatenates all the streams passed to it.
+  # Returns a stream which concatenates all the streams passed to it.
   #
   class ConcatenatedStream < IO
     def initialize(*streams)
@@ -666,9 +666,9 @@ module Splunk
 
 
   ##
-  # Make _text_or_stream_ into a stream-like object.
+  # Makes _text_or_stream_ into a stream-like object.
   #
-  # ResultsReader and MultiResultsReader both accept strings and stream-like
+  # +ResultsReader+ and +MultiResultsReader+ both accept strings and stream-like
   # objects, but internally need something stream-like. This function normalizes
   # to something stream-like.
   #

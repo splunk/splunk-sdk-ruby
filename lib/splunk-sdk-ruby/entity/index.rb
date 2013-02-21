@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -28,7 +28,7 @@ module Splunk
   # to write data to an index and delete all data from an index.
   #
   class Index < Entity
-    # Open a socket to write events to this index.
+    # Opens a socket to write events to this index.
     #
     # Write events to the returned stream Socket, and Splunk will index the
     # data. You can optionally pass a hash of _host_, _source_, and
@@ -70,9 +70,11 @@ module Splunk
     end
 
     ##
-    # Delete all events in this index. DEPRECATED: Delete the index instead.
+    # DEPRECATED: Delete the index instead.
     #
-    # +clean+ will wait until the operation completes, or _timeout_
+    # Deletes all events in this index. 
+    #
+    # The +clean+ method will wait until the operation completes, or _timeout_
     # seconds have passed. By default, _timeout_ is 100 seconds.
     #
     # Cleaning an index is done by setting +maxTotalDataSizeMG+ and
@@ -104,7 +106,7 @@ module Splunk
         end
       end
 
-      # Restore the original state
+      # Restores the original state
       if !was_disabled_initially
         enable()
         if !needed_restart_initially and @service.server_requires_restart?
@@ -116,7 +118,9 @@ module Splunk
     end
 
     ##
-    # Tell Splunk to roll the hot buckets in this index now. DEPRECATED.
+    # DEPRECATED.
+    #
+    # Tells Splunk to roll the hot buckets in this index now. 
     #
     # A Splunk index is a collection of buckets containing events. A bucket
     # begins life "hot", where events may be written into it. At some point,
@@ -135,7 +139,7 @@ module Splunk
     end
 
     ##
-    # Write a single event to this index.
+    # Writes a single event to this index.
     #
     # _event_ is the text of the event. You can optionally pass a hash
     # with the optional keys +:host+, +:source+, and +:sourcetype+.
@@ -158,13 +162,13 @@ module Splunk
     end
 
     ##
-    # Upload a file accessible by the Splunk server.
+    # Uploads a file accessible by the Splunk server.
     #
     # _filename_ should be the full path to the file on the server where
     # Splunk is running. Besides _filename_, +upload+ also takes a hash of
     # optional arguments, all of which take +String+s:
     #
-    # * +:host+ - The host for the events
+    # * +:host+ - The host for the events.
     # * +:host_regex+ - A regex to be used to extract a 'host' field from
     #   the path. If the path matches this regular expression, the captured
     #   value is used to populate the 'host' field or events from this data
@@ -172,9 +176,9 @@ module Splunk
     # * +:host_segment+ - Use the specified slash-seperated segment of the
     #   path as the host field value.
     # * +:rename-source+ - The value of the 'source' field to be applied to the
-    #   data from this file
+    #   data from this file.
     # * +:sourcetype+ - The value of the 'sourcetype' field to be applied to
-    #   data from this file
+    #   data from this file.
     #
     def upload(filename, args={})
       args['index'] = @name

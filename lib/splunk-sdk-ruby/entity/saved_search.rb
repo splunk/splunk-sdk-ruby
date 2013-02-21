@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -34,7 +34,7 @@ module Splunk
     end
 
     ##
-    # Return a list of the jobs dispatched from this saved search.
+    # Returns a list of the jobs dispatched from this saved search.
     #
     # Returns: an +Array+ of +Job+ objects.
     #
@@ -48,20 +48,20 @@ module Splunk
     end
 
     ##
-    # Update the state of this saved search.
+    # Updates the state of this saved search.
     #
-    # See the method on Entity for documentation.
+    # See the method on +Entity+ for documentation.
     #
     def update(args) # :nodoc:
-      # Before Splunk 5.0, updating a saved search requires passing a +search+
-      # argument, or it will return an error or set the search to empty. This is
-      # fixed in 5.0, but while the 4.x series is supported, we set the search
-      # field on args if it's not already set. This, of course, has a race
-      # condition if someone else has set the search since the last time the
-      # entity was refreshed.
+      # In versions before Splunk 5.0, updating a saved search requires passing 
+      # a +search+ argument, or it will return an error or set the search to 
+      # empty. This is fixed in 5.0, but while the 4.x series is supported, we 
+      # set the search field on args if it's not already set. This, of course, 
+      # has a race condition if someone else has set the search since the last 
+      # time the entity was refreshed.
       #
-      # It would be nice to check if "search" is in the requiredFields list
-      # on the entity, but that isn't always returned
+      # You might want to check if "search" is in the +requiredFields+ list
+      # on the entity, but that isn't always returned.
       if !args.has_key?(:search) && !args.has_key?("search")
         args[:search] = fetch("search")
       end

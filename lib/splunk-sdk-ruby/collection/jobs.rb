@@ -1,5 +1,5 @@
 #--
-# Copyright 2011-2012 Splunk, Inc.
+# Copyright 2011-2013 Splunk, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"): you may
 # not use this file except in compliance with the License. You may obtain
@@ -35,7 +35,7 @@ module Splunk
     def initialize(service)
       super(service, PATH_JOBS, entity_class=Job)
 
-      # Jobs is one of the inconsistent collections where 0 means
+      # +Jobs+ is one of the inconsistent collections where 0 means
       # list all, not -1.
       @infinite_count = 0
     end
@@ -46,7 +46,7 @@ module Splunk
     end
 
     ##
-    # Create an asynchronous search job.
+    # Creates an asynchronous search job.
     #
     # The search job requires a _query_, and takes a hash of other, optional
     # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST].
@@ -66,13 +66,13 @@ module Splunk
     end
 
     ##
-    # Create a blocking search.
+    # Creates a blocking search.
     #
-    # +create_oneshot+ starts a search _query_, and any optional arguments
-    # specified in a hash (which are identical to those taken by +create+).
-    # It then blocks until the job finished, and returns the results, as
-    # transformed by any transforming search commands in _query_ (equivalent
-    # to calling the +results+ method on a +Job+).
+    # The +create_oneshot+ method starts a search _query_, and any optional 
+    # arguments specified in a hash (which are identical to those taken by 
+    # +create+). It then blocks until the job finished, and returns the 
+    # results, as transformed by any transforming search commands in _query_ 
+    # (equivalent to calling the +results+ method on a +Job+).
     #
     # Returns: a stream readable by +ResultsReader+.
     #
@@ -86,13 +86,13 @@ module Splunk
     end
 
     ##
-    # Create a blocking search without transforming search commands.
+    # Creates a blocking search without transforming search commands.
     #
-    # +create_export+ starts a search _query_, and any optional arguments
-    # specified in a hash (which are identical to those taken by +create+).
-    # It then blocks until the job is finished, and returns the events
-    # found by the job before any transforming search commands (equivalent
-    # to calling +events+ on a +Job+).
+    # The +create_export+ method starts a search _query_, and any optional 
+    # arguments specified in a hash (which are identical to those taken by 
+    # +create+). It then blocks until the job is finished, and returns the 
+    # events found by the job before any transforming search commands 
+    # (equivalent to calling +events+ on a +Job+).
     #
     # Returns: a stream readable by +MultiResultsReader+.
     #
