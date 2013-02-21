@@ -60,7 +60,8 @@ resources to your computer. Use the following command:
 ### Installing the Splunk SDK for Ruby
 
 We highly recommend that you use [Bundler](http://gembundler.com) to install 
-the Splunk SDK for Ruby.
+the Splunk SDK for Ruby. Also ensure that you have the 
+[RubyGems](http://rubygems.org) package manager installed.
 
 Add this line to your application's Gemfile:
 
