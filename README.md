@@ -98,18 +98,20 @@ Examples are located in several locations within the Splunk SDK for Ruby:
 First, do not run the test suite against your production Splunk server! Install
 another copy of Splunk and run the test suite against that.
 
-Second, the versions of Rake and Test::Unit that ship with various Ruby versions
-are broken. They work enough to install the SDK, but you cannot run the unit
-tests or do any real development. You need to install the latest versions of each
-from RubyGems:
+Second, update your installations of both the [Rake](http://rake.rubyforge.org) build tool and the [Test::Unit](http://test-unit.rubyforge.org) unit test framework from RubyGems:
 
     gem install rake
     gem install test-unit
 
 The test suite reads the host to connect to and credentials to use from a
-**.splunkrc** file. Create a text file with the following format:
+**.splunkrc** file. To connect to Splunk, all of the SDK examples and unit tests take command-line arguments that specify values for the host, port, and login credentials for Splunk. For convenience during development, you can store these arguments as key-value pairs in a text file named **.splunkrc**. Then, when you don't specify these 
+arguments at the command line, the SDK examples and unit tests use the values from the .splunkrc file.
 
-    # Splunk host (default: localhost)
+**To set up a .splunkrc file**
+
+1. Create a text file with the following format:
+
+    <pre> # Splunk host (default: localhost)
     host=localhost
     # Splunk admin port (default: 8089)
     port=8089
@@ -120,32 +122,33 @@ The test suite reads the host to connect to and credentials to use from a
     # Access scheme (default: https)
     scheme=https
     # Your version of Splunk (default: 5.0)
-    version=5.0
+    version=5.0</pre>
 
-Save the file as **.splunkrc** in the current user's home directory.
+2. Save the file as .splunkrc in the current user's home directory.
 
-*   For example, on Mac OS X, save the file as:
+**On Mac OS X**
 
-        ~/.splunkrc
+Save the file as:
 
-*   On Windows, save the file as:
+    ~/.splunkrc
 
-        C:\Users\currentusername\.splunkrc
+**On Windows**
 
-    You might encounter errors in Windows when you try to name the file because
-    ".splunkrc" looks like a nameless file with an extension. You can use
-    the command line to create this file; go to the
-    **C:\Users\currentusername** directory and enter the following command:
+Save the file as:
 
-        Notepad.exe .splunkrc
+    C:\Users\[currentusername]\.splunkrc
 
-    Click **Yes**, and then continue creating the file.
+You might get errors in Windows when you try to name the file because ".splunkrc" looks like a nameless file with an extension. You can use the command line to create this file; go to the **C:\Users\\[currentusername]\\** directory and enter the following command:
 
-**Note**: Storing login credentials in the **.splunkrc** file is only for
-convenience during development. This file isn't part of the Splunk platform and
-shouldn't be used for storing user credentials for production. You should never
-put the credentials of a Splunk instance whose security concerns you in a
-**.splunkrc** file.
+    Notepad.exe .splunkrc
+    
+Click **Yes**, then continue creating the file.
+
+**Notes**
+
+* Storing login credentials in the .splunkrc file is only for convenience during development; this file isn't part of the Splunk platform and shouldn't be used for storing user credentials for production. And, if you're at all concerned about the security of your credentials, just enter them at the command line and don't bother using the .splunkrc file.
+* The format of the .splunkrc file has changed between releases. If you are using a preview or beta version of the SDK, some of the newer fields might not be recognized and you might see errors while running the examples. You can either update to the latest version of the SDK, or comment out the <tt>app</tt>, <tt>owner</tt>, and <tt>version</tt> fields.
+* The <tt>version</tt> field is only used by the Splunk SDK for JavaScript.
 
 #### Run the unit tests
 
@@ -169,98 +172,6 @@ see the coverage report.
 
 **Note**: To protect your Splunk password, you may want to delete the .splunkrc 
 file when you are done running the unit tests.
-
-## Overview 
-
-The Splunk library included in this SDK consists of two layers of API that 
-can be used to interact with **splunkd** - the _binding_ layer and the 
-_client_ layer. First, however, a word about XML...
-
-### A word about XML
-
-Ruby ships with the REXML library by default, but for most real world work,
-you may want to use Nokogiri, which can be orders of magnitude faster. The Splunk
-SDK for Ruby supports both. By default it will try to use Nokogiri, but will fall 
-back to REXML if Nokogiri is not available. The value of the library in use is 
-kept in the global variable `$splunk_xml_library` (which will be either
-`:nokogiri` or `:rexml`).
-
-You can force your program to use a particular library by calling
-**require_xml_library(**_library_**)** (where, again, _library_ is either 
-`:nokogiri` or `:rexml`). This method is in `lib/splunk_sdk_ruby/xml_shim.rb`, 
-but will be included when you include the whole SDK.
-
-If you force your program to use a particular library, the SDK will no longer
-try to fall back to REXML, but will issue a **LoadError**.
-
-### The binding layer
-This is the lowest layer of the Splunk SDK for Ruby. It is a thin wrapper around 
-low-level HTTP capabilities, including:
-
-* authentication and namespace URL management
-* accessible low-level HTTP interface for use by developers who want
-  to be close to the wire
-* Atom feed parser
-
-Here is a simple example of using the binding layer. This example makes a REST 
-call to Splunk returning an Atom feed of all users defined in the system:
-
-    require 'splunk-sdk-ruby'
-
-    c = Splunk::Context.new(:username => "admin",
-                            :password => 'password')
-    c.login()
-
-    # Will print an Atom feed in XML:
-    puts c.request(:resource => ["authentication", "users"]).body
-
-You can read the Atom feed into a convenient Ruby object with the **AtomFeed**
-class. It has two getter methods: **metadata**, which returns a hash of all the Atom
-headers; and **entries**, which returns an array of hashes describing each Atom entry.
-
-    require 'splunk-sdk-ruby'
-
-    c = Splunk::Context.new(:username => "admin",
-                            :password => 'password')
-    c.login()
-
-    response = c.request(:resource => ["authentication", "users"])
-    users = Splunk::AtomFeed.new(response.body)
-    puts users.metadata["updated"]
-    puts users.entries[0]
-
-### The client layer
-
-The _client_ layer builds on the _binding_ layer to provide a friendlier
-interface to Splunk that abstracts away many of the lower level details of the 
-_binding_ layer. It currently abstracts the following (with more to come):
-
-* Authentication
-* Apps
-* Capabilities
-* Server Info
-* Loggers
-* Settings
-* Indexes
-* Roles
-* Users
-* Jobs
-* Saved Searches
-* Searching (one-shot, asynchronous, real-time, and so on)
-* Restarting
-* Configuration
-* Messages
-* Collections and Entities
-
-Here is example code to print the names of all the users in the system:
-
-    service = Splunk::connect(:username => 'admin', :password => 'password')
-    service.users.each do |user|
-      puts user.name
-    end
-
-For more examples, see the **examples/** directory in the Splunk SDK for Ruby 
-repository.
 
 ## Repository
 
