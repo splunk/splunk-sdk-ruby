@@ -14,14 +14,13 @@
 # under the License.
 #++
 
-# :stopdoc:
-
-##
-# The version of the Splunk SDK for Ruby.
-#
-# We put it here so we only have to change it in one place as we
-# release new versions.
-#
 module Splunk
-  VERSION = '0.1.0'
+  ##
+  # Exception thrown when fetching from an entity returns HTTP code 204.
+  #
+  # This primarily comes up with jobs. When a job is not yet ready, fetching
+  # it from the server returns code 204, and we want to handle it specially.
+  #
+  class EntityNotReady < StandardError
+  end
 end

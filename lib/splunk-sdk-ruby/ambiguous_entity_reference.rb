@@ -14,14 +14,15 @@
 # under the License.
 #++
 
-# :stopdoc:
-
-##
-# The version of the Splunk SDK for Ruby.
-#
-# We put it here so we only have to change it in one place as we
-# release new versions.
-#
 module Splunk
-  VERSION = '0.1.0'
+  ##
+  # Exception thrown when a request found multiple matching entities.
+  #
+  # An entity is uniquely defined by its name plus its namespace, so when you
+  # try to fetch an entity by name alone, it is possible to get multiple
+  # results. In that case, this error is thrown by methods that are supposed 
+  # to return only a single entity.
+  #
+  class AmbiguousEntityReference < StandardError
+  end
 end

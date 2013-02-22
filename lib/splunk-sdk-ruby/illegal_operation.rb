@@ -14,14 +14,14 @@
 # under the License.
 #++
 
-# :stopdoc:
-
-##
-# The version of the Splunk SDK for Ruby.
-#
-# We put it here so we only have to change it in one place as we
-# release new versions.
-#
 module Splunk
-  VERSION = '0.1.0'
+  ##
+  # Exception thrown when a call is known statically to fail.
+  #
+  # +IllegalOperation+ is meant to be thrown when a call can be statically
+  # inferred to fail, such as trying to delete an index on versions of Splunk
+  # before 5.0. It implies that no round trips to the server were made.
+  #
+  class IllegalOperation < StandardError
+  end
 end

@@ -14,14 +14,22 @@
 # under the License.
 #++
 
-# :stopdoc:
-
 ##
-# The version of the Splunk SDK for Ruby.
+# Provides a class representing a configuration file.
 #
-# We put it here so we only have to change it in one place as we
-# release new versions.
-#
+
+require_relative '../collection'
+
 module Splunk
-  VERSION = '0.1.0'
+  class Apps < Collection
+    def initialize(service, resource, entity_class=Entity)
+      super(service, resource, entity_class)
+
+      # On Splunk 4.2, a newly created app does not have its Atom returned.
+      # Instead, an Atom entity named "Created" is returned, so we have to
+      # refresh the app manually. After 4.2 is no longer supported, we can
+      # remove this line.
+      @always_fetch = true
+    end
+  end
 end
