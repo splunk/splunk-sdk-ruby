@@ -30,7 +30,8 @@ that are enabled by Splunk's unique capabilities.
 
 The Splunk SDK for Ruby contains code and some examples that show how to
 programmatically interact with Splunk for a variety of scenarios, including
-searching, saved searches, configuration, and many more. This SDK is still in progress and is missing features such as inputs. Stay tuned.
+searching, saved searches, configuration, and many more. This SDK is still 
+in progress and is missing features such as inputs. Stay tuned.
 
 
 ### Requirements
@@ -61,7 +62,8 @@ You can also download the SDK as a ZIP file, or install it directly (see below).
 ### Installing the Splunk SDK for Ruby
 
 If you have cloned the Splunk SDK for Ruby from GitHub, you should first
-install the latest version of `rake`. For example, open a command prompt and enter the following:
+install the latest version of `rake`. For example, open a command prompt and 
+enter the following:
 
     gem install rake
 
@@ -76,7 +78,10 @@ without cloning the repository or downloading the ZIP file, by running:
     gem install splunk-sdk-ruby
 
 If you are using the Splunk SDK for Ruby in an application, we highly
-recommend that you use [bundler](http://gembundler.com/), which installs the prerequisites when you deploy your application. Add the following line to your application's Gemfile to make bundler aware of the Splunk SDK for Ruby:
+recommend that you use [bundler](http://gembundler.com/), which installs
+the prerequisites when you deploy your application. Add the following 
+line to your application's Gemfile to make bundler aware of the Splunk 
+SDK for Ruby:
 
     gem 'splunk-sdk-ruby'
 
@@ -98,14 +103,20 @@ Examples are located in several locations within the Splunk SDK for Ruby:
 First, do not run the test suite against your production Splunk server! Install
 another copy of Splunk and run the test suite against that.
 
-Second, update your installations of both the [Rake](http://rake.rubyforge.org) build tool and the [Test::Unit](http://test-unit.rubyforge.org) unit test framework from RubyGems:
+Second, update your installations of both the [Rake](http://rake.rubyforge.org) 
+build tool and the [Test::Unit](http://test-unit.rubyforge.org) unit 
+test framework from RubyGems:
 
     gem install rake
     gem install test-unit
 
 The test suite reads the host to connect to and credentials to use from a
-**.splunkrc** file. To connect to Splunk, all of the SDK examples and unit tests take command-line arguments that specify values for the host, port, and login credentials for Splunk. For convenience during development, you can store these arguments as key-value pairs in a text file named **.splunkrc**. Then, when you don't specify these 
-arguments at the command line, the SDK examples and unit tests use the values from the .splunkrc file.
+**.splunkrc** file. To connect to Splunk, all of the SDK examples and unit
+tests take command-line arguments that specify values for the host, port,
+and login credentials for Splunk. For convenience during development, you
+can store these arguments as key-value pairs in a text file named 
+**.splunkrc**. Then, when you don't specify these arguments at the command
+line, the SDK examples and unit tests use the values from the .splunkrc file.
 
 **To set up a .splunkrc file**
 
@@ -138,7 +149,10 @@ Save the file as:
 
     C:\Users\[currentusername]\.splunkrc
 
-You might get errors in Windows when you try to name the file because ".splunkrc" looks like a nameless file with an extension. You can use the command line to create this file; go to the **C:\Users\\[currentusername]\\** directory and enter the following command:
+You might get errors in Windows when you try to name the file because 
+".splunkrc" looks like a nameless file with an extension. You can use 
+the command line to create this file; go to the 
+**C:\Users\\[currentusername]\\** directory and enter the following command:
 
     Notepad.exe .splunkrc
     
@@ -146,8 +160,18 @@ Click **Yes**, then continue creating the file.
 
 **Notes**
 
-* Storing login credentials in the .splunkrc file is only for convenience during development; this file isn't part of the Splunk platform and shouldn't be used for storing user credentials for production. And, if you're at all concerned about the security of your credentials, just enter them at the command line and don't bother using the .splunkrc file.
-* The format of the .splunkrc file has changed between releases. If you are using a preview or beta version of the SDK, some of the newer fields might not be recognized and you might see errors while running the examples. You can either update to the latest version of the SDK, or comment out the <tt>app</tt>, <tt>owner</tt>, and <tt>version</tt> fields.
+* Storing login credentials in the .splunkrc file is only for 
+  convenience during development; this file isn't part of the 
+  Splunk platform and shouldn't be used for storing user credentials
+  for production. And, if you're at all concerned about the security 
+  of your credentials, just enter them at the command line and don't 
+  bother using the .splunkrc file.
+* The format of the .splunkrc file has changed between releases. If 
+  you are using a preview or beta version of the SDK, some of the 
+  newer fields might not be recognized and you might see errors while
+  running the examples. You can either update to the latest version
+  of the SDK, or comment out the <tt>app</tt>, <tt>owner</tt>, and 
+  <tt>version</tt> fields.
 * The <tt>version</tt> field is only used by the Splunk SDK for JavaScript.
 
 #### Run the unit tests
