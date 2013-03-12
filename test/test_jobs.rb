@@ -102,6 +102,70 @@ class JobsTestCase < TestCaseWithSplunkConnection
     assert_true(3 >= results.length())
   end
 
+  ##
+  # Test that oneshot jobs have no <sg> elements in the XML they return
+  # by default.
+  #
+  def test_oneshot_has_no_segmentation_by_default
+    stream = @service.create_oneshot("search index=_internal GET | head 3")
+    assert_false(stream.include?("<sg"))
+  end
+
+  ##
+  # Are <sg> elements returned in the XML from a oneshot job when we pass
+  # the option segmentation=raw?
+  #
+  def test_oneshot_has_forced_segmentation
+    stream = @service.create_oneshot("search index=_internal GET | head 3",
+                                     :segmentation => "raw")
+    assert_true(stream.include?("<sg"))
+  end
+
+  ##
+  # Test that export jobs have no <sg> elements in the XML they return by
+  # default.
+  #
+  def test_export_has_no_segmentation_by_default
+    stream = @service.create_export("search index=_internal GET | head 3")
+    assert_false(stream.include?("<sg"))
+  end
+
+  ##
+  # Export jobs should have <sg> elements in the XML they return when a
+  # value is passed to the segmentation argument to make it so.
+  #
+  def test_export_has_forced_segmentation
+    stream = @service.create_export("search index=_internal GET | head 3",
+                                     :segmentation => "raw")
+    assert_true(stream.include?("<sg"))
+  end
+
+  ##
+  # Results and preview on a search job should have no segmentation
+  # by default.
+  #
+  def test_asynchronous_job_has_no_segmentation_by_default
+    job = @service.jobs.create("search index=_internal GET | head 3")
+    until job.is_done?()
+      sleep(0.1)
+    end
+    assert_false(job.events().include?("<sg"))
+    assert_false(job.preview().include?("<sg"))
+  end
+
+  ##
+  # Results and preview on a search job should have segmentation when
+  # it is forced.
+  #
+  def test_asynchronous_job_has_segmentation_when_forced
+    job = @service.jobs.create("search index=_internal GET | head 3")
+    until job.is_done?()
+      sleep(0.1)
+    end
+    assert_true(job.events(:segmentation => "raw").include?("<sg"))
+    assert_true(job.preview(:segmentation => "raw").include?("<sg"))
+  end
+
   def test_each_and_values
     jobs = Jobs.new(@service)
 
