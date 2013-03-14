@@ -55,7 +55,8 @@ class TestResultsReader < Test::Unit::TestCase
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_sans_preview"
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
-        file = File.open("test/data/export/#{version}/export_results.xml")
+        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        file = Splunk::ExportStream.new(raw_file)
         reader = MultiResultsReader.new(file)
         found = reader.final_results()
         expected = tests["without_preview"]
@@ -66,7 +67,8 @@ class TestResultsReader < Test::Unit::TestCase
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_with_preview"
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
-        file = File.open("test/data/export/#{version}/export_results.xml")
+        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        file = Splunk::ExportStream.new(raw_file)
         multireader = MultiResultsReader.new(file)
         n_results_sets = 0
         readers = []
