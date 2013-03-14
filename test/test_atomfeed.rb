@@ -1,6 +1,8 @@
 require_relative "test_helper"
 require "splunk-sdk-ruby"
 
+require 'json'
+
 include Splunk
 
 # URI's classes compare by object identity, which is exactly what we
@@ -37,7 +39,7 @@ class TestAtomFeed < Test::Unit::TestCase
     puts "Nokogiri not installed. Skipping."
   end
 
-  test_cases = eval(open("test/atom_test_data.rb").read())
+  test_cases = JSON::parse(open("test/data/atom_test_data.json").read())
 
   xml_libraries.each do |xml_library|
     test_cases.each_entry do |filename, expected|
@@ -45,25 +47,33 @@ class TestAtomFeed < Test::Unit::TestCase
         file = File.open("test/data/atom/#{filename}.xml")
         feed = Splunk::AtomFeed.new(file)
 
+        # In the assert statements below, the output of the code is first,
+        # the expected data second, which is breaking convention, but has
+        # to be this way since we need to match URLs which are URI objects
+        # in the output of the code to URLs which are strings in the expected
+        # data from the JSON file. URI has been patched to make this
+        # work...but only if the == method is called on the URI object,
+        # not the string. == is not commutative.
+
         # To make debugging easy, test the metadata a key at
         # a time, since Test::Unit doesn't display diffs.
         # Then test the whole thing at the end to make sure it all matches.
-        expected[:metadata].each_entry do |key, value|
-          assert_equal([filename, key, value],
-                       [filename, key, feed.metadata[key]])
+        expected["metadata"].each_entry do |key, value|
+          assert_equal([filename, key, feed.metadata[key]],
+                       [filename, key, value])
         end
-        assert_equal(expected[:metadata], feed.metadata)
+        assert_equal(feed.metadata, expected["metadata"])
 
         # To make debugging easy, test each key of each entry
         # separately, since Test::Unit doesn't display diffs.
         # Then test the whole thing at the end to make sure it all matches.
-        expected[:entries].each_with_index do |entry, index|
+        expected["entries"].each_with_index do |entry, index|
           entry.each_entry do |key, value|
-            assert_equal([filename, index, key, value],
-                         [filename, index, key, feed.entries[index][key]])
+            assert_equal([filename, index, key, feed.entries[index][key]],
+                         [filename, index, key, value])
           end
         end
-        assert_equal(expected[:entries], feed.entries)
+        assert_equal(feed.entries, expected["entries"])
       end
     end
   end

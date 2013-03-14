@@ -1,5 +1,15 @@
 # Splunk SDK for Ruby Changelog
 
+## Version 0.8.0 (beta)
+
+### Breaking changes
+
+* The _raw field in events is now returned as text, not XML. That is, all tags
+  such as the sg elements, are removed, and all characters are unescaped. The
+  XML is available from the raw_as_xml method on the event, which returns a
+  proper XML element `v` containing the XML returned by the server.
+* The severities in messages in Atom feeds are now strings instead of symbols.
+
 ## Version 0.1.0 (preview)
 
 ### Breaking changes
