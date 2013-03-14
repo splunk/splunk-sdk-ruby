@@ -387,7 +387,10 @@ module Splunk
     # Synonyms: +size+.
     #
     def length()
-      return values().length()
+      response = @service.request(:resource => @resource,
+                                  :query => {"count" => 0})
+      feed = AtomFeed.new(response.body)
+      return Integer(feed.metadata["totalResults"])
     end
 
     synonym "size", "length"
