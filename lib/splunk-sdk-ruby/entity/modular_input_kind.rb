@@ -16,21 +16,21 @@
 
 require_relative '../entity'
 
-
-class ModularInputKind < ReadOnlyEntity
-  ##
-  # Return a Hash of all the arguments support by this modular input kind.
-  #
-  # The keys in the Hash are the names of the arguments. The values are
-  # additional Hashes giving the metadata about each argument. The possible
-  # keys in those Hashes are +"title"+, +"description"+,
-  # +"required_on_create``+, +"required_on_edit"+, +"data_type"+. Each value is
-  # a string. It should be one of +"true"+ or +"false"+ for
-  # +"required_on_create"+ and +"required_on_edit"+, and one of +"boolean"+,
-  # +"string"+, or +"number"+ for +"data_type"+.
-  #
-  def arguments
-    @state["content"]["endpoint"]["args"]
+module Splunk
+  class ModularInputKind < ReadOnlyEntity
+    ##
+    # Return a Hash of all the arguments support by this modular input kind.
+    #
+    # The keys in the Hash are the names of the arguments. The values are
+    # additional Hashes giving the metadata about each argument. The possible
+    # keys in those Hashes are +"title"+, +"description"+,
+    # +"required_on_create``+, +"required_on_edit"+, +"data_type"+. Each value is
+    # a string. It should be one of +"true"+ or +"false"+ for
+    # +"required_on_create"+ and +"required_on_edit"+, and one of +"boolean"+,
+    # +"string"+, or +"number"+ for +"data_type"+.
+    #
+    def arguments
+      @state["content"]["endpoint"]["args"]
+    end
   end
-
 end

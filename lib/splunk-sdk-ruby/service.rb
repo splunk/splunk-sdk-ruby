@@ -27,6 +27,7 @@ require_relative 'entity'
 require_relative 'entity/index'
 require_relative 'entity/job'
 require_relative 'entity/message'
+require_relative 'entity/modular_input_kind'
 require_relative 'entity/saved_search'
 require_relative 'entity/stanza'
 
