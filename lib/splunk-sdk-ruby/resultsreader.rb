@@ -98,6 +98,18 @@ module Splunk
   #   in this set, in the order they should be displayed (if you're going
   #   to make a table or the like)
   #
+  # The values yielded by calling +each+ and similar methods on +ResultsReader+
+  # are of class +Event+, which is a subclass of +Hash+ with one extra method,
+  # +segmented_raw+. The fields of the event are available as values in the hash,
+  # with no escaped characters and no XML tags. The +_raw+ field, however, is
+  # returned with extra XML specifying how terms should be highlighted for
+  # display, and this full XML form is available by called the +segmented_raw+
+  # method. The XML returned looks something like:
+  #
+  #     "<v xml:space=\"preserve\" trunc=\"0\">127.0.0.1 - admin
+  #     [11/Feb/2013:10:42:49.790 -0800] \"POST /services/search/jobs/export
+  #     HTTP/1.1\" 200 440404 - - - 257ms</v>"
+  #
   # *Example*:
   #
   #     require 'splunk-sdk-ruby'
@@ -109,7 +121,8 @@ module Splunk
   #     puts reader.is_preview?
   #     # Prints: false
   #     reader.each do |result|
-  #       puts result
+  #       puts result # Prints the fields in the result as a Hash
+  #       puts result.segmented_raw() # Prints the XML version of the _raw field
   #     end
   #     # Prints a sequence of Hashes containing events.
   #
@@ -220,6 +233,24 @@ module Splunk
   end
 
   ##
+  # +Event+ represents a single event returned from a +ResultsReader+.
+  #
+  # +Event+ is a subclass of +Hash+, adding a single method +segmented_raw()+
+  # which returns a string containing the XML of the raw event, as opposed
+  # to the unescaped, raw strings returned by fetching a particular field
+  # via [].
+  #
+  class Event < Hash
+    @raw_xml = nil
+
+    attr_writer :raw_xml
+
+    def segmented_raw
+      @raw_xml
+    end
+  end
+
+  ##
   # +ResultsListener+ is the SAX event handler for +ResultsReader+.
   #
   # The authors of Nokogiri decided to make their SAX interface
@@ -269,7 +300,7 @@ module Splunk
                 elsif name == "result"
                   @state = :result
                   @current_offset = Integer(attributes["offset"])
-                  @current_result = {}
+                  @current_result = Event.new()
                 end
               end,
               :end_element => lambda do |name|
@@ -326,7 +357,23 @@ module Splunk
                   @current_value = nil
                 elsif name == "text" || name == "v"
                   @state = :field_values
-                  @current_scratch = ""
+                  @current_text = ""
+                  s = ["v"] + attributes.map do |entry|
+                    key, value = entry
+                    # Nokogiri and REXML both drop the namespaces of attributes,
+                    # and there is no way to recover them. To reconstruct the
+                    # XML (since we can't get at its raw form) we put in the
+                    # one instance of a namespace on an attribute that shows up
+                    # in what Splunk returns. Yes, this is a terribly, ugly
+                    # kludge.
+                    if key == "space"
+                      prefixed_key = "xml:space"
+                    else
+                      prefixed_key = key
+                    end
+                    "#{prefixed_key}=\"#{value}\""
+                  end
+                  @current_xml = "<" + s.join(" ") + ">"
                 end
               end,
               :end_element => lambda do |name|
@@ -346,6 +393,11 @@ module Splunk
                   else
                     @current_result[@current_field] = @current_value
                   end
+
+                  if @current_field == "_raw"
+                    @current_result.raw_xml = @current_xml
+                  end
+
                   @current_field = nil
                   @current_value = nil
                 end
@@ -356,19 +408,23 @@ module Splunk
               :end_element => lambda do |name|
                 if name == "text" || name == "v"
                   if @current_value == nil
-                    @current_value = @current_scratch
+                    @current_value = @current_text
                   elsif @current_value.is_a?(Array)
-                    @current_value << @current_scratch
+                    @current_value << @current_text
                   else
-                    @current_value = [@current_value, @current_scratch]
+                    @current_value = [@current_value, @current_text]
                   end
 
-                  @current_scratch = nil
+                  if name == "v"
+                    @current_xml << "</v>"
+                  end
+
+                  @current_text = nil
                   @state = :result
                 elsif name == "sg"
                   # <sg> is emitted to delimit text that should be displayed
                   # highlighted. We preserve it in field values.
-                  @current_scratch << "</sg>"
+                  @current_xml << "</sg>"
                 end
               end,
               :start_element => lambda do |name, attributes|
@@ -378,11 +434,12 @@ module Splunk
                     "#{key}=\"#{value}\""
                   end
                   text = "<" + s.join(" ") + ">"
-                  @current_scratch << text
+                  @current_xml << text
                 end
               end,
               :characters => lambda do |text|
-                @current_scratch << text
+                @current_text << text
+                @current_xml << Splunk::escape_string(text)
               end
           }
       }

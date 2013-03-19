@@ -181,7 +181,7 @@ module Splunk
           element.elements.each do |element|
             if element.name == "msg"
               metadata["messages"] << {
-                  "type" => element.attributes["type"].text.intern,
+                  "type" => element.attributes["type"].text,
                   "message" => children_to_s(element)
               }
             end
