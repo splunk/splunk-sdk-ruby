@@ -18,6 +18,7 @@ require_relative 'atomfeed'
 require_relative 'collection'
 require_relative 'collection/apps'
 require_relative 'collection/configurations'
+require_relative 'collection/input_kinds'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
 require_relative 'collection/case_insensitive_collection'
@@ -44,6 +45,7 @@ module Splunk
   PATH_MESSAGES = ["messages"]
   PATH_MODULAR_INPUT_KINDS = ["data", "modular-inputs"]
   PATH_INFO = ["server", "info"]
+  PATH_INPUTS = ["data", "inputs"]
   PATH_SETTINGS = ["server", "settings"]
   PATH_INDEXES = ["data","indexes"]
   PATH_CONFS = ["properties"]
@@ -218,6 +220,13 @@ module Splunk
                          :resource => PATH_INFO)
       feed = AtomFeed.new(response.body)
       feed.entries[0]["content"]
+    end
+
+    ##
+    # Return a collection of the input kinds.
+    #
+    def inputs
+      InputKinds.new(self, PATH_INPUTS)
     end
 
     ##

@@ -117,7 +117,7 @@ module Splunk
   #     service = Splunk::connect(:username => "admin", :password => "changeme")
   #
   #     stream = service.jobs.create_oneshot("search index=_internal | head 10")
-  #     reader = ResultsReader.new(stream)
+  #     reader = Splunk::ResultsReader.new(stream)
   #     puts reader.is_preview?
   #     # Prints: false
   #     reader.each do |result|
