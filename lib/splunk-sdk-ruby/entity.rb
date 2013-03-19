@@ -20,25 +20,7 @@ require_relative 'entity_not_ready'
 require_relative 'synonyms'
 
 module Splunk
-  ##
-  # Class representing individual entities in Splunk.
-  #
-  # +Entity+ objects represent individual items such as indexes, users, roles,
-  # etc. They are usually contained within +Collection+ objects.
-  #
-  # The basic, identifying information for an +Entity+ (name, namespace, path
-  # of the collection containing entity, and the service it's on) is all
-  # accessible via getters (+name+, +namespace+, +resource+, +service+). All
-  # the fields containing the +Entity+'s state, such as the capabilities of
-  # a role or whether an app should check for updates, are accessible with 
-  # the [] operator (for instance, +role+["+capabilities+"] or 
-  # +app+["+check_for_updates+"]).
-  #
-  # +Entity+ objects cache their state, so each lookup of a field does not
-  # make a roundtrip to the server. The state may be refreshed by calling
-  # the +refresh+ method on the +Entity+.
-  #
-  class Entity
+  class ReadOnlyEntity
     extend Synonyms
 
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:
@@ -87,17 +69,6 @@ module Splunk
     attr_reader :service
 
     ##
-    # Deletes this entity from the server.
-    #
-    # Returns: +nil+.
-    #
-    def delete()
-      @service.request({:method => :DELETE,
-                        :namespace => @namespace,
-                        :resource => @resource + [name]})
-    end
-
-    ##
     # Fetches the field _key_ on this entity.
     #
     # You may provide a default value. All values are returned
@@ -138,7 +109,7 @@ module Splunk
     # +Entity+. If you specify one or more +Strings+ or +Arrays+ of +Strings+,
     # all the keys specified in the arguments will be returned in the +Hash+.
     #
-    # Returns: a +Hash+ with +Strings+ as keys, and +Strings+ or +Hashes+ or 
+    # Returns: a +Hash+ with +Strings+ as keys, and +Strings+ or +Hashes+ or
     # +Arrays+ as values.
     #
     def read(*field_list)
@@ -186,6 +157,37 @@ module Splunk
       feed = AtomFeed.new(response.body)
       @state = feed.entries[0]
       self
+    end
+  end
+
+  ##
+  # Class representing individual entities in Splunk.
+  #
+  # +Entity+ objects represent individual items such as indexes, users, roles,
+  # etc. They are usually contained within +Collection+ objects.
+  #
+  # The basic, identifying information for an +Entity+ (name, namespace, path
+  # of the collection containing entity, and the service it's on) is all
+  # accessible via getters (+name+, +namespace+, +resource+, +service+). All
+  # the fields containing the +Entity+'s state, such as the capabilities of
+  # a role or whether an app should check for updates, are accessible with 
+  # the [] operator (for instance, +role+["+capabilities+"] or 
+  # +app+["+check_for_updates+"]).
+  #
+  # +Entity+ objects cache their state, so each lookup of a field does not
+  # make a roundtrip to the server. The state may be refreshed by calling
+  # the +refresh+ method on the +Entity+.
+  #
+  class Entity < ReadOnlyEntity
+    ##
+    # Deletes this entity from the server.
+    #
+    # Returns: +nil+.
+    #
+    def delete()
+      @service.request({:method => :DELETE,
+                        :namespace => @namespace,
+                        :resource => @resource + [name]})
     end
 
     ##
