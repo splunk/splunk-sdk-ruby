@@ -98,12 +98,12 @@ module Splunk
   #   in this set, in the order they should be displayed (if you're going
   #   to make a table or the like)
   #
-  # The yielded by calling +each+ and similar methods on +ResultsReader+ are
-  # of class +Event+, which is a subclass of +Hash+ with one extra method,
-  # +raw_as_xml+. The fields of the event are available as values in the hash,
+  # The values yielded by calling +each+ and similar methods on +ResultsReader+
+  # are of class +Event+, which is a subclass of +Hash+ with one extra method,
+  # +segmented_raw+. The fields of the event are available as values in the hash,
   # with no escaped characters and no XML tags. The +_raw+ field, however, is
   # returned with extra XML specifying how terms should be highlighted for
-  # display, and this full XML form is available by called the +raw_as_xml+
+  # display, and this full XML form is available by called the +segmented_raw+
   # method. The XML returned looks something like:
   #
   #     "<v xml:space=\"preserve\" trunc=\"0\">127.0.0.1 - admin
@@ -122,7 +122,7 @@ module Splunk
   #     # Prints: false
   #     reader.each do |result|
   #       puts result # Prints the fields in the result as a Hash
-  #       puts result.raw_as_xml() # Prints the XML version of the _raw field
+  #       puts result.segmented_raw() # Prints the XML version of the _raw field
   #     end
   #     # Prints a sequence of Hashes containing events.
   #
@@ -235,7 +235,7 @@ module Splunk
   ##
   # +Event+ represents a single event returned from a +ResultsReader+.
   #
-  # +Event+ is a subclass of +Hash+, adding a single method +raw_as_xml()+
+  # +Event+ is a subclass of +Hash+, adding a single method +segmented_raw()+
   # which returns a string containing the XML of the raw event, as opposed
   # to the unescaped, raw strings returned by fetching a particular field
   # via [].
@@ -245,7 +245,7 @@ module Splunk
 
     attr_writer :raw_xml
 
-    def raw_as_xml
+    def segmented_raw
       @raw_xml
     end
   end

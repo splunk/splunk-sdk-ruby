@@ -117,9 +117,9 @@ module Splunk
   ##
   # Escape reserved XML entities in a string.
   #
-  # We only escape &, <, and >, not single and double quotes. This means
-  # we have to write the behavior ourselves, since both REXML and Nokogiri
-  # also escape both kinds of quotes.
+  # To match the behavior of splunkd, we only escape &, <, and >, not single
+  # and double quotes. This means we have to write the behavior ourselves,
+  # since both REXML and Nokogiri also escape both kinds of quotes.
   #
   def self.escape_string(str)
     str.gsub(/&/, "&amp;").gsub(/</, "&lt;").gsub(/>/, "&gt;")

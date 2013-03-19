@@ -29,7 +29,7 @@ class TestResultsReader < Test::Unit::TestCase
                      [index, key, result[key]])
       end
       assert_equal(expected_fields, result)
-      assert_equal(expected["results"][index]["RAW_XML"], result.raw_as_xml())
+      assert_equal(expected["results"][index]["RAW_XML"], result.segmented_raw())
     end
     assert_equal(expected["results"].length, n_results)
   end
