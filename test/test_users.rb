@@ -30,4 +30,11 @@ class UserTestCase < TestCaseWithSplunkConnection
     user = @service.users.create(name, :password => "abc", :roles => ["power"])
     assert_true(@service.users.has_key?(name.downcase()))
   end
+
+  def test_roles
+    name = temporary_name()
+    user = @service.users.create(name, :password => "abc",
+                                 :roles => ["power", "can_delete"])
+    assert_equal(["can_delete", "power"], user["roles"].sort())
+  end
 end
