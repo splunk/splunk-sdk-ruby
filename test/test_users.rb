@@ -28,6 +28,7 @@ class UserTestCase < TestCaseWithSplunkConnection
   def test_case_insensitive
     name = temporary_name() + "UPCASE"
     user = @service.users.create(name, :password => "abc", :roles => ["power"])
+    assert_equal(name.downcase(), @service.users.fetch(name).name)
     assert_true(@service.users.has_key?(name.downcase()))
   end
 

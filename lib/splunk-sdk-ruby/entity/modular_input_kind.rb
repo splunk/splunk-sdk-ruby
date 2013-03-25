@@ -17,6 +17,17 @@
 require_relative '../entity'
 
 module Splunk
+  ##
+  # Class representing a family of user defined inputs on the server.
+  #
+  # Modular input kinds define new, first-class input kinds on the server.
+  # This endpoint provides access to a list of the arguments and parameters
+  # of the various kinds defined. The actual inputs of these kinds can be
+  # accessed via the Serve#inputs method.
+  #
+  # Modular input kinds are read only, so there is no update or delete method
+  # on this class.
+  #
   class ModularInputKind < ReadOnlyEntity
     ##
     # Return a Hash of all the arguments support by this modular input kind.

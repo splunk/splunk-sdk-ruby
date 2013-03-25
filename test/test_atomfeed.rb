@@ -45,6 +45,7 @@ class TestAtomFeed < Test::Unit::TestCase
     test_cases.each_entry do |filename, expected|
       define_method("test_#{xml_library}_#{filename}".intern()) do
         file = File.open("test/data/atom/#{filename}.xml")
+        Splunk::require_xml_library(xml_library)
         feed = Splunk::AtomFeed.new(file)
 
         # In the assert statements below, the output of the code is first,

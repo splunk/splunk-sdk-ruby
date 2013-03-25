@@ -59,6 +59,43 @@ class InputsTest < TestCaseWithSplunkConnection
     assert_false(all_inputs.has_key?(port))
   end
 
+  ##
+  # Check that fetching with namespaces provided works.
+  #
+  def test_fetch_with_namespaces
+    user_ns = Splunk::namespace(
+        :sharing => "user",
+        :app => "search",
+        :owner => @splunkrc[:username]
+    )
+    begin
+      user_udp_inputs = @service.inputs.fetch("udp", namespace=user_ns)
+      port = get_free_port(user_udp_inputs)
+      user_udp_inputs.create(port.to_s, :namespace => user_ns)
+      user_udp_inputs.fetch(port.to_s, namespace=user_ns)
+    ensure
+      @service.inputs.fetch("udp", namespace=user_ns).delete(port.to_s)
+    end
+  end
+
+  ##
+  # Check that fetching a nonexistent input kind returns nil.
+  #
+  def test_fetch_nonexistent_input_kind
+    assert_nil(@service.inputs[temporary_name()])
+  end
+
+  ##
+  # Test that fetch resulting in server error raises SplunkHTTPError.
+  def test_fetch_with_server_error
+    new_service = Splunk::Service.new(@splunkrc)
+    new_inputs = new_service.inputs()
+    new_service.logout()
+    assert_raise(SplunkHTTPError) do
+      new_inputs["tcp"]
+    end
+  end
+
   def test_create_and_delete_tcp_raw_with_restrictToHost
     tcp_inputs = @service.inputs["tcp"]["raw"]
     all_inputs = @service.inputs["all"]
@@ -115,8 +152,8 @@ class InputsTest < TestCaseWithSplunkConnection
   end
 
   def test_oneshot_input
-    if !has_app_collection?(@service)
-      print "Test requires sdk-app-collection. Skipping."
+    if not has_test_data?(@service)
+      fail("Install the SDK test data to test oneshot inputs.")
       return
     end
 

@@ -27,9 +27,9 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # There is a convenience method on service to create an asynchronous
   # search job. Test it the same way.
   #
-  def service_create_and_idempotent_cancel
+  def test_service_create_and_idempotent_cancel
     jobs = @service.jobs
-    job = @service.create(QUERY)
+    job = @service.create_search(QUERY)
     assert_true(jobs.has_key?(job.sid))
     job.cancel()
     assert_eventually_true() { !jobs.has_key?(job.sid) }

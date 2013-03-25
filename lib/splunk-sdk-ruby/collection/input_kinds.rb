@@ -19,10 +19,9 @@ require_relative '../collection'
 ##
 # Provide a class representing a collection of input kinds.
 #
-
 module Splunk
   ##
-  # A collection if input types.
+  # A collection of input types.
   #
   # Inputs in the Splunk REST API are arranged in what looks like a
   # directory structure, as in
@@ -56,7 +55,7 @@ module Splunk
   class InputKinds < ReadOnlyCollection
     def fetch(name, namespace=nil)
       request_args = {:resource => @resource + [name]}
-      if !namespace.nil?
+      if not namespace.nil?
         request_args[:namespace] = namespace
       end
 

@@ -150,7 +150,7 @@ module Splunk
     def initialize(text_or_stream)
       if text_or_stream.nil?
         stream = StringIO.new("")
-      elsif stream.is_a?(ExportStream)
+      elsif text_or_stream.is_a?(ExportStream)
         # The sensible behavior on streams from the export endpoints is to
         # skip all preview results and concatenate all others. The export
         # functions wrap their streams in ExportStream to mark that they need
@@ -167,11 +167,9 @@ module Splunk
         stream = text_or_stream
       end
 
-      if stream.eof?
+      if !stream.nil? and stream.eof?
         @is_preview = nil
         @fields = []
-      elsif stream.is_a?(ExportStream)
-
       else
         # We use a SAX parser. +listener+ is the event handler, but a SAX
         # parser won't usually transfer control during parsing. 
@@ -199,8 +197,7 @@ module Splunk
       if @is_export
         warn "[DEPRECATED] Do not use ResultsReader on the output of the " +
                  "export endpoint. Use MultiResultsReader instead."
-        reader = MultiResultsReader.new(@stream).final_results()
-        enum = reader.each()
+        enum = @reader.each()
       else
         enum = Enumerator.new() do |yielder|
           if !@iteration_fiber.nil? # Handle the case of empty files

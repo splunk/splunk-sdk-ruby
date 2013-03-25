@@ -297,7 +297,7 @@ module Splunk
     def modular_input_kinds
       if self.splunk_version[0] < 5
         raise IllegalOperation.new("Modular input kinds are " +
-                                       "not support before Splunk 5.0")
+                                       "not supported before Splunk 5.0")
       else
         ReadOnlyCollection.new(self, PATH_MODULAR_INPUT_KINDS,
                                entity_class=ModularInputKind)

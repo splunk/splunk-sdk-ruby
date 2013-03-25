@@ -20,7 +20,13 @@ require_relative 'entity_not_ready'
 require_relative 'synonyms'
 
 module Splunk
+  ##
+  # ReadOnlyEntity represents entities that can be read, but not created or
+  # updated, via the REST API. The canonical example is a modular input kind.
+  #
   class ReadOnlyEntity
+    # ReadOnlyEntity was factored out of Entity to avoid having to add
+    # special behavior to modular input kinds.
     extend Synonyms
 
     def initialize(service, namespace, resource, name, state=nil) # :nodoc:

@@ -8,8 +8,8 @@ class ModularInputKindsTestCase < TestCaseWithSplunkConnection
     super
 
     omit_if(@service.splunk_version[0] < 5)
-    if !has_app_collection?(@service)
-      fail("Install the SDK app collection to test modular input kinds.")
+    if not has_test_data?(@service)
+      fail("Install the SDK test data to test modular input kinds.")
     end
     install_app_from_collection("modular-inputs")
   end
