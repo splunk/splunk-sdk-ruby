@@ -10,6 +10,18 @@
   string containing the raw XML of the _raw field returned by the server.
 * The severities in messages in Atom feeds are now strings instead of symbols.
 
+### New features
+
+* Added support for inputs via the Service#inputs method, and for modular
+  input kinds via the Service#modular_input_kinds method.
+* Added segmented_raw method to events returned by ResultsReader.
+
+### Bugs fixed
+
+* Added missing Splunk:: prefix in example in the docs for Service.
+* Moved default "segmentation=none" option for asynchronous searches from
+  Job#initialize to Job#events, Job#preview, and Job#results.
+
 ## Version 0.1.0 (preview)
 
 ### Breaking changes

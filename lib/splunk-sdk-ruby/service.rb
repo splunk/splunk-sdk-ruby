@@ -18,6 +18,7 @@ require_relative 'atomfeed'
 require_relative 'collection'
 require_relative 'collection/apps'
 require_relative 'collection/configurations'
+require_relative 'collection/input_kinds'
 require_relative 'collection/jobs'
 require_relative 'collection/messages'
 require_relative 'collection/case_insensitive_collection'
@@ -26,6 +27,7 @@ require_relative 'entity'
 require_relative 'entity/index'
 require_relative 'entity/job'
 require_relative 'entity/message'
+require_relative 'entity/modular_input_kind'
 require_relative 'entity/saved_search'
 require_relative 'entity/stanza'
 
@@ -42,7 +44,9 @@ module Splunk
   PATH_ROLES = ["authorization", "roles"]
   PATH_USERS = ["authentication","users"]
   PATH_MESSAGES = ["messages"]
+  PATH_MODULAR_INPUT_KINDS = ["data", "modular-inputs"]
   PATH_INFO = ["server", "info"]
+  PATH_INPUTS = ["data", "inputs"]
   PATH_SETTINGS = ["server", "settings"]
   PATH_INDEXES = ["data","indexes"]
   PATH_CONFS = ["properties"]
@@ -220,6 +224,13 @@ module Splunk
     end
 
     ##
+    # Return a collection of the input kinds.
+    #
+    def inputs
+      InputKinds.new(self, PATH_INPUTS)
+    end
+
+    ##
     # Returns a collection of all the search jobs running on Splunk.
     #
     # The +Jobs+ object returned is a subclass of +Collection+, but also has
@@ -270,6 +281,27 @@ module Splunk
     #
     def messages
       Messages.new(self, PATH_MESSAGES, entity_class=Message)
+    end
+
+    ##
+    # Returns a read only collection of modular input kinds.
+    #
+    # The modular input kinds are custom input kinds on this Splunk instance.
+    # To access the actual inputs of these kinds, use the +Service+#+inputs+
+    # method. This method gives access to the metadata describing the input
+    # kinds.
+    #
+    # Returns: A +ReadOnlyCollection+ of +ModularInputKind+ objects representing
+    # all the custom input types added to this Splunk instance.
+    #
+    def modular_input_kinds
+      if self.splunk_version[0] < 5
+        raise IllegalOperation.new("Modular input kinds are " +
+                                       "not supported before Splunk 5.0")
+      else
+        ReadOnlyCollection.new(self, PATH_MODULAR_INPUT_KINDS,
+                               entity_class=ModularInputKind)
+      end
     end
 
     ##

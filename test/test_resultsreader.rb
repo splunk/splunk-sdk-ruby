@@ -51,6 +51,17 @@ class TestResultsReader < Test::Unit::TestCase
     end
 
     export_data.each_entry do |version, tests|
+      # without preview via ResultsReader
+      test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_export_via_results_reader"
+      define_method(test_name.intern) do
+        Splunk::require_xml_library(xml_library)
+        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        file = Splunk::ExportStream.new(raw_file)
+        found = ResultsReader.new(file)
+        expected = tests["without_preview"]
+        assert_results_reader_equals(expected, found)
+      end
+
       # without_preview
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_sans_preview"
       define_method(test_name.intern) do

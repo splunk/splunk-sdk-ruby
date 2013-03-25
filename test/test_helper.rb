@@ -143,7 +143,7 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
     end
   end
 
-  def has_app_collection?(service)
+  def has_test_data?(service)
     collection_name = 'sdk-app-collection'
     return service.apps.has_key?(collection_name)
   end
