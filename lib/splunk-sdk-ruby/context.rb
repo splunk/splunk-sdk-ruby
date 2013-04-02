@@ -445,7 +445,8 @@ module Splunk
                             " of the Splunk Ruby SDK"})
 
       # Make the actual restart request.
-      request(:resource => ["server", "control", "restart"])
+      request(:method => :POST,
+              :resource => ["server", "control", "restart"])
 
       # Clear our old token, which will no longer work after the restart.
       logout()
