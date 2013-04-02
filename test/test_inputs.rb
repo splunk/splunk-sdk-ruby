@@ -52,11 +52,15 @@ class InputsTest < TestCaseWithSplunkConnection
     input = tcp_inputs.create(port)
     assert_equal(port, input.name)
     assert_true(tcp_inputs.has_key?(port))
-    assert_true(all_inputs.has_key?(port))
+    if @service.splunk_version[0] >= 5
+      assert_true(all_inputs.has_key?(port))
+    end
 
     tcp_inputs.delete(port)
     assert_false(tcp_inputs.has_key?(port))
-    assert_false(all_inputs.has_key?(port))
+    if @service.splunk_version[0] >= 5
+      assert_false(all_inputs.has_key?(port))
+    end
   end
 
   ##
@@ -98,7 +102,6 @@ class InputsTest < TestCaseWithSplunkConnection
 
   def test_create_and_delete_tcp_raw_with_restrictToHost
     tcp_inputs = @service.inputs["tcp"]["raw"]
-    all_inputs = @service.inputs["all"]
 
     port = get_free_port(tcp_inputs)
     name = "localhost:" + port
@@ -108,18 +111,25 @@ class InputsTest < TestCaseWithSplunkConnection
     assert_equal(name, input.name)
     assert_equal("localhost", input["restrictToHost"])
     assert_true(tcp_inputs.has_key?(name))
-    assert_true(all_inputs.has_key?(name))
     assert_false(tcp_inputs.has_key?(port))
-    assert_false(all_inputs.has_key?(port))
+
+    if @service.splunk_version[0] >= 5
+      all_inputs = @service.inputs["all"]
+      assert_true(all_inputs.has_key?(name))
+      assert_false(all_inputs.has_key?(port))
+
+    end
 
     tcp_inputs.delete(name)
+
     assert_false(tcp_inputs.has_key?(name))
-    assert_false(all_inputs.has_key?(name))
+    if @service.splunk_version[0] >= 5
+      assert_false(all_inputs.has_key?(name))
+    end
   end
 
   def test_update_on_restrictToHost_does_not_clear
     tcp_inputs = @service.inputs["tcp"]["raw"]
-    all_inputs = @service.inputs["all"]
 
     port = get_free_port(tcp_inputs)
     name = "localhost:" + port
@@ -131,12 +141,15 @@ class InputsTest < TestCaseWithSplunkConnection
     input.refresh()
     assert_equal("localhost", input["restrictToHost"])
     assert_true(tcp_inputs.has_key?(name))
-    assert_true(all_inputs.has_key?(name))
+
+    if @service.splunk_version[0] >= 5
+      all_inputs = @service.inputs["all"]
+      assert_true(all_inputs.has_key?(name))
+    end
   end
 
   def test_create_and_delete_udp
     udp_inputs = @service.inputs["udp"]
-    all_inputs = @service.inputs["all"]
 
     port = get_free_port(udp_inputs)
     @ports_to_delete << [["udp"], port]
@@ -144,11 +157,18 @@ class InputsTest < TestCaseWithSplunkConnection
     input = udp_inputs.create(port)
     assert_equal(port, input.name)
     assert_true(udp_inputs.has_key?(port))
-    assert_true(all_inputs.has_key?(port))
+
+    if @service.splunk_version[0] >= 5
+      all_inputs = @service.inputs["all"]
+      assert_true(all_inputs.has_key?(port))
+    end
 
     udp_inputs.delete(port)
     assert_false(udp_inputs.has_key?(port))
-    assert_false(all_inputs.has_key?(port))
+
+    if @service.splunk_version[0] >= 5
+      assert_false(all_inputs.has_key?(port))
+    end
   end
 
   def test_oneshot_input
@@ -176,7 +196,9 @@ class InputsTest < TestCaseWithSplunkConnection
         Integer(index['totalEventCount']) == event_count + 4
       end
     ensure
-      index.delete()
+      if @service.splunk_version[0] >= 5
+        index.delete()
+      end
     end
   end
 
