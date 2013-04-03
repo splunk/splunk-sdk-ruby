@@ -79,13 +79,17 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
       fail("Test left server in a state requiring restart.")
     end
 
+    # Are we on Windows or Unix? We need this below.
+    splunk_home = @service.settings["SPLUNK_HOME"]
+    is_windows = splunk_home.include?("\\") == true
+
     if @service.splunk_version[0..1] != [4,2]
       @installed_apps.each() do |app_name|
         # There is a bug in Python on Windows which results in the
         # sleep_command not deleting properly because there are still
         # hung jobs that haven't terminated when we reach this point.
         # We skip deleting the sleep_command app on Windows.
-        if app_name != 'sleep_command' or !RUBY_PLATFORM.match('mingw32')
+        if app_name != 'sleep_command' or !is_windows
           @service.apps.delete(app_name)
           assert_eventually_true() do
             !@service.apps.has_key?(app_name)
