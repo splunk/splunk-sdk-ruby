@@ -107,6 +107,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # by default.
   #
   def test_oneshot_has_no_segmentation_by_default
+    omit_if(@service.splunk_version[0] == 4)
     stream = @service.create_oneshot("search index=_internal GET | head 3")
     assert_false(stream.include?("<sg"))
   end
@@ -116,6 +117,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # the option segmentation=raw?
   #
   def test_oneshot_has_forced_segmentation
+    omit_if(@service.splunk_version[0] == 4)
     stream = @service.create_oneshot("search index=_internal GET | head 3",
                                      :segmentation => "raw")
     assert_true(stream.include?("<sg"))
@@ -126,6 +128,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # default.
   #
   def test_export_has_no_segmentation_by_default
+    omit_if(@service.splunk_version[0] == 4)
     stream = @service.create_export("search index=_internal GET | head 3")
     assert_false(stream.include?("<sg"))
   end
@@ -135,6 +138,8 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # value is passed to the segmentation argument to make it so.
   #
   def test_export_has_forced_segmentation
+    omit_if(@service.splunk_version[0] == 4)
+
     stream = @service.create_export("search index=_internal GET | head 3",
                                      :segmentation => "raw")
     assert_true(stream.include?("<sg"))
@@ -145,6 +150,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # by default.
   #
   def test_asynchronous_job_has_no_segmentation_by_default
+    omit_if(@service.splunk_version[0] == 4)
     job = @service.jobs.create("search index=_internal GET | head 3")
     until job.is_done?()
       sleep(0.1)
@@ -158,6 +164,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   # it is forced.
   #
   def test_asynchronous_job_has_segmentation_when_forced
+    omit_if(@service.splunk_version[0] == 4)
     job = @service.jobs.create("search index=_internal GET | head 3")
     until job.is_done?()
       sleep(0.1)
