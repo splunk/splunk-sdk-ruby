@@ -24,17 +24,17 @@ class InputsTest < TestCaseWithSplunkConnection
   end
 
   def get_free_port(input_collection)
-    highest_existing_port = input_collection
-        .map() {|ent| ent.name}
-        .select() {|name| name != nil}
-        .map() do |name|
-            if name.include?(":")
-              name.split(":")[1]
-            else
-              name.name
-            end
-        end
-    .map() {|p| Integer(p)}.max()
+    port_names = input_collection.map() {|ent| ent.name}
+    proper_port_names = port_names.select() {|name| name != nil}
+    ports = proper_port_names.map() do |name|
+      if name.include?(":")
+        name.split(":")[1]
+      else
+        name
+      end
+    end
+    highest_existing_port = ports.map() {|p| Integer(p)}.max()
+
     if highest_existing_port == nil
       port = "10000"
     else
