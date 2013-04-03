@@ -81,12 +81,18 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
 
     if @service.splunk_version[0..1] != [4,2]
       @installed_apps.each() do |app_name|
-        @service.apps.delete(app_name)
-        assert_eventually_true() do
-          !@service.apps.has_key?(app_name)
-        end
-        if @service.server_requires_restart?
-          clear_restart_message(@service)
+        # There is a bug in Python on Windows which results in the
+        # sleep_command not deleting properly because there are still
+        # hung jobs that haven't terminated when we reach this point.
+        # We skip deleting the sleep_command app on Windows.
+        if app_name != 'sleep_command' or !RUBY_PLATFORM.match('mingw32')
+          @service.apps.delete(app_name)
+          assert_eventually_true() do
+            !@service.apps.has_key?(app_name)
+          end
+          if @service.server_requires_restart?
+            clear_restart_message(@service)
+          end
         end
       end
     end
