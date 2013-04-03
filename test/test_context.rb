@@ -97,7 +97,7 @@ class TestContext < TestCaseWithSplunkConnection
 
   def test_server_accepting_connections?
     values = @splunkrc.clone()
-    values[:port] = 10253
+    values[:port] = 8000
     service = Context.new(values)
     assert_false(service.server_accepting_connections?)
 

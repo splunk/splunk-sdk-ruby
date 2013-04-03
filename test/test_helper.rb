@@ -123,13 +123,15 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
   end
 
   def assert_not_logged_in(service)
-    begin
-      service.request(:method=>:GET,
-                      :resource=>["data", "indexes"])
-    rescue SplunkHTTPError => err
-      assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
-    else
-      fail("Context is logged in.")
+    if service.server_accepting_connections?
+      begin
+        service.request(:method=>:GET,
+                        :resource=>["data", "indexes"])
+      rescue SplunkHTTPError => err
+        assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
+      else
+        fail("Context is logged in.")
+      end
     end
   end
 

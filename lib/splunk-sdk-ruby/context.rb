@@ -479,6 +479,8 @@ module Splunk
         request(:resource => ["data", "indexes"])
       rescue Errno::ECONNREFUSED, EOFError, Errno::ECONNRESET
         return false
+      rescue OpenSSL::SSL::SSLError
+        return false
       rescue SplunkHTTPError
         # Splunk is up, because it responded with a proper HTTP error
         # that our SplunkHTTPError parser understood.
