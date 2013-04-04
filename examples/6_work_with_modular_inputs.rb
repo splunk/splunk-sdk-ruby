@@ -26,9 +26,9 @@ require 'splunk-sdk-ruby'
 config = {
     :scheme => :https,
     :host => "localhost",
-    :port => 8090,
+    :port => 8089,
     :username => "admin",
-    :password => "admin"
+    :password => "changeme"
 }
 
 # First open a connection to Splunk.
