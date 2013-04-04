@@ -20,12 +20,34 @@ require 'splunk-sdk-ruby'
 # For console output
 class SplunkShell < Splunk::Service
 
+	# Raw log access for deleting/changing
+	attr_accessor :raw_log
+	def initialize(opts={})
+		super
+		# Extend this as needed, search, stats, etc. 
+		#Can resubmit to splunk if needed
+		@raw_log = {}
+	end
+
+	# Execute query, log everything, return raw output string
 	def splunk_exec(qstr)
-		return Splunk::ResultsReader.new( self.create_oneshot(qstr) ).map do |res|
+		results = self.create_oneshot(qstr)
+		raw_log[qstr] = {Time.now.to_s => results}
+		return Splunk::ResultsReader.new(results).map do |res|
 			res['_raw']
 		end.join("\n")
 	end
 
+	# Create JSON representation of parsed raw_log
+	def splunk_log
+		clear_text = {}
+		raw_log.each {|qry,res|
+			clear_text[qry] = {res.keys.first => Splunk::ResultsReader.new(*res.values).to_a}
+		}
+		clear_text
+	end
+			
+	# CLI for splunk
 	def splunk_shell
 		while line = Readline::readline('splunk> ', true)
 		        break if line.strip == 'exit'
@@ -33,10 +55,12 @@ class SplunkShell < Splunk::Service
 		end
 	end
 	
+	# Should get smarter as this grows
 	def splunk_help
 		print("\n Available Commands:\n\tsplunk_shell - launch a CLI shell\n\tsplunk_exec - execute oneshot\n")
 	end
 end
+
 # How to get to the Splunk server. Edit this to match your
 # own Splunk install.
 config = {
@@ -44,14 +68,14 @@ config = {
     :host => "localhost",
     :port => 8089,
     :username => "admin",
-    :password => "changemenow"
+    :password => "changeme"
 }
 
-# First open a connection to Splunk.
-#service = Splunk::connect(config)
+# First open a connection to Splunk, login.
 service = SplunkShell.new(config).login
 # Configure our prompt
 Pry.config.prompt = proc { |obj, nest_level, _| "Splunk::#{obj.class}> " }
+# Start the REPL
 pry service
 # Lets not leave stale session tokens about
 service.logout
