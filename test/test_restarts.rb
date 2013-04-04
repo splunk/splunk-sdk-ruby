@@ -13,6 +13,9 @@ class TestRestarts < TestCaseWithSplunkConnection
           service.server_requires_restart?
         sleep(0.3)
       end
+      if !service.server_accepting_connections?
+        fail("Did not restart within timeout.")
+      end
     end
 
     assert_logged_in(service)
@@ -23,6 +26,12 @@ class TestRestarts < TestCaseWithSplunkConnection
     begin
       service.restart(0.1)
     rescue TimeoutError
+      # Wait for it to go down
+      while service.server_accepting_connections? &&
+          service.server_requires_restart?
+        sleep(0.1)
+      end
+
       # Wait for it to come back up
       while !service.server_accepting_connections? ||
           service.server_requires_restart?
@@ -37,6 +46,7 @@ class TestRestarts < TestCaseWithSplunkConnection
   def test_restart_with_no_timeout
     service = Context.new(@splunkrc).login()
     service.restart()
+
     assert_not_logged_in(service)
 
     # Wait for it to come back up

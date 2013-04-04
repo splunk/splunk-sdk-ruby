@@ -74,9 +74,8 @@ class IndexTestCase < TestCaseWithSplunkConnection
   end
 
   def test_upload
-    if !has_app_collection?(@service)
-        print "Test requires sdk-app-collection. Skipping."
-        return
+    if not has_test_data?(@service)
+        fail("Install the SDK test data to test uploads.")
     end
 
     install_app_from_collection("file_to_upload")

@@ -105,10 +105,14 @@ module Splunk
     # Returns: a stream that can be read with +ResultsReader+.
     #
     def events(args={})
+      # Suppress segmentation (<sg> tags in the XML response) by default:
+      if !args.has_key?(:segmentation)
+        args[:segmentation] = "none"
+      end
       response = @service.request(
           :method => :GET,
           :resource => @resource + [sid, "events"],
-          :body => args)
+          :query => args)
       return response.body
     end
 
@@ -192,10 +196,14 @@ module Splunk
     # Returns: a stream readable by +ResultsReader+.
     #
     def preview(args={})
+      # Suppress segmentation (<sg> tags in the XML response) by default:
+      if !args.has_key?(:segmentation)
+        args[:segmentation] = "none"
+      end
       response = @service.request(:method => :GET,
                                   :resource => @resource +
                                       [sid, "results_preview"],
-                                  :body => args)
+                                  :query => args)
       return response.body
     end
 

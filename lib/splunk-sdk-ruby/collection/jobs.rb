@@ -81,6 +81,10 @@ module Splunk
     def create_oneshot(query, args={})
       args[:search] = query
       args[:exec_mode] = 'oneshot'
+      # Suppress segmentation (<sg> tags in the XML response) by default:
+      if !args.has_key?(:segmentation)
+        args[:segmentation] = "none"
+      end
       response = @service.request(:method => :POST,
                                   :resource => @resource,
                                   :body => args)
@@ -100,6 +104,10 @@ module Splunk
     #
     def create_export(query, args={})
       args["search"] = query
+      # Suppress segmentation (<sg> tags in the XML response) by default:
+      if !args.has_key?(:segmentation)
+        args[:segmentation] = "none"
+      end
       response = @service.request(:method => :GET,
                                   :resource => @resource + ["export"],
                                   :query => args)

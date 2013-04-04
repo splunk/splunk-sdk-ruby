@@ -68,6 +68,28 @@ class ConfigurationFileTestCase < TestCaseWithSplunkConnection
     assert_equal(created_conf.name, bracket_fetched_conf.name)
   end
 
+  ##
+  # Check that fetching nonexistent configuration files returns nil.
+  #
+  def test_fetch_nonexistent
+    nonexistent_name = temporary_name()
+
+    assert_nil(@confs[nonexistent_name])
+    assert_nil(@confs.fetch(nonexistent_name))
+  end
+
+  ##
+  # Check that server errors during fetch are encapsulated sensibly.
+  #
+  def test_error_from_fetch
+    new_service = Splunk::Service.new(@splunkrc)
+    new_confs = new_service.confs()
+    new_service.logout()
+    assert_raise(SplunkHTTPError) do
+      new_confs[temporary_name()]
+    end
+  end
+
   def test_each_and_values
     each_names = []
     @confs.each() { |entity| each_names << entity.name }

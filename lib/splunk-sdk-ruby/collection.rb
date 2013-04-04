@@ -25,17 +25,7 @@ require_relative 'splunk_http_error'
 require_relative 'synonyms'
 
 module Splunk
-  # Class representing a collection in Splunk.
-  #
-  # A +Collection+ is a group of items, usually of class +Entity+ or one of its
-  # subclasses, but occasionally another +Collection+. Usually you obtain a
-  # +Collection+ by calling one of the convenience methods on +Service+.
-  #
-  # A +Collection+ is enumerable, and implements many of the methods found on
-  # +Hash+, so methods like +each+, +select+, and +delete_if+ all work, as does
-  # fetching a member of the +Collection+ with [].
-  #
-  class Collection
+  class ReadOnlyCollection
     include Enumerable
     extend Synonyms
 
@@ -49,8 +39,8 @@ module Splunk
       @infinite_count = -1
 
       # @always_fetch tells whether, when creating an entity in this collection,
-      # to bother trying to parse the response and always fetch the new state 
-      # after the fact. This is necessary for some collections, such as users, 
+      # to bother trying to parse the response and always fetch the new state
+      # after the fact. This is necessary for some collections, such as users,
       # which don't return the newly created object.
       @always_fetch = false
     end
@@ -118,100 +108,6 @@ module Splunk
                         resource=@resource,
                         name=name,
                         state=entry)
-    end
-
-    ##
-    # Creates an item in this collection.
-    #
-    # The _name_ argument is required. All other arguments are passed as a hash,
-    # though they vary from collection to collection.
-    #
-    # Returns: the created entity.
-    #
-    # *Example:*
-    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
-    #     service.users.create('jack',
-    #       :password => 'mypassword',
-    #       :realname => 'Jack_be_nimble',
-    #       :roles => ['user'])
-    #
-    def create(name, args={})
-      body_args = args.clone()
-      body_args["name"] = name
-
-      request_args = {
-          :method => :POST,
-          :resource => @resource,
-          :body => body_args
-      }
-      if args.has_key?(:namespace)
-        request_args[:namespace] = body_args.delete(:namespace)
-      end
-
-      response = @service.request(request_args)
-
-      if @always_fetch
-        fetch_args = {:method => :GET,
-                      :resource => @resource + [name]}
-        if args.has_key?(:namespace)
-          fetch_args[:namespace] = args[:namespace]
-        end
-        response = @service.request(fetch_args)
-      end
-      feed = AtomFeed.new(response.body)
-      raise StandardError.new("No entities returned") if feed.entries.empty?
-      entity = atom_entry_to_entity(feed.entries[0])
-      raise StandardError.new("Found nil entity.") if entity.nil?
-      return entity
-    end
-
-    ##
-    # Deletes an item from the collection.
-    #
-    # Entities from different namespaces may have the same name, so if you are
-    # connected to Splunk using a namespace with wildcards in it, there may
-    # be multiple entities in the collection with the same name. In this case
-    # you must specify a namespace as well, or the +delete+ method will raise an
-    # AmbiguousEntityReference error.
-    #
-    # *Example:*
-    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
-    #     props = service.confs['props']
-    #     props.delete('sdk-tests')
-    #
-    def delete(name, namespace=nil)
-      if namespace.nil?
-        namespace = @service.namespace
-      end
-
-      # We don't want to handle any cases about deleting ambiguously named
-      # entities.
-      if !namespace.is_exact?
-        raise StandardError.new("Must provide an exact namespace to delete an entity.")
-      end
-
-      @service.request(:method => :DELETE,
-                       :namespace => namespace,
-                       :resource => @resource + [name])
-      return self
-    end
-
-    ##
-    # Deletes all entities on this collection for which the block returns true.
-    #
-    # If block is omitted, returns an enumerator over all members of the
-    # collection.
-    #
-    def delete_if(&block)
-      # Without a block, just return an enumerator
-      return each() if !block_given?
-
-      values.each() do |entity|
-        if block.call(entity)
-          delete(entity.name, entity.namespace)
-        end
-      end
-
     end
 
     ##
@@ -294,7 +190,7 @@ module Splunk
     end
 
     ##
-    # Identical to the +each+ method, but the block is passed both the entity's 
+    # Identical to the +each+ method, but the block is passed both the entity's
     # name, and the entity.
     #
     def each_pair(args={}, &block)
@@ -387,7 +283,10 @@ module Splunk
     # Synonyms: +size+.
     #
     def length()
-      return values().length()
+      response = @service.request(:resource => @resource,
+                                  :query => {"count" => 0})
+      feed = AtomFeed.new(response.body)
+      return Integer(feed.metadata["totalResults"])
     end
 
     synonym "size", "length"
@@ -414,4 +313,108 @@ module Splunk
     synonym "to_a", "values"
   end
 
+  # Class representing a collection in Splunk.
+  #
+  # A +Collection+ is a group of items, usually of class +Entity+ or one of its
+  # subclasses, but occasionally another +Collection+. Usually you obtain a
+  # +Collection+ by calling one of the convenience methods on +Service+.
+  #
+  # A +Collection+ is enumerable, and implements many of the methods found on
+  # +Hash+, so methods like +each+, +select+, and +delete_if+ all work, as does
+  # fetching a member of the +Collection+ with [].
+  #
+  class Collection < ReadOnlyCollection
+    ##
+    # Creates an item in this collection.
+    #
+    # The _name_ argument is required. All other arguments are passed as a hash,
+    # though they vary from collection to collection.
+    #
+    # Returns: the created entity.
+    #
+    # *Example:*
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     service.users.create('jack',
+    #       :password => 'mypassword',
+    #       :realname => 'Jack_be_nimble',
+    #       :roles => ['user'])
+    #
+    def create(name, args={})
+      body_args = args.clone()
+      body_args["name"] = name
+
+      request_args = {
+          :method => :POST,
+          :resource => @resource,
+          :body => body_args
+      }
+      if args.has_key?(:namespace)
+        request_args[:namespace] = body_args.delete(:namespace)
+      end
+
+      response = @service.request(request_args)
+
+      if @always_fetch
+        fetch_args = {:method => :GET,
+                      :resource => @resource + [name]}
+        if args.has_key?(:namespace)
+          fetch_args[:namespace] = args[:namespace]
+        end
+        response = @service.request(fetch_args)
+      end
+      feed = AtomFeed.new(response.body)
+      raise StandardError.new("No entities returned") if feed.entries.empty?
+      entity = atom_entry_to_entity(feed.entries[0])
+      raise StandardError.new("Found nil entity.") if entity.nil?
+      return entity
+    end
+
+    ##
+    # Deletes an item from the collection.
+    #
+    # Entities from different namespaces may have the same name, so if you are
+    # connected to Splunk using a namespace with wildcards in it, there may
+    # be multiple entities in the collection with the same name. In this case
+    # you must specify a namespace as well, or the +delete+ method will raise an
+    # AmbiguousEntityReference error.
+    #
+    # *Example:*
+    #     service = Splunk::connect(:username => 'admin', :password => 'foo')
+    #     props = service.confs['props']
+    #     props.delete('sdk-tests')
+    #
+    def delete(name, namespace=nil)
+      if namespace.nil?
+        namespace = @service.namespace
+      end
+
+      # We don't want to handle any cases about deleting ambiguously named
+      # entities.
+      if !namespace.is_exact?
+        raise StandardError.new("Must provide an exact namespace to delete an entity.")
+      end
+
+      @service.request(:method => :DELETE,
+                       :namespace => namespace,
+                       :resource => @resource + [name])
+      return self
+    end
+
+    ##
+    # Deletes all entities on this collection for which the block returns true.
+    #
+    # If block is omitted, returns an enumerator over all members of the
+    # collection.
+    #
+    def delete_if(&block)
+      # Without a block, just return an enumerator
+      return each() if !block_given?
+
+      values.each() do |entity|
+        if block.call(entity)
+          delete(entity.name, entity.namespace)
+        end
+      end
+    end
+  end
 end
