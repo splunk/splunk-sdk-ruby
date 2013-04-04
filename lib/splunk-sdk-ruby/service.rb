@@ -352,8 +352,8 @@ module Splunk
     #
     # The version is represented as an +Array+ of length 3, with each
     # of its components an integer. For example, on Splunk 4.3.5,
-    # +splunk_version+ would return [+4, 3, 5+], while on Splunk 5.0.2,
-    # +splunk_version+ would return [+5, 0, 2+].
+    # +splunk_version+ would return [+4+, +3+, +5+], while on Splunk 5.0.2,
+    # +splunk_version+ would return [+5+, +0+, +2+].
     #
     # Returns: An +Array+ of +Integers+ of length 3.
     #
