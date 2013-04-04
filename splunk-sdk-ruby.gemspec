@@ -2,13 +2,14 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'splunk-sdk-ruby'
-  gem.version       = '0.1.0'
+  gem.version       = '0.8.0'
 
   gem.authors       = ['Splunk']
   gem.email         = ['devinfo@splunk.com']
   gem.description   = %q{Splunk SDK for Ruby}
   gem.summary       = %q{Ruby bindings to Splunk REST layer}
   gem.homepage      = 'http://dev.splunk.com'
+  gem.license       = 'APL2'
 
   gem.required_ruby_version = '>=1.9.2'
   gem.add_dependency 'jruby-openssl', '~>0.7.7' if RUBY_PLATFORM == "java"
