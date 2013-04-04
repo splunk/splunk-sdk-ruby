@@ -445,7 +445,8 @@ module Splunk
                             " of the Splunk Ruby SDK"})
 
       # Make the actual restart request.
-      request(:resource => ["server", "control", "restart"])
+      request(:method => :POST,
+              :resource => ["server", "control", "restart"])
 
       # Clear our old token, which will no longer work after the restart.
       logout()
@@ -477,6 +478,8 @@ module Splunk
         # a request directly.
         request(:resource => ["data", "indexes"])
       rescue Errno::ECONNREFUSED, EOFError, Errno::ECONNRESET
+        return false
+      rescue OpenSSL::SSL::SSLError
         return false
       rescue SplunkHTTPError
         # Splunk is up, because it responded with a proper HTTP error

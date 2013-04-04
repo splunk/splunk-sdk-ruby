@@ -79,14 +79,24 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
       fail("Test left server in a state requiring restart.")
     end
 
+    # Are we on Windows or Unix? We need this below.
+    splunk_home = @service.settings["SPLUNK_HOME"]
+    is_windows = splunk_home.include?("\\") == true
+
     if @service.splunk_version[0..1] != [4,2]
       @installed_apps.each() do |app_name|
-        @service.apps.delete(app_name)
-        assert_eventually_true() do
-          !@service.apps.has_key?(app_name)
-        end
-        if @service.server_requires_restart?
-          clear_restart_message(@service)
+        # There is a bug in Python on Windows which results in the
+        # sleep_command not deleting properly because there are still
+        # hung jobs that haven't terminated when we reach this point.
+        # We skip deleting the sleep_command app on Windows.
+        if app_name != 'sleep_command' or !is_windows
+          @service.apps.delete(app_name)
+          assert_eventually_true() do
+            !@service.apps.has_key?(app_name)
+          end
+          if @service.server_requires_restart?
+            clear_restart_message(@service)
+          end
         end
       end
     end
@@ -113,13 +123,15 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
   end
 
   def assert_not_logged_in(service)
-    begin
-      service.request(:method=>:GET,
-                      :resource=>["data", "indexes"])
-    rescue SplunkHTTPError => err
-      assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
-    else
-      fail("Context is logged in.")
+    if service.server_accepting_connections?
+      begin
+        service.request(:method=>:GET,
+                        :resource=>["data", "indexes"])
+      rescue SplunkHTTPError => err
+        assert_equal(401, err.code, "Expected HTTP status code 401, found: #{err.code}")
+      else
+        fail("Context is logged in.")
+      end
     end
   end
 
@@ -143,7 +155,7 @@ class TestCaseWithSplunkConnection < Test::Unit::TestCase
     end
   end
 
-  def has_app_collection?(service)
+  def has_test_data?(service)
     collection_name = 'sdk-app-collection'
     return service.apps.has_key?(collection_name)
   end
