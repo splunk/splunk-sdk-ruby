@@ -232,13 +232,13 @@ module Splunk
     # * +method+: The HTTP method to use (one of +:GET+, +:POST+, or +:DELETE+;
     #   default: +:GET+).
     # * +namespace+: The namespace to request a resource from Splunk in. Must
-    #   be a +Namespace+ object. (default: the value of +@namespace+ on
+    #   be a +Namespace+ object. (default: the value of @+namespace+ on
     #   this +Context+)
     # * +resource+: An array of strings specifying the components of the path
     #   to the resource after the namespace. The strings should not be URL
     #   encoded, as that will be handled by +request+. (default: [])
     # * +query+: A hash containing the values to be encoded as
-    #   the query (the part following +?+) in the URL. Nothing should be URL
+    #   the query (the part following "?") in the URL. Nothing should be URL
     #   encoded as +request+ will do the encoding. If you need to pass multiple
     #   values for the same key, insert them as an Array as the value of their
     #   key into the Hash, and they will be properly encoded as a sequence of
@@ -332,7 +332,7 @@ module Splunk
     #   make a request to.
     # * +:method+: (+:GET+, +:POST+, or +:DELETE+) The HTTP method to use.
     # * +query+: A hash containing the values to be encoded as
-    #   the query (the part following +?+) in the URL. Nothing should be URL
+    #   the query (the part following "?") in the URL. Nothing should be URL
     #   encoded as +request+ will do the encoding. If you need to pass multiple
     #   values for the same key, insert them as an +Array+ as the value of their
     #   key into the Hash, and they will be properly encoded as a sequence of

@@ -1,8 +1,8 @@
-# The Splunk Software Development Kit for Ruby (Preview Release)
+# The Splunk Software Development Kit for Ruby (Beta Release)
 
-#### Version 0.1
-This Splunk Software Development Kit (SDK) contains library code and examples
-designed to enable developers to build applications using Splunk.
+#### Version 0.8
+This Splunk Software Development Kit (SDK) for Ruby contains library code and 
+examples designed to enable developers to build applications using Splunk.
 
 Splunk is a search engine and analytic environment that uses a distributed
 map-reduce architecture to efficiently index, search, and process large 
@@ -16,15 +16,6 @@ and generate real-time notifications from large volumes of time series data.
 The Splunk developer platform enables developers to take advantage of the 
 same technology used by the Splunk product to build exciting new applications
 that are enabled by Splunk's unique capabilities.
-
-1.  This Preview release is pre-beta, and therefore is incomplete and may have 
-    bugs. A Beta release is planned prior to a general release. 
-
-2.  The Apache license only applies to this SDK and no other software provided 
-    by Splunk.
-
-3.  Splunk, in using the Apache license, is not providing any warranties or 
-    indemnification, or accepting any liabilities with the Preview of this SDK.
 
 ## Getting started with the Splunk SDK for Ruby
 
@@ -131,9 +122,7 @@ line, the SDK examples and unit tests use the values from the .splunkrc file.
     # Splunk password
     password=changeme
     # Access scheme (default: https)
-    scheme=https
-    # Your version of Splunk (default: 5.0)
-    version=5.0</pre>
+    scheme=https</pre>
 
 2. Save the file as .splunkrc in the current user's home directory.
 
@@ -172,7 +161,6 @@ Click **Yes**, then continue creating the file.
   running the examples. You can either update to the latest version
   of the SDK, or comment out the <tt>app</tt>, <tt>owner</tt>, and 
   <tt>version</tt> fields.
-* The <tt>version</tt> field is only used by the Splunk SDK for JavaScript.
 
 #### Run the unit tests
 
