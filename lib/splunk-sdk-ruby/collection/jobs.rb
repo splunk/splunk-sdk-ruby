@@ -51,7 +51,7 @@ module Splunk
     # Creates an asynchronous search job.
     #
     # The search job requires a _query_, and takes a hash of other, optional
-    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs - POST].
+    # arguments, which are documented in the {Splunk REST documentation}[http://docs.splunk.com/Documentation/Splunk/latest/RESTAPI/RESTsearch#search.2Fjobs].
     #
     def create(query, args={})
       if args.has_key?(:exec_mode)

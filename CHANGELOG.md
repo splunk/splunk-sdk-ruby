@@ -1,5 +1,11 @@
 # Splunk SDK for Ruby Changelog
 
+## Version 0.8.1 (beta)
+
+### Bugs fixed
+
+* Fixed wrong version number in a few documentation files.
+
 ## Version 0.8.0 (beta)
 
 ### Breaking changes

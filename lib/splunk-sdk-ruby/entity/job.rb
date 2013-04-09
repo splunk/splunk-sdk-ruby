@@ -255,7 +255,7 @@ module Splunk
     end
 
     ##
-    # Return the +Job's+ search id.
+    # Return the +Job+'s search id.
     #
     # Returns: a +String+.
     #
@@ -276,7 +276,7 @@ module Splunk
     # duration), and +:time+ (a string representing the bucket's time in human
     # readable form).
     #
-    # Returns: an +Array+ of +Hash+es describing each time bucket.
+    # Returns: an +Array+ of Hashes describing each time bucket.
     #
     def timeline(args={})
       response = @service.request(:resource => @resource + [sid, "timeline"],
