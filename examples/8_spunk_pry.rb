@@ -16,12 +16,16 @@
 
 require 'pry'
 require 'splunk-sdk-ruby'
+# Wordplay for metaprogramming
+require 'active_support/inflector'
 
 # For console output
 class SplunkShell < Splunk::Service
 
 	# Raw log access for deleting/changing
 	attr_accessor :raw_log
+	# ActiveSupport prefers this
+	alias :indices :indexes
 	def initialize(opts={})
 		super
 		# Extend this as needed, search, stats, etc. 
@@ -57,7 +61,24 @@ class SplunkShell < Splunk::Service
 	
 	# Should get smarter as this grows
 	def splunk_help
-		print("\n Available Commands:\n\tsplunk_shell - launch a CLI shell\n\tsplunk_exec - execute oneshot\n")
+		print("\n Available Commands:\n\t#{self.class.instance_methods(false).map(&:to_s).select {|m| m !~/^raw/}.join("\n\t")}\n\t")
+	end
+
+	# Common getters and setters
+	%w{index app input}.each do  |meth|
+		# The stock Service methods are none too readable
+		define_method("get_#{meth.pluralize}") {
+			self.send(meth.pluralize.intern).map(&:name)
+		}
+		# Get current
+		define_method(meth) {
+			eval("@#{meth}")
+		}
+		# Set current
+		define_method("set_#{meth}") do |value|
+			puts value
+			eval("@#{meth} = self.send(meth.pluralize.intern)['#{value.strip}']")
+		end
 	end
 end
 
