@@ -1,6 +1,6 @@
 # The Splunk Software Development Kit for Ruby (Beta Release)
 
-#### Version 0.8
+#### Version 1.0
 This Splunk Software Development Kit (SDK) for Ruby contains library code and 
 examples designed to enable developers to build applications using Splunk.
 
