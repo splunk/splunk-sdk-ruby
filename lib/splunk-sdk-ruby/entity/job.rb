@@ -219,7 +219,7 @@ module Splunk
     #
     def results(args={})
       response = @service.request(:resource => @resource + [sid, "results"],
-                                  :body => args)
+                                  :query => args)
       return response.body
     end
 

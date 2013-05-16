@@ -270,6 +270,39 @@ class JobsTestCase < TestCaseWithSplunkConnection
       sleep(4)
     end
   end
+
+  ##
+  # Splunk by default returns 100 events in a call to results or preview.
+  # We need to make sure overriding this with count works.
+  #
+  def test_search_with_many_results
+    internal = @service.indexes.fetch("_internal")
+    internal.refresh()
+    if internal.fetch("totalEventCount").to_i < 150
+      fail("Need at 150 events in index _internal for this test.")
+    end
+
+    job = @service.jobs.create("search index=_internal | head 150")
+    while !job.is_done?()
+      sleep(0.1)
+    end
+
+    stream = job.results(:count => 0)
+    results = Splunk::ResultsReader.new(stream)
+    count = 0
+    results.each do |event|
+      count += 1
+    end
+    assert_equal(150, count)
+
+    stream = job.preview(:count => 0)
+    results = Splunk::ResultsReader.new(stream)
+    count = 0
+    results.each do |event|
+      count += 1
+    end
+    assert_equal(150, count)
+  end
 end
 
 class LongJobTestCase < JobsTestCase
