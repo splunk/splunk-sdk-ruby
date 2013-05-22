@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'splunk-sdk-ruby'
-  gem.version       = '1.0.0'
+  gem.version       = '1.0.1'
 
   gem.authors       = ['Splunk']
   gem.email         = ['devinfo@splunk.com']

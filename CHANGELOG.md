@@ -1,5 +1,9 @@
 # Splunk SDK for Ruby Changelog
 
+## Version 1.0.1
+
+* Fixed Job#results to properly handle arguments.
+	
 ## Version 1.0
 
 * No bugs found during beta period.
