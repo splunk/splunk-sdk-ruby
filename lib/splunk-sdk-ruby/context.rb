@@ -394,8 +394,12 @@ module Splunk
       end
 
       # Issue the request.
+      url_hostname = url.host
+      if url.respond_to?(:hostname)
+        url_hostname = url.hostname
+      end
       response = Net::HTTP::start(
-          url.hostname, url.port,
+          url_hostname, url.port,
           :use_ssl => url.scheme == 'https',
           # We don't support certificates.
           :verify_mode => OpenSSL::SSL::VERIFY_NONE
