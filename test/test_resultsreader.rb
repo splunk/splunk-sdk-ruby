@@ -4,6 +4,8 @@ require 'json'
 
 include Splunk
 
+TEST_PATH = File.dirname(File.expand_path(__FILE__))
+
 class TestResultsReader < Test::Unit::TestCase
   if nokogiri_available?
     xml_libraries = [:nokogiri, :rexml]
@@ -34,8 +36,9 @@ class TestResultsReader < Test::Unit::TestCase
     assert_equal(expected["results"].length, n_results)
   end
 
-  test_data = JSON::parse(open("test/data/resultsreader_test_data.json").read())
-  export_data = JSON::parse(open("test/data/export_test_data.json").read())
+  data_path = File.dirname(File.expand_path(__FILE__))
+  test_data = JSON::parse(open(data_path + "/data/resultsreader_test_data.json").read())
+  export_data = JSON::parse(open(data_path + "/data/export_test_data.json").read())
 
   xml_libraries.each do |xml_library|
     test_data.each_entry do |version, tests|
@@ -43,7 +46,7 @@ class TestResultsReader < Test::Unit::TestCase
         test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_#{name}"
         define_method(test_name.intern()) do
           Splunk::require_xml_library(xml_library)
-          file = File.open("test/data/results/#{version}/#{name}.xml")
+          file = File.open(TEST_PATH + "/data/results/#{version}/#{name}.xml")
           reader = ResultsReader.new(file)
           assert_results_reader_equals(expected, reader)
         end
@@ -55,7 +58,7 @@ class TestResultsReader < Test::Unit::TestCase
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_export_via_results_reader"
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
-        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        raw_file = File.open(TEST_PATH + "/data/export/#{version}/export_results.xml")
         file = Splunk::ExportStream.new(raw_file)
         found = ResultsReader.new(file)
         expected = tests["without_preview"]
@@ -66,7 +69,7 @@ class TestResultsReader < Test::Unit::TestCase
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_sans_preview"
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
-        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        raw_file = File.open(TEST_PATH + "/data/export/#{version}/export_results.xml")
         file = Splunk::ExportStream.new(raw_file)
         reader = MultiResultsReader.new(file)
         found = reader.final_results()
@@ -78,7 +81,7 @@ class TestResultsReader < Test::Unit::TestCase
       test_name = "test_#{xml_library}_#{version.gsub(/\./, "_")}_with_preview"
       define_method(test_name.intern) do
         Splunk::require_xml_library(xml_library)
-        raw_file = File.open("test/data/export/#{version}/export_results.xml")
+        raw_file = File.open(TEST_PATH + "/data/export/#{version}/export_results.xml")
         file = Splunk::ExportStream.new(raw_file)
         multireader = MultiResultsReader.new(file)
         n_results_sets = 0
@@ -100,7 +103,7 @@ class TestResultsReader < Test::Unit::TestCase
       if tests.has_key?("nonreporting")
         define_method(test_name.intern) do
           Splunk::require_xml_library(xml_library)
-          file = File.open("test/data/export/#{version}/nonreporting.xml")
+          file = File.open(TEST_PATH + "/data/export/#{version}/nonreporting.xml")
           multireader = MultiResultsReader.new(file)
           n_results_sets = 0
           readers = []

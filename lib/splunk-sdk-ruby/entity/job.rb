@@ -165,12 +165,23 @@ module Splunk
     # Returns: +true+ or +false+.
     #
     def is_ready?()
-      begin
-        refresh()
-        return true
-      rescue EntityNotReady
+      response = @service.request(:resource => @resource + [name],
+                                  :namespace => @namespace)
+      if response.code == 204 or response.body.nil?
         return false
       end
+
+      # We are guaranteed a unique entity, since entities must have
+      # exact namespaces.
+      feed = AtomFeed.new(response.body)
+      @state = feed.entries[0]
+
+      if @state["content"]["dispatchState"] == "QUEUED" || @state["content"]["dispatchState"] == "PARSING"
+        return false
+      end
+
+      # Fallthrough
+      return true
     end
 
     ##
