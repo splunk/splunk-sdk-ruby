@@ -342,8 +342,10 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
+    # Any request resets the TTL in Splunk 6.0. This was an error that
+    # has been filed and will be reverted.
     if @service.splunk_version[0,2] == [6,0]
-      return # Any request resets the TTL in Splunk 6.0.
+      return
     end
     i = 2
     while i < 20
