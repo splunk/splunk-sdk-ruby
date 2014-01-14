@@ -117,16 +117,16 @@ class TestNamespaces < Test::Unit::TestCase
                  Splunk::namespace(:sharing => "global").to_path_fragment)
     assert_equal(["servicesNS", "nobody", "system"],
                  Splunk::namespace(:sharing => "system").to_path_fragment)
-    assert_equal(["servicesNS", "nobody", "search"],
-                 Splunk::namespace(:sharing => "app", :app => "search").to_path_fragment)
+    assert_equal(["servicesNS", "nobody", "search/@!"],
+                 Splunk::namespace(:sharing => "app", :app => "search/@!").to_path_fragment)
     assert_equal(["servicesNS", "nobody", "-"],
                  Splunk::namespace(:sharing => "app", :app => "-").to_path_fragment)
     assert_equal(["services"], Splunk::namespace(:sharing => "app",
                                                  :app => "").to_path_fragment)
-    assert_equal(["servicesNS", "boris", "search"],
+    assert_equal(["servicesNS", "boris/@!", "search/@!"],
                  Splunk::namespace(:sharing => "user",
-                                   :app => "search",
-                                   :owner => "boris").to_path_fragment)
+                                   :app => "search/@!",
+                                   :owner => "boris/@!").to_path_fragment)
   end
 
   def test_eai_acl_to_namespace

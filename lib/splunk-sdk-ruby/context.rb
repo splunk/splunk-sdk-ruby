@@ -308,7 +308,7 @@ module Splunk
       url << "#{(scheme || @scheme).to_s}://"
       url << "#{host || @host}:#{(port || @port).to_s}/"
       url << (namespace.to_path_fragment() + resource).
-          map {|fragment| URI::encode(fragment)}.
+          map {|fragment| URI::encode(fragment, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.
           join("/")
 
       return request_by_url(:url => url,
