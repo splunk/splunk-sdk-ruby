@@ -169,13 +169,12 @@ module Splunk
         refresh()
         if @state["content"]["dispatchState"] == "QUEUED" || @state["content"]["dispatchState"] == "PARSING"
           return false
+        else
+          return true
         end
       rescue EntityNotReady
         return false
       end
-      
-      # Fallthrough
-      return true
     end
 
     ##

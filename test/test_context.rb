@@ -124,7 +124,7 @@ class TestContext < TestCaseWithSplunkConnection
       fail("Didn't receive an error.")
     rescue SplunkHTTPError => err
       assert_equal(404, err.code)
-      assert_not_nil(err.detail.match("User does not exist"))
+      assert_equal("User does not exist: " + name, err.detail)
     end
   end
 

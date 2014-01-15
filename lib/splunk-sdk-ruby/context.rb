@@ -307,6 +307,9 @@ module Splunk
       url = ""
       url << "#{(scheme || @scheme).to_s}://"
       url << "#{host || @host}:#{(port || @port).to_s}/"
+      # You would think that the second argument to URI::encode would be unnecessary
+      # for it to actually escape URI reserved characters. You would be wrong. It does
+      # have to be there.
       url << (namespace.to_path_fragment() + resource).
           map {|fragment| URI::encode(fragment, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.
           join("/")

@@ -343,7 +343,7 @@ class LongJobTestCase < JobsTestCase
 
   def test_touch
     # Any request resets the TTL in Splunk 6.0. This was an error that
-    # has been filed and will be reverted.
+    # has been filed and will be reverted (TODO: Insert Jira number once dnoble logs it).
     if @service.splunk_version[0,2] == [6,0]
       return
     end
