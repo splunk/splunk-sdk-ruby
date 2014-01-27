@@ -103,7 +103,7 @@ gemspec.close()
 puts "Merging to master in git."
 `git checkout master`
 `git merge --no-ff -m "Release #{version}" release/#{version}`
-`git tag #{version}`
+`git tag --force #{version}`
 # Push everything to GitHub
 `git push origin master:master`
 `git push --tags`
