@@ -1,5 +1,14 @@
 # Splunk SDK for Ruby Changelog
 
+## Version 1.0.3
+
+* Splunk SDK for Ruby now works with Splunk 6.
+* Fixed URL escaping of owners and apps in namespaces that contain special characters.
+
+## Version 1.0.2
+
+* Cosmetic changes to the repository only.
+
 ## Version 1.0.1
 
 * Fixed Job#results to properly handle arguments.

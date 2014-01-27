@@ -116,4 +116,16 @@ class TestContext < TestCaseWithSplunkConnection
       assert_true(v.is_a?(Integer))
     end
   end
+
+  def test_url_encoding_of_characters_in_usernames
+    name = temporary_name() + "/\441@"
+    begin
+      @service.request(:namespace => Splunk::namespace(:sharing => "user", :owner => name, :app => name))
+      fail("Didn't receive an error.")
+    rescue SplunkHTTPError => err
+      assert_equal(404, err.code)
+      assert_equal("User does not exist: " + name, err.detail)
+    end
+  end
+
 end

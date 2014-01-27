@@ -250,9 +250,11 @@ class JobsTestCase < TestCaseWithSplunkConnection
     begin
       install_app_from_collection("sleep_command")
       job = @service.jobs.create("search index=_internal | sleep 2 | join [sleep 2]")
+
       while !job.is_ready?()
         sleep(0.1)
       end
+
       assert_equal("0", job["isPreviewEnabled"])
       job.enable_preview()
       assert_eventually_true(1000) do
@@ -340,6 +342,11 @@ class LongJobTestCase < JobsTestCase
   end
 
   def test_touch
+    # Any request resets the TTL in Splunk 6.0. This was an error that
+    # has been filed and will be reverted (TODO: Insert Jira number once dnoble logs it).
+    if @service.splunk_version[0,2] == [6,0]
+      return
+    end
     i = 2
     while i < 20
       sleep(i)

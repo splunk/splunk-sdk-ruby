@@ -39,12 +39,14 @@ class TestAtomFeed < Test::Unit::TestCase
     puts "Nokogiri not installed. Skipping."
   end
 
-  test_cases = JSON::parse(open("test/data/atom_test_data.json").read())
+  data_path = File.dirname(File.expand_path(__FILE__))
+  test_cases = JSON::parse(open(data_path + "/data/atom_test_data.json").read())
 
   xml_libraries.each do |xml_library|
     test_cases.each_entry do |filename, expected|
       define_method("test_#{xml_library}_#{filename}".intern()) do
-        file = File.open("test/data/atom/#{filename}.xml")
+
+        file = File.open(File.dirname(File.expand_path(__FILE__)) + "/data/atom/#{filename}.xml")
         Splunk::require_xml_library(xml_library)
         feed = Splunk::AtomFeed.new(file)
 

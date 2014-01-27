@@ -61,5 +61,5 @@ class ServiceTestCase < TestCaseWithSplunkConnection
     expected.each do |item|
       assert(capabilities.include?(item))
     end
-  end
+    end
 end

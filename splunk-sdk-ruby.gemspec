@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'splunk-sdk-ruby'
-  gem.version       = '1.0.2'
+  gem.version       = '1.0.3'
 
   gem.authors       = ['Splunk']
   gem.email         = ['devinfo@splunk.com']
@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>=1.9.2'
   gem.add_dependency 'jruby-openssl', '~>0.7.7' if RUBY_PLATFORM == "java"
   gem.add_dependency 'rake', '~>10'
-  gem.add_development_dependency 'test-unit'
+  gem.add_development_dependency 'test-unit', '~> 0'
 
   gem.files         = Dir['{lib,examples,test}/**/*',
                           'CHANGELOG.md', 

@@ -167,7 +167,11 @@ module Splunk
     def is_ready?()
       begin
         refresh()
-        return true
+        if @state["content"]["dispatchState"] == "QUEUED" || @state["content"]["dispatchState"] == "PARSING"
+          return false
+        else
+          return true
+        end
       rescue EntityNotReady
         return false
       end

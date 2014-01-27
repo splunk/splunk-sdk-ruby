@@ -42,7 +42,9 @@ class IndexTestCase < TestCaseWithSplunkConnection
 
   def test_disable_enable
     @index.disable()
-    checked_restart(@service)
+    if @service.splunk_version[0] < 6
+      checked_restart(@service)
+    end
     @index.refresh()
     assert_equal('1', @index["disabled"])
 
