@@ -57,6 +57,8 @@ module Splunk
   # * +:protocol+ - either :https or :http (default: :https)
   # * +:namespace+ - a +Namespace+ object representing the default namespace for
   #   this context (default: +DefaultNamespace+)
+  # * +:proxy+ An instance of +Net::HTTP::Proxy+ to use as a proxy service.
+  # * +:path_prefix+ A path prefix that should be prepended to all URLs.
   # * +:ssl_client_cert+ A +OpenSSL::X509::Certificate+ object to use as a client certificate.
   # * +:ssl_client_key+ A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
@@ -83,6 +85,7 @@ module Splunk
       # local accessor.
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
+      @proxy = args.fetch(:proxy, nil)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
@@ -154,6 +157,11 @@ module Splunk
     # Returns: a +Namespace+ object.
     #
     attr_reader :namespace
+
+    ##
+    # An instance of +Net::HTTP::Proxy+ to use as a proxy service.
+    #
+    attr_reader :proxy
 
     ##
     # The path prefix that should be prepended to all URLs.
@@ -426,7 +434,7 @@ module Splunk
       if url.respond_to?(:hostname)
         url_hostname = url.hostname
       end
-      response = Net::HTTP::start(
+      response = (@proxy || Net::HTTP)::start(
           url_hostname, url.port,
           :use_ssl => url.scheme == 'https',
           # We don't support certificates.
