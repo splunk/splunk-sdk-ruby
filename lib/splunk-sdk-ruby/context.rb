@@ -23,6 +23,7 @@
 #
 
 require 'net/http'
+require 'openssl'
 
 require_relative 'splunk_http_error'
 require_relative 'version'
