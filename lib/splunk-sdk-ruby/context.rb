@@ -23,6 +23,7 @@
 #
 
 require 'net/http'
+require 'openssl'
 
 require_relative 'splunk_http_error'
 require_relative 'version'
@@ -33,6 +34,7 @@ module Splunk
   DEFAULT_HOST = 'localhost'
   DEFAULT_PORT = 8089
   DEFAULT_SCHEME = :https
+  DEFAULT_PATH_PREFIX = ''
 
   # Class encapsulating a connection to a Splunk server.
   #
@@ -56,6 +58,10 @@ module Splunk
   # * +:protocol+ - either :https or :http (default: :https)
   # * +:namespace+ - a +Namespace+ object representing the default namespace for
   #   this context (default: +DefaultNamespace+)
+  # * +:proxy+ An instance of +Net::HTTP::Proxy+ to use as a proxy service.
+  # * +:path_prefix+ A path prefix that should be prepended to all URLs.
+  # * +:ssl_client_cert+ A +OpenSSL::X509::Certificate+ object to use as a client certificate.
+  # * +:ssl_client_key+ A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
   #
   # If you specify a token, you need not specify a username or password, nor
@@ -80,6 +86,10 @@ module Splunk
       # local accessor.
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
+      @proxy = args.fetch(:proxy, nil)
+      @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
+      @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
+      @ssl_client_key = args.fetch(:ssl_client_key, nil)
     end
 
     ##
@@ -148,6 +158,29 @@ module Splunk
     # Returns: a +Namespace+ object.
     #
     attr_reader :namespace
+
+    ##
+    # An instance of +Net::HTTP::Proxy+ to use as a proxy service.
+    #
+    attr_reader :proxy
+
+    ##
+    # The path prefix that should be prepended to all URLs.
+    # This is useful if the Splunk server is behind a reverse proxy server.
+    #
+    # Defaults to empty string.
+    #
+    attr_reader :path_prefix
+
+    ##
+    # A +OpenSSL::X509::Certificate+ object to use as a client certificate.
+    #
+    attr_reader :ssl_client_cert
+
+    ##
+    # A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
+    #
+    attr_reader :ssl_client_key
 
     ##
     # Opens a TCP socket to the Splunk HTTP server.
@@ -307,6 +340,7 @@ module Splunk
       url = ""
       url << "#{(scheme || @scheme).to_s}://"
       url << "#{host || @host}:#{(port || @port).to_s}/"
+      url << @path_prefix
       # You would think that the second argument to URI::encode would be unnecessary
       # for it to actually escape URI reserved characters. You would be wrong. It does
       # have to be there, or URI::encode doesn't actually escape any characters.
@@ -401,11 +435,13 @@ module Splunk
       if url.respond_to?(:hostname)
         url_hostname = url.hostname
       end
-      response = Net::HTTP::start(
+      response = (@proxy || Net::HTTP)::start(
           url_hostname, url.port,
           :use_ssl => url.scheme == 'https',
           # We don't support certificates.
-          :verify_mode => OpenSSL::SSL::VERIFY_NONE
+          :verify_mode => OpenSSL::SSL::VERIFY_NONE,
+          :cert => @ssl_client_cert,
+          :key => @ssl_client_key
       ) do |http|
         http.request(request)
       end
