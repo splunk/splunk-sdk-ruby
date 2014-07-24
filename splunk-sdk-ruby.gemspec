@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.license       = 'APL2'
 
   gem.required_ruby_version = '>=1.9.2'
-  gem.add_dependency 'jruby-openssl', '~>0.7.7' if RUBY_PLATFORM == "java"
+  gem.add_dependency 'jruby-openssl', '>=0.7.7' if RUBY_PLATFORM == "java"
   gem.add_development_dependency 'rake', '~>10'
   gem.add_development_dependency 'test-unit', '~> 0'
 
