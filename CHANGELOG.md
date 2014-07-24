@@ -3,7 +3,7 @@
 ## Version 1.0.4
 
 * Added support for client certificates and path prefix.
-* Added an ption to specify a proxy server to use. Includes connect_via_proxy.rb example.
+* Added an option to specify a proxy server to use. Includes connect_via_proxy.rb example.
 * Minor Fixes
 
 ## Version 1.0.3
