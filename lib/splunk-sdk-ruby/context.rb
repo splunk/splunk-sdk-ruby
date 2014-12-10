@@ -62,6 +62,7 @@ module Splunk
   # * +:path_prefix+ A path prefix that should be prepended to all URLs.
   # * +:ssl_client_cert+ A +OpenSSL::X509::Certificate+ object to use as a client certificate.
   # * +:ssl_client_key+ A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
+  # * +:http_opts+ A +Hash+ representing options to pass to +Net::HTTP::start()+.
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
   #
   # If you specify a token, you need not specify a username or password, nor
@@ -88,8 +89,15 @@ module Splunk
                               Splunk::namespace(:sharing => "default"))
       @proxy = args.fetch(:proxy, nil)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
+      @http_opts = args.fetch(:http_opts, {})
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
+      
+      if args.key?(:ssl_client_cert):
+        @http_opts[:cert] = args[:ssl_client_cert]
+      
+      if args.key?(:ssl_client_key):
+        @http_opts[:key] = args[:ssl_client_key]
     end
 
     ##
@@ -181,6 +189,11 @@ module Splunk
     # A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
     #
     attr_reader :ssl_client_key
+
+    ##
+    # A +Hash+ representing options to pass to +Net::HTTP::start()+.
+    #
+    attr_reader :http_opts
 
     ##
     # Opens a TCP socket to the Splunk HTTP server.
@@ -435,13 +448,13 @@ module Splunk
       if url.respond_to?(:hostname)
         url_hostname = url.hostname
       end
+      
+      http_opts = @http_opts.clone
+      http_opts[:use_ssl] = url.scheme == 'https'
+      http_opts[:verify_mode] = OpenSSL::SSL::VERIFY_NONE
+      
       response = (@proxy || Net::HTTP)::start(
-          url_hostname, url.port,
-          :use_ssl => url.scheme == 'https',
-          # We don't support certificates.
-          :verify_mode => OpenSSL::SSL::VERIFY_NONE,
-          :cert => @ssl_client_cert,
-          :key => @ssl_client_key
+          url_hostname, url.port, http_opts
       ) do |http|
         http.request(request)
       end
