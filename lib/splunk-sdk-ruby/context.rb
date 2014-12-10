@@ -93,11 +93,13 @@ module Splunk
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
       
-      if args.key?(:ssl_client_cert):
+      if args.key?(:ssl_client_cert)
         @http_opts[:cert] = args[:ssl_client_cert]
+      end
       
-      if args.key?(:ssl_client_key):
+      if args.key?(:ssl_client_key)
         @http_opts[:key] = args[:ssl_client_key]
+      end
     end
 
     ##
@@ -451,7 +453,12 @@ module Splunk
       
       http_opts = @http_opts.clone
       http_opts[:use_ssl] = url.scheme == 'https'
-      http_opts[:verify_mode] = OpenSSL::SSL::VERIFY_NONE
+      
+      unless http_opts.key?(:verify_mode)
+        http_opts[:verify_mode] = OpenSSL::SSL::VERIFY_NONE
+      end
+      
+      puts http_opts
       
       response = (@proxy || Net::HTTP)::start(
           url_hostname, url.port, http_opts
