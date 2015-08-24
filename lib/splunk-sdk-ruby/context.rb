@@ -82,6 +82,7 @@ module Splunk
       @port = Integer(args.fetch(:port, DEFAULT_PORT))
       @username = args.fetch(:username, nil)
       @password = args.fetch(:password, nil)
+      @basic = args.fetch(:basic, nil)
       # Have to use Splunk::namespace() or we will call the
       # local accessor.
       @namespace = args.fetch(:namespace,
@@ -335,7 +336,6 @@ module Splunk
         raise ArgumentError.new("Namespace must be a Namespace, " +
                                     "found: #{namespace}")
       end
-
       # Construct the URL for the request.
       url = ""
       url << "#{(scheme || @scheme).to_s}://"
@@ -417,7 +417,15 @@ module Splunk
 
       # Headers
       request["User-Agent"] = "splunk-sdk-ruby/#{VERSION}"
-      request["Authorization"] = "Splunk #{@token}" if @token
+      if @token then
+        puts "Got token " + @token.to_s
+        request["Authorization"] = "Splunk #{@token}"
+      end
+      # if basic auth is enabled, it will overwrite splunk token authentication
+      if @basic then
+        puts "Got basic " + @basic.to_s
+        request["Authorization"] = "Basic " +["#{@username}:#{@password}"].pack("m").strip
+      end
       headers.each_entry do |key, value|
         request[key] = value
       end
