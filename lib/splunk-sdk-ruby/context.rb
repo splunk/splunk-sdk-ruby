@@ -87,6 +87,7 @@ module Splunk
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
       @proxy = args.fetch(:proxy, nil)
+      @basic = args.fetch(:basic, nil)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
@@ -418,6 +419,10 @@ module Splunk
       # Headers
       request["User-Agent"] = "splunk-sdk-ruby/#{VERSION}"
       request["Authorization"] = "Splunk #{@token}" if @token
+      # basic authentication supercedes Splunk authentication
+      if @basic then
+        request["Authorization"] = "Basic " + ["#{@username}:#{@password}"].pack('m').strip
+      end
       headers.each_entry do |key, value|
         request[key] = value
       end
