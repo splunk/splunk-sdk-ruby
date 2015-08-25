@@ -23,5 +23,5 @@
 # release new versions.
 #
 module Splunk
-  VERSION = '1.0.3'
+  VERSION = '1.0.4.1'
 end
