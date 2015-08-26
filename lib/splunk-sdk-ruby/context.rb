@@ -63,6 +63,7 @@ module Splunk
   # * +:ssl_client_cert+ A +OpenSSL::X509::Certificate+ object to use as a client certificate.
   # * +:ssl_client_key+ A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
+  # * +:basic+ - indicates if HTTP Basic Auth is going to be used (default: +false+)
   #
   # If you specify a token, you need not specify a username or password, nor
   # do you need to call the +login+ method.
