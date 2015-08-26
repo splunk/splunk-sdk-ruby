@@ -87,7 +87,7 @@ module Splunk
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
       @proxy = args.fetch(:proxy, nil)
-      @basic = args.fetch(:basic, nil)
+      @basic = args.fetch(:basic, False)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
@@ -226,7 +226,9 @@ module Splunk
       if @token # If we're already logged in, this method is a nop.
         return
       end
-
+      if @basic # We're using basic authentication, thus making this a nop
+        return
+      end
       response = request(:namespace => Splunk::namespace(:sharing => "default"),
                          :method => :POST,
                          :resource => ["auth", "login"],
