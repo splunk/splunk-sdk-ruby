@@ -65,6 +65,7 @@ class TestContext < TestCaseWithSplunkConnection
 
     new_service = Context.new(new_arguments)
     assert_logged_in(new_service)
+    assert_true(new_service.apps.length() > 0)
   end
 
   def test_failed_login()
