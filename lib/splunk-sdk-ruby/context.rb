@@ -225,10 +225,10 @@ module Splunk
     #
     def login()
       if @token # If we're already logged in, this method is a nop.
-        return
+        return self
       end
       if @basic # We're using basic authentication, thus making this a nop
-        return
+        return self
       end
       response = request(:namespace => Splunk::namespace(:sharing => "default"),
                          :method => :POST,
@@ -422,9 +422,10 @@ module Splunk
       # Headers
       request["User-Agent"] = "splunk-sdk-ruby/#{VERSION}"
       request["Authorization"] = "Splunk #{@token}" if @token
+
       # basic authentication supercedes Splunk authentication
       if @basic then
-        request["Authorization"] = "Basic " + ["#{@username}:#{@password}"].pack('m').strip
+        request.basic_auth(@username, @password)
       end
       headers.each_entry do |key, value|
         request[key] = value
