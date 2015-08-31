@@ -2,8 +2,8 @@
 
 ## Version 1.0.5
 
-* Added support for basic authentication
-* Added an example for load balanced search heads
+* Added support for basic authentication.
+* Added an example for load balanced search heads.
 
 ## Version 1.0.4
 
