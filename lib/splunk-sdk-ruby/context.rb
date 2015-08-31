@@ -88,7 +88,7 @@ module Splunk
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
       @proxy = args.fetch(:proxy, nil)
-      @basic = args.fetch(:basic, False)
+      @basic = args.fetch(:basic, false)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
