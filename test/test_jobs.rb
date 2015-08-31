@@ -99,7 +99,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   def test_export_on_reporting_search
     stream = @service.create_export("search index=_internal earliest=-2d | stats count(_raw) by method")
     results = ResultsReader.new(stream).to_a()
-    assert_true(3 >= results.length())
+    assert_true(3 <= results.length())
   end
 
   ##
