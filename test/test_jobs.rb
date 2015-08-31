@@ -99,7 +99,7 @@ class JobsTestCase < TestCaseWithSplunkConnection
   def test_export_on_reporting_search
     stream = @service.create_export("search index=_internal earliest=-2d | stats count(_raw) by method")
     results = ResultsReader.new(stream).to_a()
-    assert_true(3 >= results.length())
+    assert_true(3 <= results.length())
   end
 
   ##
@@ -340,27 +340,27 @@ class LongJobTestCase < JobsTestCase
       ttl <= new_ttl && ttl > old_ttl
     end
   end
-
-  def test_touch
-    # Any request resets the TTL in Splunk 6.0. This was an error that
-    # has been filed and will be reverted (TODO: Insert Jira number once dnoble logs it).
-    if @service.splunk_version[0,2] == [6,0]
-      return
-    end
-    i = 2
-    while i < 20
-      sleep(i)
-      old_ttl = Integer(@job.refresh()["ttl"])
-      @job.touch()
-      new_ttl = Integer(@job.refresh()["ttl"])
-      if new_ttl > old_ttl
-        break
-      else
-        i += 1
-      end
-    end
-    assert_true(new_ttl > old_ttl)
-  end
+  # NOTE: this test is no longer relevant due to some changes in Splunk 6.0+
+  # def test_touch
+  #   # Any request resets the TTL in Splunk 6.0. This was an error that
+  #   # has been filed and will be reverted (TODO: Insert Jira number once dnoble logs it).
+  #   if @service.splunk_version[0,2] == [6,0]
+  #     return
+  #   end
+  #   i = 2
+  #   while i < 20
+  #     sleep(i)
+  #     old_ttl = Integer(@job.refresh()["ttl"])
+  #     @job.touch()
+  #     new_ttl = Integer(@job.refresh()["ttl"])
+  #     if new_ttl > old_ttl
+  #       break
+  #     else
+  #       i += 1
+  #     end
+  #   end
+  #   assert_true(new_ttl > old_ttl)
+  # end
 end
 
 class RealTimeJobTestCase < JobsTestCase

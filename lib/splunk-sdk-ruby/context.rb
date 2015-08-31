@@ -63,6 +63,7 @@ module Splunk
   # * +:ssl_client_cert+ A +OpenSSL::X509::Certificate+ object to use as a client certificate.
   # * +:ssl_client_key+ A +OpenSSL::PKey::RSA+ or +OpenSSL::PKey::DSA+ object to use as a client key.
   # * +:token+ - a preauthenticated Splunk token (default: +nil+)
+  # * +:basic+ - indicates if HTTP Basic Auth is going to be used (default: +false+)
   #
   # If you specify a token, you need not specify a username or password, nor
   # do you need to call the +login+ method.
@@ -87,6 +88,7 @@ module Splunk
       @namespace = args.fetch(:namespace,
                               Splunk::namespace(:sharing => "default"))
       @proxy = args.fetch(:proxy, nil)
+      @basic = args.fetch(:basic, false)
       @path_prefix = args.fetch(:path_prefix, DEFAULT_PATH_PREFIX)
       @ssl_client_cert = args.fetch(:ssl_client_cert, nil)
       @ssl_client_key = args.fetch(:ssl_client_key, nil)
@@ -223,9 +225,11 @@ module Splunk
     #
     def login()
       if @token # If we're already logged in, this method is a nop.
-        return
+        return self
       end
-
+      if @basic # We're using basic authentication, thus making this a nop
+        return self
+      end
       response = request(:namespace => Splunk::namespace(:sharing => "default"),
                          :method => :POST,
                          :resource => ["auth", "login"],
@@ -418,6 +422,11 @@ module Splunk
       # Headers
       request["User-Agent"] = "splunk-sdk-ruby/#{VERSION}"
       request["Authorization"] = "Splunk #{@token}" if @token
+
+      # basic authentication supercedes Splunk authentication
+      if @basic then
+        request.basic_auth(@username, @password)
+      end
       headers.each_entry do |key, value|
         request[key] = value
       end

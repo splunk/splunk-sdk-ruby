@@ -4,20 +4,6 @@ require 'rubygems/specification'
 require 'rake/testtask'
 require 'date'
 
-spec = Gem::Specification.new do |s|
-  s.name = "splunk-sdk"
-  s.version = "0.1.0"
-  s.author = "Splunk"
-  s.email = "devinfo@splunk.com"
-  s.homepage = "http://dev.splunk.com"
-  s.summary = "SDK for easily working with Splunk from Ruby."
-  s.description = s.summary
-  s.has_rdoc = true
-  s.extra_rdoc_files = ["README", "LICENSE", "TODO"]
-  s.require_path = "lib"
-  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob('{lib,test}/**/*')
-end
-
 task :default => :help
 
 desc "Print help on using the Rakefile for the Ruby SDK for Splunk."
@@ -36,5 +22,5 @@ end
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.pattern = "test/test_*.rb"
-  t.verbose = true
+  t.options = "-v"
 end

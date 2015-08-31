@@ -57,6 +57,15 @@ class TestContext < TestCaseWithSplunkConnection
     assert_logged_in(new_service)
   end
 
+  def test_authenticate_with_basic
+    new_arguments = @splunkrc.clone
+    new_arguments[:basic] = true
+
+    new_service = Context.new(new_arguments)
+    assert_logged_in(new_service)
+    assert_equal(new_service.request(:resource => ["apps", "local"]).code, "200")
+  end
+
   def test_failed_login()
     args = @splunkrc.clone()
     args[:username] = args[:username] + "-boris"
