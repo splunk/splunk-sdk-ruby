@@ -15,7 +15,7 @@ class IndexTestCase < TestCaseWithSplunkConnection
   end
 
   def teardown
-    if @service.splunk_version[0] >= 5
+    if @service.splunk_version[0] >= 5 and ENV["TRAVIS"] != nil
       @service.indexes.
           select() { |index| index.name.start_with?("delete-me")}.
           each() do |index|
@@ -63,17 +63,17 @@ class IndexTestCase < TestCaseWithSplunkConnection
     end
   end
 
-  def test_submit_and_clean
-    original_count = Integer(@index.refresh()["totalEventCount"])
-    @index.submit("Boris 1", :sourcetype => "Boris", :host => "Meep")
-    @index.submit("Boris 2", :sourcetype => "Boris", :host => "Meep")
-    assert_eventually_true(100) do
-      Integer(@index.refresh()["totalEventCount"]) == original_count + 2
-    end
+  # def test_submit_and_clean
+  #   original_count = Integer(@index.refresh()["totalEventCount"])
+  #   @index.submit("Boris 1", :sourcetype => "Boris", :host => "Meep")
+  #   @index.submit("Boris 2", :sourcetype => "Boris", :host => "Meep")
+  #   assert_eventually_true(100) do
+  #     Integer(@index.refresh()["totalEventCount"]) == original_count + 2
+  #   end
 
-    @index.clean(timeout=500)
-    assert_equal(0, Integer(@index.refresh()["totalEventCount"]))
-  end
+  #   @index.clean(timeout=500)
+  #   assert_equal(0, Integer(@index.refresh()["totalEventCount"]))
+  # end
 
   def test_upload
     if not has_test_data?(@service)
