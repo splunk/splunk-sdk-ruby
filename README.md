@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/splunk/splunk-sdk-ruby.svg?branch=master)](https://travis-ci.org/splunk/splunk-sdk-ruby)
 
-# The Splunk Software Development Kit for Ruby
+# The Splunk Software Development Kit for Ruby (Deprecated)
 
 #### Version 1.0.5
 
