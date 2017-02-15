@@ -64,7 +64,7 @@ and running Splunk and system requirements, see
 
 #### Ruby
 
-The Splunk SDK for Ruby requires Ruby 1.9.2 or later.
+The Splunk SDK for Ruby has been tested with [Ruby 1.9.2 and Ruby 1.9.3](http://www.ruby-lang.org/). For best results, use one of those versions.
 
 #### Splunk SDK for Ruby
 
