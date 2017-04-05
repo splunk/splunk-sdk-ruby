@@ -1,6 +1,29 @@
-# The Splunk Software Development Kit for Ruby
+# The Splunk Software Development Kit for Ruby (Deprecated)
 
 #### Version 1.0.5
+
+<blockquote>
+<h3>Deprecation notice</h3>
+<p>The Splunk SDK for Ruby is deprecated.  </p>
+<p>What deprecation means:</p>
+<ul>
+<li>On June 1, 2017, the resources relating to the Splunk SDK for Ruby will be removed from dev.splunk.com and will only be available in the GitHub repository. </li>
+<li>Apps that use the Splunk SDK for Ruby will continue to work as they do now. </li>
+<li>Apps that use the Splunk SDK for Ruby will continue to be eligible for Splunk App Certification.</li>
+<li>Splunk will no longer provide feature enhancements, engineering support, or customer support for the Splunk SDK for Ruby.</li></ul>
+<p>Recommendation on new app development and app migration:</p>
+<ul>
+<li>Because Splunk is no longer investing in the Splunk SDK for Ruby, we recommend that any new app development be done using other approaches:<p>
+<ul><li>Directly using our REST API in the language of their choice.</li>
+<li>Using one of our supported SDKs: 
+<p><ul><li>Python (<a href="https://github.com/splunk/splunk-sdk-python">GitHub</a> | <a href="http://dev.splunk.com/view/python-sdk/SP-CAAAEBB">dev.splunk.com</a>)</li>
+<li>Java (<a href="https://github.com/splunk/splunk-sdk-java">GitHub</a> | <a href="http://dev.splunk.com/view/java-sdk/SP-CAAAECN">dev.splunk.com</a>)</li>
+<li>JavaScript (<a href="https://github.com/splunk/splunk-sdk-javascript">GitHub</a> | <a href="http://dev.splunk.com/view/javascript-sdk/SP-CAAAECM">dev.splunk.com</a>)</li>
+<li>C# (<a href="https://github.com/splunk/splunk-sdk-csharp-pcl">GitHub</a> | <a href="http://dev.splunk.com/view/csharp-sdk/SP-CAAAEPK">dev.splunk.com</a>)</li></ul></p></li></ul></p></li>
+<li>For existing apps that use the Splunk SDK for Ruby, while not necessary, we request that developers begin the migration process away from the Splunk SDK for Ruby. We encourage developers to provide feedback to Splunk at <a href="mailto:devinfo@splunk.com">devinfo@splunk.com</a> if there are any issues with migration. </li></ul>
+<p>Notice of removal:</p>
+<ul><li>The Splunk SDK for Ruby will continue to be available on GitHub, should other developers want to clone or fork the project. </li></ul>
+</blockquote>
 
 This Splunk Software Development Kit (SDK) for Ruby contains library code and 
 examples designed to enable developers to build applications using Splunk.
@@ -39,7 +62,7 @@ and running Splunk and system requirements, see
 
 #### Ruby
 
-The Splunk SDK for Ruby requires Ruby 1.9.2 or later.
+The Splunk SDK for Ruby has been tested with [Ruby 1.9.2 and Ruby 1.9.3](http://www.ruby-lang.org/). For best results, use one of those versions.
 
 #### Splunk SDK for Ruby
 
