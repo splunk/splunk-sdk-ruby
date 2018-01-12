@@ -22,7 +22,7 @@
 <li>C# (<a href="https://github.com/splunk/splunk-sdk-csharp-pcl">GitHub</a> | <a href="http://dev.splunk.com/view/csharp-sdk/SP-CAAAEPK">dev.splunk.com</a>)</li></ul></p></li></ul></p></li>
 <li>For existing apps that use the Splunk SDK for Ruby, while not necessary, we request that developers begin the migration process away from the Splunk SDK for Ruby. We encourage developers to provide feedback to Splunk at <a href="mailto:devinfo@splunk.com">devinfo@splunk.com</a> if there are any issues with migration. </li></ul>
 <p>Notice of removal:</p>
-<ul><li>The Splunk SDK for Ruby will continue to be available on GitHub, should other developers want to clone or fork the project. </li></ul>
+<ul><li>The Splunk SDK for Ruby will continue to be available on GitHub, should other developers want to clone or fork the project. <a href="https://github.com/splunk/splunk-sdk-ruby/raw/master/docs.pdf">Documentation</a> is located on GitHub as well.</li></ul>
 </blockquote>
 
 This Splunk Software Development Kit (SDK) for Ruby contains library code and 
