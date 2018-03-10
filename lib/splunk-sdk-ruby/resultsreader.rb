@@ -280,11 +280,14 @@ module Splunk
       @concatenate = false
       @is_preview = nil
       @state = :base
+      @msg_type = nil
       @states = {
           # Toplevel state.
           :base => {
               :start_element => lambda do |name, attributes|
-                if name == "results"
+                if name == "response"
+                  @state = :response
+                elsif name == "results"
                   if !@concatenate
                     @is_preview = attributes["preview"] == "1"
                     Fiber.yield(@is_preview)
@@ -313,6 +316,29 @@ module Splunk
                   end
                 end
               end
+          },
+          :response => {
+              :start_element => lambda do |name, attributes|
+                if name == 'messages'
+                  @state = :response_messages
+                end
+              end,
+          },
+          :response_messages => {
+              :start_element => lambda do |name, attributes|
+                if name == "msg"
+                  case attributes['type']
+                  when 'ERROR', 'FATAL'
+                    @state = :response_messages_msg
+                    @msg_type = attributes['type']
+                  end
+                end
+              end,
+          },
+          :response_messages_msg => {
+            :characters => lambda do |text|
+              raise "#{@msg_type}: #{text}"
+            end,
           },
           # Inside a `fieldOrder` element. Recognizes only
           # the `field` element, and returns to the `:base` state
